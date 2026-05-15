@@ -605,7 +605,20 @@ onAuthStateChanged(auth, async user => {
 function initListeners(){
   // Jogos
   onSnapshot(collection(db,'jogos'), snap => {
-    jogosData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const firestoreJogos = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Jogos do mata-mata vêm do Firestore normalmente
+    const mataMata = firestoreJogos.filter(j=>j.fase!=='Fase de grupos');
+    // Fase de grupos: sempre usa JOGOS_GRUPOS_OFICIAIS (fonte de verdade)
+    const grupos = JOGOS_GRUPOS_OFICIAIS.map(([timeA,timeB,data,hora,grupo])=>({
+      id: (timeA+'_'+timeB+'_'+data+'_'+hora).replace(/[^a-zA-Z0-9_]/g,'_'),
+      timeA, timeB, data, hora, grupo,
+      fase: 'Fase de grupos',
+      ts: new Date(data+'T'+hora+':00-03:00').getTime(),
+      encerrado: false,
+      // mescla resultado do Firestore se existir
+      ...( firestoreJogos.find(j=>j.timeA===timeA && j.timeB===timeB && j.data===data) || {} )
+    }));
+    jogosData = [...grupos, ...mataMata];
     renderJogos();
     renderAdminJogos();
     renderAdminClassif();
