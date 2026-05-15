@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bolão Copa do Mundo 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:15px}
+header{background:#1a1a2e;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+header h1{font-size:18px;font-weight:600}
+.header-right{display:flex;align-items:center;gap:12px}
+.user-info{font-size:13px;opacity:0.8}
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s}
+.btn:hover{opacity:0.85}
+.btn-google{background:#fff;color:#333;display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;border:1px solid #ddd;font-size:15px;font-weight:500;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.btn-google img{width:20px}
+.btn-primary{background:#2d6a4f;color:#fff}
+.btn-secondary{background:#eee;color:#333}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-danger{border:1px solid #c0392b;color:#c0392b;background:transparent;padding:5px 10px;font-size:12px}
+.btn-warn{background:#e67e22;color:#fff;padding:5px 10px;font-size:12px;border:none;border-radius:6px;cursor:pointer}
+.container{max-width:820px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:24px;overflow-x:auto}
+.tab{padding:10px 16px;font-size:14px;font-weight:500;border:none;background:transparent;color:#666;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.active{color:#2d6a4f;border-bottom-color:#2d6a4f}
+.section{display:none}.section.active{display:block}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+.metric{background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.metric-label{font-size:12px;color:#666;margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:700;color:#1a1a2e}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-group label{font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.3px}
+input,select,textarea{padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;width:100%;background:#fff}
+input:focus,select:focus{outline:none;border-color:#2d6a4f}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ranking-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+.ranking-row:last-child{border-bottom:none}
+.pos-badge{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.pos-1{background:#FFD700;color:#7a5a00}
+.pos-2{background:#C0C0C0;color:#444}
+.pos-3{background:#CD7F32;color:#5a2d00}
+.pos-n{background:#eee;color:#777}
+.ranking-name{flex:1;font-weight:600;font-size:15px}
+.ranking-sub{font-size:12px;color:#888;margin-top:2px}
+.ranking-pts{font-size:18px;font-weight:700;color:#2d6a4f}
+.game-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.phase-badge{font-size:11px;font-weight:600;background:#e8f5e9;color:#2d6a4f;padding:3px 8px;border-radius:99px}
+.game-date{font-size:12px;color:#888}
+.game-teams{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:10px}
+.team-block{flex:1;text-align:center}
+.team-flag{font-size:22px;display:block;margin-bottom:2px}
+.team-name{font-weight:600;font-size:14px}
+.score-display{font-size:22px;font-weight:700;color:#1a1a2e;min-width:56px;text-align:center}
+.score-input{width:46px;text-align:center;font-size:18px;font-weight:700;padding:6px}
+.encerrado-badge{display:inline-block;background:#e8f5e9;color:#2d6a4f;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.fechado-badge{display:inline-block;background:#fff3cd;color:#856404;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.aposta-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.07);display:flex;align-items:center;gap:12px}
+.aposta-info{flex:1}
+.aposta-jogo{font-size:13px;font-weight:600}
+.aposta-placar{font-size:12px;color:#666}
+.aposta-pts{font-size:15px;font-weight:700;color:#2d6a4f;white-space:nowrap}
+.aposta-pendente{font-size:12px;color:#aaa}
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px}
+.alert-info{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.alert-warn{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.alert-success{background:#e8f5e9;color:#2d6a4f;border:1px solid #a5d6a7}
+.alert-danger{background:#fdecea;color:#c0392b;border:1px solid #f5c6cb}
+.section-title{font-size:16px;font-weight:700}
+.grupo-titulo{font-size:13px;font-weight:700;color:#fff;background:#1a1a2e;padding:6px 14px;border-radius:8px;margin:20px 0 10px;display:inline-block}
+.mata-titulo{font-size:13px;font-weight:700;color:#fff;background:#c0392b;padding:6px 14px;border-radius:8px;margin:20px 0 10px;display:inline-block}
+.pts-rule{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.pts-rule:last-child{border-bottom:none}
+.pts-val{font-weight:700;color:#2d6a4f;font-size:15px}
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:20px}
+.login-screen h2{font-size:28px;font-weight:700;margin-bottom:8px;color:#1a1a2e}
+.login-screen p{color:#666;margin-bottom:32px;font-size:16px}
+.empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:14px}
+.loading{text-align:center;padding:60px;color:#aaa;font-size:15px}
+.countdown{font-size:11px;color:#e67e22;font-weight:600;margin-top:4px}
+
+/* ── Classificação — layout estilo grade de grupos ── */
+.classif-fase-bloco{margin-bottom:32px}
+.classif-fase-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;background:#1a1a2e;border-radius:10px 10px 0 0;
+  color:#fff;margin-bottom:0
+}
+.classif-fase-title{font-size:14px;font-weight:700}
+.classif-fase-meta{display:flex;align-items:center;gap:10px}
+.classif-fase-bonus{font-size:12px;color:#81c784;font-weight:600}
+.classif-fase-count{
+  font-size:12px;background:rgba(255,255,255,0.18);
+  padding:2px 9px;border-radius:99px;font-weight:700
+}
+.classif-fase-body{
+  background:#fff;border:1px solid #e0e0e0;border-top:none;
+  border-radius:0 0 10px 10px;padding:16px;
+}
+.classif-progress{height:3px;background:#e0e0e0;border-radius:2px;margin-bottom:16px;overflow:hidden}
+.classif-progress-bar{height:100%;background:#2d6a4f;border-radius:2px;transition:width 0.3s}
+
+/* Grade dos grupos: 4 colunas no desktop, 2 no mobile */
+.grupos-grade{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px
+}
+.grupo-bloco{background:#f7f8fa;border-radius:8px;overflow:hidden}
+.grupo-header{
+  background:#1a1a2e;color:#fff;font-size:11px;font-weight:700;
+  letter-spacing:0.8px;text-transform:uppercase;
+  padding:5px 10px;text-align:center
+}
+/* cada linha de time dentro do grupo */
+.grupo-time{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 10px;cursor:pointer;
+  border-bottom:1px solid #ebebeb;
+  transition:background 0.1s;user-select:none;position:relative
+}
+.grupo-time:last-child{border-bottom:none}
+.grupo-time:hover{background:#eef7f1}
+.grupo-time.selecionado{background:#2d6a4f}
+.grupo-time.selecionado .gt-nome{color:#fff;font-weight:600}
+.grupo-time.selecionado .gt-flag{filter:none}
+.grupo-time.correto{background:#e8f5e9}
+.grupo-time.correto .gt-nome{color:#1b5e20;font-weight:600}
+.grupo-time.errado{background:#fdf0f0;opacity:0.6}
+.grupo-time.bloqueado{cursor:default}
+.grupo-time.bloqueado:hover{background:transparent}
+.gt-flag{font-size:18px;flex-shrink:0;line-height:1}
+.gt-nome{font-size:12px;font-weight:500;flex:1;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt-check{
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#2d6a4f;font-weight:800;flex-shrink:0;
+  opacity:0;transition:opacity 0.1s
+}
+.grupo-time.selecionado .gt-check{opacity:1}
+.grupo-time.correto .gt-check{opacity:1;color:#2d6a4f;background:#c8e6c9}
+
+/* Para fases posteriores (oitavas+): lista horizontal compacta */
+.fase-times-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:6px
+}
+.fase-time{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  border:2px solid #e8e8e8;background:#fff;
+  cursor:pointer;transition:all 0.1s;user-select:none
+}
+.fase-time:hover{border-color:#b2dfdb;background:#f5fffe}
+.fase-time.selecionado{border-color:#2d6a4f;background:#2d6a4f}
+.fase-time.selecionado .ft-nome{color:#fff;font-weight:600}
+.fase-time.correto{border-color:#2d6a4f;background:#e8f5e9}
+.fase-time.correto .ft-nome{color:#1b5e20;font-weight:600}
+.fase-time.errado{border-color:#e74c3c;background:#fdf0f0;opacity:0.6}
+.fase-time.bloqueado{cursor:default}
+.fase-time.bloqueado:hover{border-color:#e8e8e8;background:#fff}
+.ft-flag{font-size:20px;flex-shrink:0}
+.ft-nome{font-size:13px;font-weight:500;flex:1;color:#222}
+.ft-check{font-size:13px;color:#fff;flex-shrink:0;opacity:0}
+.fase-time.selecionado .ft-check{opacity:1}
+.fase-time.correto .ft-check{opacity:1;color:#2d6a4f}
+
+/* Palpite especial: 3º lugar e campeão (escolha única) */
+.especial-bloco{margin-bottom:28px}
+.especial-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:10px 10px 0 0;color:#fff;
+}
+.especial-header.terceiro{background:#b5651d}
+.especial-header.campeao{background:#c0992a}
+.especial-body{background:#fff;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 10px 10px;padding:16px}
+.especial-times{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.especial-time{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:10px;border:2px solid #e8e8e8;background:#fff;
+  cursor:pointer;transition:all 0.12s;user-select:none
+}
+.especial-time:hover{border-color:#b2dfdb;background:#f9fffe}
+.especial-time.selecionado{border-color:#2d6a4f;background:#2d6a4f}
+.especial-time.selecionado .et-nome{color:#fff;font-weight:700}
+.especial-time.selecionado .et-check{opacity:1}
+.especial-time.correto{border-color:#2d6a4f;background:#e8f5e9}
+.especial-time.correto .et-nome{color:#1b5e20;font-weight:700}
+.especial-time.correto .et-check{opacity:1;color:#2d6a4f}
+.especial-time.errado{border-color:#e74c3c;background:#fdf0f0;opacity:0.55}
+.especial-time.bloqueado{cursor:default}
+.especial-time.bloqueado:hover{border-color:#e8e8e8;background:#fff}
+.et-flag{font-size:24px;flex-shrink:0}
+.et-nome{font-size:13px;font-weight:500;flex:1;color:#222}
+.et-check{font-size:14px;color:#fff;opacity:0;flex-shrink:0}
+.especial-aviso{color:#aaa;font-size:13px;padding:4px 0}
+@media(max-width:600px){
+  .grupos-grade{grid-template-columns:repeat(2,1fr)}
+  .fase-times-grid{grid-template-columns:repeat(2,1fr)}
+  .especial-times{grid-template-columns:repeat(2,1fr)}
+}
+
+
+/* Pending screen */
+.pending-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:20px}
+.pending-screen h2{font-size:24px;font-weight:700;margin-bottom:12px;color:#1a1a2e}
+.pending-screen p{color:#666;font-size:15px;line-height:1.6}
+
+/* Palpites públicos */
+.publico-participante{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.publico-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer}
+.publico-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.publico-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
+.publico-nome{font-weight:600;font-size:14px;flex:1}
+.publico-pts{font-size:13px;color:#2d6a4f;font-weight:700}
+.publico-toggle{font-size:12px;color:#888}
+.publico-palpites{display:none}
+.publico-palpites.aberto{display:block}
+.publico-jogo-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px}
+.publico-jogo-row:last-child{border-bottom:none}
+.publico-jogo-nome{flex:1;color:#333}
+.publico-placar{font-weight:600;color:#1a1a2e;min-width:50px;text-align:center}
+.publico-pts-badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.pts-badge-green{background:#e8f5e9;color:#2d6a4f}
+.pts-badge-gray{background:#f0f0f0;color:#888}
+.publico-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.publico-filter select{width:auto;padding:6px 10px;font-size:13px}
+
+/* Histórico */
+.historico-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:20px}
+.hist-stat{background:#fff;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.hist-stat-val{font-size:20px;font-weight:700;color:#1a1a2e}
+.hist-stat-label{font-size:11px;color:#888;margin-top:2px}
+
+/* Admin aprovação */
+.participante-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.participante-row:last-child{border-bottom:none}
+.participante-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.participante-placeholder{width:32px;height:32px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#666}
+.participante-nome{flex:1;font-size:14px;font-weight:600}
+.participante-email{font-size:12px;color:#888}
+.status-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.status-pendente{background:#fff3cd;color:#856404}
+.status-aprovado{background:#e8f5e9;color:#2d6a4f}
+.status-rejeitado{background:#fdecea;color:#c0392b}
+
+@media(max-width:500px){.form-row{grid-template-columns:1fr}header h1{font-size:15px}.historico-stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Bolão Copa 2026</h1>
+  <div class="header-right">
+    <span class="user-info" id="header-user"></span>
+    <button class="btn btn-secondary btn-sm" id="btn-logout" style="display:none" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<!-- Tela de login -->
+<div id="login-screen" class="login-screen" style="display:none">
+  <h2>Bolão Copa do Mundo 2026</h2>
+  <p>Entre com sua conta Google para acessar o bolão</p>
+  <button class="btn-google" onclick="loginGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"/>
+    Entrar com Google
+  </button>
+</div>
+
+<!-- Tela de aguardando aprovação -->
+<div id="pending-screen" class="pending-screen" style="display:none">
+  <div style="font-size:48px;margin-bottom:16px">⏳</div>
+  <h2>Aguardando aprovação</h2>
+  <p>Seu cadastro está sendo analisado pelo administrador.<br/>Você receberá acesso assim que for aprovado.<br/><br/><span style="font-size:13px;color:#aaa">Conta: <span id="pending-email"></span></span></p>
+  <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
+</div>
+
+<!-- App principal -->
+<div id="app" style="display:none">
+  <div class="container">
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Participantes</div><div class="metric-value" id="m-part">—</div></div>
+      <div class="metric"><div class="metric-label">Jogos</div><div class="metric-value" id="m-jogos">—</div></div>
+      <div class="metric"><div class="metric-label">Encerrados</div><div class="metric-value" id="m-enc">—</div></div>
+      <div class="metric"><div class="metric-label">Líder</div><div class="metric-value" style="font-size:13px;padding-top:4px" id="m-lider">—</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('ranking')">Ranking</button>
+      <button class="tab" onclick="switchTab('apostas')">Meus palpites</button>
+      <button class="tab" onclick="switchTab('classif')">Classificação</button>
+      <button class="tab" onclick="switchTab('jogos')">Jogos</button>
+      <button class="tab" onclick="switchTab('publico')">Palpites públicos</button>
+      <button class="tab admin-only" onclick="switchTab('admin')" style="display:none">Admin</button>
+      <button class="tab" onclick="switchTab('regras')">Pontuação</button>
+    </div>
+
+    <!-- Ranking -->
+    <div id="tab-ranking" class="section active">
+      <div id="ranking-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Meus palpites / Histórico -->
+    <div id="tab-apostas" class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span class="section-title">Meus palpites</span>
+      </div>
+      <div id="historico-stats-wrap"></div>
+      <div class="alert alert-info" id="apostas-info">Vá até a aba "Jogos" e clique em "Registrar palpite" no jogo desejado.</div>
+      <div id="apostas-form-wrap"></div>
+      <div style="height:1px;background:#f0f0f0;margin:16px 0"></div>
+      <div id="apostas-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Classificação -->
+    <div id="tab-classif" class="section">
+      <div style="margin-bottom:16px">
+        <div class="section-title" style="margin-bottom:4px">Palpites de classificação</div>
+        <div style="font-size:13px;color:#666">Selecione as seleções que você acha que vão avançar em cada fase. Cada acerto gera bônus de pontos.</div>
+      </div>
+      <div id="classif-content"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Jogos -->
+    <div id="tab-jogos" class="section">
+      <div id="jogos-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Palpites Públicos -->
+    <div id="tab-publico" class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span class="section-title">Palpites de todos</span>
+      </div>
+      <div class="alert alert-info" style="font-size:13px">Palpites ficam visíveis após o bloqueio de cada jogo ou fase.</div>
+      <div class="publico-filter">
+        <select id="publico-filtro-fase" onchange="renderPublico()">
+          <option value="">Todas as fases</option>
+          <option value="Fase de grupos">Fase de grupos</option>
+          <option value="16avos">16-avos de final</option>
+          <option value="Oitavas">Oitavas de final</option>
+          <option value="Quartas">Quartas de final</option>
+          <option value="Semifinal">Semifinal</option>
+          <option value="Terceiro lugar">3º lugar</option>
+          <option value="Final">Final</option>
+        </select>
+        <select id="publico-filtro-tipo" onchange="renderPublico()">
+          <option value="jogos">Palpites de placar</option>
+          <option value="classif">Palpites de classificação</option>
+        </select>
+      </div>
+      <div id="publico-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Admin -->
+    <div id="tab-admin" class="section">
+      <div class="alert alert-warn">Somente o administrador pode ver esta aba.</div>
+
+      <!-- Aprovar participantes -->
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">👥 Aprovação de participantes</div>
+        <div id="admin-participantes-list"><div class="loading">Carregando...</div></div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">Adicionar jogo</div>
+        <div class="form-row">
+          <div class="form-group"><label>Time A</label><input id="j-timeA" placeholder="Brasil"/></div>
+          <div class="form-group"><label>Time B</label><input id="j-timeB" placeholder="Argentina"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data</label><input id="j-data" type="date"/></div>
+          <div class="form-group"><label>Hora (Brasília)</label><input id="j-hora" type="time"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Fase</label>
+            <select id="j-fase">
+              <option value="Fase de grupos">Fase de grupos</option>
+              <option value="16avos">16-avos de final</option>
+              <option value="Oitavas">Oitavas de final</option>
+              <option value="Quartas">Quartas de final</option>
+              <option value="Semifinal">Semifinal</option>
+              <option value="Terceiro lugar">Terceiro lugar</option>
+              <option value="Final">Final</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Grupo (só fase de grupos)</label><input id="j-grupo" placeholder="A"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="addJogo()">Salvar jogo</button>
+      </div>
+
+      <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Registrar resultados</div>
+      <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 72 jogos corretos da fase de grupos.</div>
+      <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 72 jogos da fase de grupos</button>
+      <div id="admin-jogos-list"><div class="loading">Carregando...</div></div>
+
+      <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Confirmar classificados</div>
+      <div id="admin-classif-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Regras -->
+    <div id="tab-regras" class="section">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:12px">Pontuação por acerto de placar</div>
+        <div class="pts-rule"><span>Placar exato</span><span class="pts-val">10 pts × mult.</span></div>
+        <div class="pts-rule"><span>Vencedor + saldo de gols certo</span><span class="pts-val">7 pts × mult.</span></div>
+        <div class="pts-rule"><span>Vencedor certo (placar errado)</span><span class="pts-val">5 pts × mult.</span></div>
+        <div class="pts-rule"><span>Empate previsto (placar errado)</span><span class="pts-val">3 pts × mult.</span></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:12px">Multiplicador por fase</div>
+        <div class="pts-rule"><span>Fase de grupos</span><span class="pts-val">× 1</span></div>
+        <div class="pts-rule"><span>16-avos de final</span><span class="pts-val">× 1.5</span></div>
+        <div class="pts-rule"><span>Oitavas de final</span><span class="pts-val">× 2</span></div>
+        <div class="pts-rule"><span>Quartas de final</span><span class="pts-val">× 2.5</span></div>
+        <div class="pts-rule"><span>Semifinal</span><span class="pts-val">× 3</span></div>
+        <div class="pts-rule"><span>Terceiro lugar</span><span class="pts-val">× 2</span></div>
+        <div class="pts-rule"><span>Final</span><span class="pts-val">× 4</span></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:12px">Bônus por classificação</div>
+        <div class="pts-rule"><span>Acertou seleção nos 16-avos</span><span class="pts-val">+10 pts</span></div>
+        <div class="pts-rule"><span>Acertou seleção nas oitavas</span><span class="pts-val">+15 pts</span></div>
+        <div class="pts-rule"><span>Acertou seleção nas quartas</span><span class="pts-val">+20 pts</span></div>
+        <div class="pts-rule"><span>Acertou seleção na semifinal</span><span class="pts-val">+30 pts</span></div>
+        <div class="pts-rule"><span>Acertou disputante do 3º lugar</span><span class="pts-val">+30 pts</span></div>
+        <div class="pts-rule"><span>Acertou um finalista</span><span class="pts-val">+50 pts</span></div>
+        <div class="pts-rule"><span>Acertou o vencedor do 3º lugar</span><span class="pts-val">+50 pts</span></div>
+        <div class="pts-rule"><span>Acertou o campeão</span><span class="pts-val">+100 pts</span></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:8px">Prazo de palpites</div>
+        <p style="font-size:14px;color:#555;line-height:1.6">
+          <strong>Palpites de jogo:</strong> bloqueados individualmente 5 minutos antes do horário de início de cada jogo.<br/>
+          <strong>Palpites de classificação:</strong> bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 15h), para todas as fases de uma vez.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDoc, getDocs, query, where }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_tGcwH0SaS1likqeonmEnHPkYs7JneIc",
+  authDomain: "bolao-copa-do-mundo-2026-97092.firebaseapp.com",
+  projectId: "bolao-copa-do-mundo-2026-97092",
+  storageBucket: "bolao-copa-do-mundo-2026-97092.firebasestorage.app",
+  messagingSenderId: "1049008727743",
+  appId: "1:1049008727743:web:e2596a5b77374bbdb4480a"
+};
+
+const ADMIN_EMAIL = "felipemarinho.adv@gmail.com";
+
+const MULT = {
+  'Fase de grupos':1, '16avos':1.5, 'Oitavas':2,
+  'Quartas':2.5, 'Semifinal':3, 'Terceiro lugar':2, 'Final':4
+};
+
+const BONUS_CLASSIF = {
+  '16avos':10, 'Oitavas':15, 'Quartas':20, 'Semifinal':30, 'Terceiro lugar':30, 'Final':50
+};
+
+// Palpites especiais: vencedor do 3º lugar e campeão
+const BONUS_ESPECIAL = { 'TerceiroLugar': 50, 'Campeao': 100 };
+const LABEL_ESPECIAL = { 'TerceiroLugar': '🥉 Vencedor do 3º lugar', 'Campeao': '🏆 Campeão' };
+
+const FASES_CLASSIF = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+const LIMITES_CLASSIF = {'16avos':32,'Oitavas':16,'Quartas':8,'Semifinal':4,'Terceiro lugar':2,'Final':2};
+const FASES_LABEL = {
+  '16avos':'16-avos de final','Oitavas':'Oitavas de final',
+  'Quartas':'Quartas de final','Semifinal':'Semifinal',
+  'Terceiro lugar':'Disputa de 3º lugar','Final':'Finalistas'
+};
+const GRUPOS_ORDEM = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+// Grupos fixos da Copa 2026 (fonte: configuração oficial do bolão)
+const GRUPOS_FIXOS = {
+  'A': ['México', 'África do Sul', 'Coreia do Sul', 'Tchéquia'],
+  'B': ['Canadá', 'Bósnia', 'Catar', 'Suíça'],
+  'C': ['Brasil', 'Marrocos', 'Haiti', 'Escócia'],
+  'D': ['Estados Unidos', 'Paraguai', 'Austrália', 'Turquia'],
+  'E': ['Alemanha', 'Curaçao', 'Costa do Marfim', 'Equador'],
+  'F': ['Holanda', 'Japão', 'Suécia', 'Tunísia'],
+  'G': ['Bélgica', 'Egito', 'Irã', 'Nova Zelândia'],
+  'H': ['Espanha', 'Cabo Verde', 'Arábia Saudita', 'Uruguai'],
+  'I': ['França', 'Senegal', 'Iraque', 'Noruega'],
+  'J': ['Argentina', 'Argélia', 'Áustria', 'Jordânia'],
+  'K': ['Portugal', 'RD Congo', 'Uzbequistão', 'Colômbia'],
+  'L': ['Inglaterra', 'Croácia', 'Gana', 'Panamá']
+};
+const FASES_MATA_ORDEM = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+
+const FLAGS = {
+  'Brasil':'🇧🇷','Argentina':'🇦🇷','França':'🇫🇷','Alemanha':'🇩🇪','Espanha':'🇪🇸',
+  'Portugal':'🇵🇹','Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Holanda':'🇳🇱','Bélgica':'🇧🇪','Itália':'🇮🇹',
+  'Croácia':'🇭🇷','Uruguai':'🇺🇾','Colômbia':'🇨🇴','México':'🇲🇽','Estados Unidos':'🇺🇸',
+  'Canadá':'🇨🇦','Marrocos':'🇲🇦','Senegal':'🇸🇳','Gana':'🇬🇭','Nigéria':'🇳🇬',
+  'Egito':'🇪🇬','Costa do Marfim':'🇨🇮','África do Sul':'🇿🇦','Camarões':'🇨🇲',
+  'Mali':'🇲🇱','RD Congo':'🇨🇩','Cabo Verde':'🇨🇻','Japão':'🇯🇵','Coreia do Sul':'🇰🇷',
+  'Austrália':'🇦🇺','Irã':'🇮🇷','Arábia Saudita':'🇸🇦','Iraque':'🇮🇶','Catar':'🇶🇦',
+  'Uzbequistão':'🇺🇿','Jordânia':'🇯🇴','Indonésia':'🇮🇩','Escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Suíça':'🇨🇭',
+  'Áustria':'🇦🇹','Dinamarca':'🇩🇰','Noruega':'🇳🇴','Suécia':'🇸🇪','Turquia':'🇹🇷',
+  'Polônia':'🇵🇱','Tchéquia':'🇨🇿','Sérvia':'🇷🇸','Eslováquia':'🇸🇰','Hungria':'🇭🇺',
+  'Romênia':'🇷🇴','Eslovênia':'🇸🇮','Albânia':'🇦🇱','Geórgia':'🇬🇪','Bósnia':'🇧🇦',
+  'Ucrânia':'🇺🇦','Haiti':'🇭🇹','Panamá':'🇵🇦','Paraguai':'🇵🇾','Equador':'🇪🇨',
+  'Peru':'🇵🇪','Venezuela':'🇻🇪','Chile':'🇨🇱','Bolívia':'🇧🇴','Honduras':'🇭🇳',
+  'Costa Rica':'🇨🇷','Jamaica':'🇯🇲','El Salvador':'🇸🇻','Tunísia':'🇹🇳','Argélia':'🇩🇿',
+  'Nova Zelândia':'🇳🇿','Curaçao':'🇨🇼','Coreia do Sul':'🇰🇷',
+  'Finlândia':'🇫🇮','Grécia':'🇬🇷','Islândia':'🇮🇸','Israel':'🇮🇱','Bulgária':'🇧🇬'
+};
+
+function flag(team){ return FLAGS[team] || '🏳️'; }
+
+// App state
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+let isAdmin = false;
+let jogosData = [];
+let apostasData = {};
+let usuariosData = {};
+let classificadosData = {};
+let classifsData = {}; // palpites de classificação de todos
+let allApostasData = {}; // apostas de todos para aba pública
+
+// Auth
+window.loginGoogle = async () => {
+  try { await signInWithPopup(auth, provider); }
+  catch(e){ console.error(e); }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+
+onAuthStateChanged(auth, async user => {
+  if(!user){
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+    document.getElementById('pending-screen').style.display='none';
+    document.getElementById('btn-logout').style.display='none';
+    return;
+  }
+  currentUser = user;
+  isAdmin = user.email === ADMIN_EMAIL;
+
+  // Registra/verifica usuário no Firestore
+  const userRef = doc(db, 'usuarios', user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if(!userSnap.exists()){
+    // Novo usuário: cria como pendente (admin é aprovado automaticamente)
+    await setDoc(userRef, {
+      uid: user.uid,
+      nome: user.displayName || user.email,
+      email: user.email,
+      foto: user.photoURL || '',
+      status: isAdmin ? 'aprovado' : 'pendente',
+      pts: 0,
+      criadoEm: Date.now()
+    });
+  }
+
+  // Verifica status
+  const snap = await getDoc(userRef);
+  const userData = snap.data();
+
+  if(!isAdmin && userData.status !== 'aprovado'){
+    // Mostra tela de pendente
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='none';
+    document.getElementById('pending-screen').style.display='flex';
+    document.getElementById('pending-email').textContent = user.email;
+    document.getElementById('btn-logout').style.display='block';
+    document.getElementById('header-user').textContent = user.displayName || user.email;
+    return;
+  }
+
+  // Acesso liberado
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('pending-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('btn-logout').style.display='block';
+  document.getElementById('header-user').textContent = user.displayName || '';
+
+  if(isAdmin){
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
+  }
+
+  initListeners();
+});
+
+function initListeners(){
+  // Jogos
+  onSnapshot(collection(db,'jogos'), snap => {
+    jogosData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderJogos();
+    renderAdminJogos();
+    renderAdminClassif();
+    updateMetrics();
+    renderApostasHistorico();
+    renderPublico();
+  });
+
+  // Apostas do usuário atual
+  onSnapshot(collection(db,`apostas/${currentUser.uid}/jogos`), snap => {
+    apostasData = {};
+    snap.docs.forEach(d=>{ apostasData[d.id]=d.data(); });
+    renderApostasHistorico();
+    renderJogos();
+    renderPublico();
+  });
+
+  // Classificação do usuário atual
+  onSnapshot(doc(db,'classificacoes',currentUser.uid), snap => {
+    classificadosData = snap.exists() ? snap.data() : {};
+    renderClassif();
+  });
+
+  // Usuários
+  onSnapshot(collection(db,'usuarios'), snap => {
+    usuariosData = {};
+    snap.docs.forEach(d=>{ usuariosData[d.id]=d.data(); });
+    renderRanking();
+    updateMetrics();
+    renderAdminParticipantes();
+    renderPublico();
+  });
+
+  // Classificados confirmados (admin)
+  onSnapshot(collection(db,'classificados_confirmados'), snap => {
+    classifsData = {};
+    snap.docs.forEach(d=>{ classifsData[d.id]=d.data(); });
+    renderClassif();
+    renderApostasHistorico();
+  });
+
+  // Todas as apostas (para aba pública e histórico de classificação)
+  onSnapshot(collection(db,'classificacoes'), snap => {
+    allApostasData = {};
+    snap.docs.forEach(d=>{ allApostasData[d.id]=d.data(); });
+    renderPublico();
+  });
+}
+
+// ─── TAB SWITCH ───────────────────────────────────────────────────────────────
+window.switchTab = (tab) => {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if(tab==='publico') renderPublico();
+};
+
+// ─── MÉTRICAS ────────────────────────────────────────────────────────────────
+function updateMetrics(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  document.getElementById('m-part').textContent = aprovados.length || '—';
+  document.getElementById('m-jogos').textContent = jogosData.length || '—';
+  document.getElementById('m-enc').textContent = jogosData.filter(j=>j.encerrado).length || '0';
+  const lider = aprovados.sort((a,b)=>(b.pts||0)-(a.pts||0))[0];
+  document.getElementById('m-lider').textContent = lider ? `${lider.nome.split(' ')[0]} (${lider.pts||0}pts)` : '—';
+}
+
+// ─── RANKING ─────────────────────────────────────────────────────────────────
+function renderRanking(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado')
+    .sort((a,b)=>(b.pts||0)-(a.pts||0));
+  const el = document.getElementById('ranking-list');
+  if(!aprovados.length){ el.innerHTML='<div class="empty-state">Nenhum participante ainda.</div>'; return; }
+  el.innerHTML = aprovados.map((u,i)=>{
+    const posClass = i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'pos-n';
+    const foto = u.foto ? `<img src="${u.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">` :
+      `<div style="width:36px;height:36px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${u.nome[0]}</div>`;
+    return `<div class="ranking-row">
+      <div class="pos-badge ${posClass}">${i+1}</div>
+      ${foto}
+      <div class="ranking-name">${u.nome}<div class="ranking-sub">${u.email||''}</div></div>
+      <div class="ranking-pts">${u.pts||0} pts</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── JOGOS ───────────────────────────────────────────────────────────────────
+function renderJogos(){
+  const el = document.getElementById('jogos-list');
+  if(!jogosData.length){ el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>'; return; }
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+
+  const jogosGrupos = sorted.filter(j=>j.fase==='Fase de grupos');
+  const jogosMata   = sorted.filter(j=>j.fase!=='Fase de grupos');
+
+  let html='';
+
+  // Fase de grupos: ordem cronologica agrupada por data
+  if(jogosGrupos.length){
+    html+='<div class="grupo-titulo">Fase de grupos</div>';
+    let dataAtual='';
+    jogosGrupos.forEach(j=>{
+      if(j.data !== dataAtual){
+        dataAtual = j.data;
+        const parts = j.data.split('-');
+        const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(j.data+'T12:00:00').getDay()];
+        html+=`<div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.6px;margin:14px 0 6px;padding:0 0 4px;border-bottom:1px solid #e0e0e0">${parts[2]}/${parts[1]} &middot; ${diaSemana}</div>`;
+      }
+      html+=gameCardHTML(j);
+    });
+  }
+
+  // Mata-mata: por fase
+  const gruposMata = {};
+  jogosMata.forEach(j=>{ if(!gruposMata[j.fase]) gruposMata[j.fase]=[]; gruposMata[j.fase].push(j); });
+  FASES_MATA_ORDEM.forEach(f=>{
+    if(!gruposMata[f]) return;
+    html+=`<div class="mata-titulo">${FASES_LABEL[f]||f}</div>`;
+    gruposMata[f].forEach(j=>{ html+=gameCardHTML(j); });
+  });
+
+  el.innerHTML=html;
+}
+
+function gameCardHTML(j){
+  const now=Date.now();
+  const bloqueado = now >= j.ts - 5*60*1000;
+  const aposta = apostasData[j.id];
+  const temAposta = aposta && aposta.gA !== undefined;
+  const dtStr = formatarDataJogo(j);
+  let scorePart='';
+  if(j.encerrado){
+    scorePart=`<div class="score-display">${j.gA} × ${j.gB}</div>`;
+  } else {
+    scorePart=`<div class="score-display">× </div>`;
+  }
+  let apostaBadge='';
+  if(temAposta){
+    const pts = aposta.pts !== undefined ? `+${aposta.pts} pts` : 'Aguardando resultado';
+    const cor = aposta.pts > 0 ? 'pts-badge-green':'pts-badge-gray';
+    apostaBadge=`<span class="publico-pts-badge ${cor}">${pts}</span>`;
+  }
+  let btnAposta='';
+  if(!j.encerrado){
+    if(bloqueado){
+      btnAposta=`<span class="fechado-badge">⏱ Bloqueado</span>`;
+    } else {
+      const txt = temAposta ? 'Alterar palpite' : 'Registrar palpite';
+      btnAposta=`<button class="btn btn-primary btn-sm" onclick="abrirAposta('${j.id}')">✏️ ${txt}</button>`;
+      const minutos = Math.ceil((j.ts - 5*60*1000 - now)/60000);
+      if(minutos > 0 && minutos < 60) btnAposta += `<div class="countdown">Fecha em ${minutos} min</div>`;
+    }
+  } else {
+    btnAposta=`<span class="encerrado-badge">✅ Encerrado</span>`;
+  }
+  return `<div class="game-card">
+    <div class="game-header">
+      <span class="phase-badge">${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:FASES_LABEL[j.fase]||j.fase}</span>
+      <span class="game-date">${dtStr}</span>
+    </div>
+    <div class="game-teams">
+      <div class="team-block"><span class="team-flag">${flag(j.timeA)}</span><div class="team-name">${j.timeA}</div></div>
+      ${scorePart}
+      <div class="team-block"><span class="team-flag">${flag(j.timeB)}</span><div class="team-name">${j.timeB}</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      ${btnAposta}
+      <div style="display:flex;gap:6px;align-items:center">${apostaBadge}${temAposta?`<span style="font-size:12px;color:#888">Palpite: ${aposta.gA}×${aposta.gB}</span>`:''}</div>
+    </div>
+  </div>`;
+}
+
+// ─── APOSTAS / HISTÓRICO ─────────────────────────────────────────────────────
+function renderApostasHistorico(){
+  const wrap = document.getElementById('apostas-form-wrap');
+  const list = document.getElementById('apostas-list');
+  const info = document.getElementById('apostas-info');
+  const statsWrap = document.getElementById('historico-stats-wrap');
+
+  // Estatísticas do histórico
+  const minhasApostas = Object.values(apostasData);
+  const comResultado = minhasApostas.filter(a=>a.pts!==undefined);
+  const totalPts = comResultado.reduce((s,a)=>s+(a.pts||0),0);
+  const exatos = comResultado.filter(a=>a.resultado==='exato').length;
+  const vencedor = comResultado.filter(a=>a.resultado==='vencedor').length;
+  const empate = comResultado.filter(a=>a.resultado==='empate').length;
+  const errados = comResultado.filter(a=>a.pts===0).length;
+
+  if(comResultado.length > 0){
+    statsWrap.innerHTML=`<div class="historico-stats">
+      <div class="hist-stat"><div class="hist-stat-val">${totalPts}</div><div class="hist-stat-label">Pontos totais</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${minhasApostas.length}</div><div class="hist-stat-label">Palpites feitos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${exatos}</div><div class="hist-stat-label">Placares exatos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${vencedor}</div><div class="hist-stat-label">Vencedores certos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${empate}</div><div class="hist-stat-label">Empates certos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${errados}</div><div class="hist-stat-label">Erros</div></div>
+    </div>`;
+  } else {
+    statsWrap.innerHTML='';
+  }
+
+  if(!minhasApostas.length){
+    info.style.display='block';
+    list.innerHTML='<div class="empty-state">Você ainda não fez nenhum palpite.</div>';
+    return;
+  }
+  info.style.display='none';
+
+  // Ordena por fase/data
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+  let html='';
+  // Por fase
+  const fases = ['Fase de grupos','16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  fases.forEach(fase=>{
+    const jogsFase = sorted.filter(j=>j.fase===fase);
+    const apostasNaFase = jogsFase.filter(j=>apostasData[j.id]);
+    if(!apostasNaFase.length) return;
+    const faseLbl = fase==='Fase de grupos'?'Fase de grupos':(FASES_LABEL[fase]||fase);
+    html+=`<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px">${faseLbl}</div>`;
+    apostasNaFase.forEach(j=>{
+      const a = apostasData[j.id];
+      let ptsBadge='';
+      if(a.pts!==undefined){
+        const cor = a.pts>0?'pts-badge-green':'pts-badge-gray';
+        let desc='';
+        if(a.resultado==='exato') desc='Placar exato';
+        else if(a.resultado==='vencedor_saldo') desc='Vencedor+saldo';
+        else if(a.resultado==='vencedor') desc='Vencedor certo';
+        else if(a.resultado==='empate') desc='Empate certo';
+        else desc='Errou';
+        ptsBadge=`<div><span class="publico-pts-badge ${cor}">+${a.pts} pts</span><div style="font-size:11px;color:#888;margin-top:2px">${desc}</div></div>`;
+      } else {
+        ptsBadge=`<span class="aposta-pendente">Aguardando resultado</span>`;
+      }
+      const resultado = j.encerrado ? ` | Resultado: ${j.gA}×${j.gB}` : '';
+      html+=`<div class="aposta-card">
+        <div style="font-size:22px">${flag(j.timeA)}</div>
+        <div class="aposta-info">
+          <div class="aposta-jogo">${j.timeA} × ${j.timeB}</div>
+          <div class="aposta-placar">Meu palpite: ${a.gA}×${a.gB}${resultado}</div>
+        </div>
+        ${ptsBadge}
+      </div>`;
+    });
+  });
+
+  // Palpites de classificação com resultados
+  const minhasClassifs = classificadosData;
+  let classifHtml='';
+  FASES_CLASSIF.forEach(fase=>{
+    const meusPalpites = minhasClassifs[fase] || [];
+    if(!meusPalpites.length) return;
+    const confirmados = classifsData[fase]?.times || [];
+    classifHtml+=`<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px">Classificação — ${FASES_LABEL[fase]||fase}</div>`;
+    meusPalpites.forEach(time=>{
+      const acertou = confirmados.includes(time);
+      const resultado = confirmados.length > 0 ? (acertou ?
+        `<span class="publico-pts-badge pts-badge-green">+${BONUS_CLASSIF[fase]} pts ✓</span>` :
+        `<span class="publico-pts-badge pts-badge-gray">Não classificado</span>`) : '';
+      classifHtml+=`<div class="aposta-card">
+        <div style="font-size:22px">${flag(time)}</div>
+        <div class="aposta-info">
+          <div class="aposta-jogo">${time}</div>
+          <div class="aposta-placar">${FASES_LABEL[fase]||fase}</div>
+        </div>
+        ${resultado}
+      </div>`;
+    });
+  });
+
+  // Palpites especiais no histórico
+  ['TerceiroLugar','Campeao'].forEach(chave=>{
+    const meuPalpite = classificadosData[chave]||null;
+    if(!meuPalpite) return;
+    const confirmado = classifsData[chave]?.time||null;
+    let resultado='';
+    if(confirmado){
+      if(meuPalpite===confirmado) resultado=`<span class="publico-pts-badge pts-badge-green">+${BONUS_ESPECIAL[chave]} pts ✓</span>`;
+      else resultado=`<span class="publico-pts-badge pts-badge-gray">Errou</span>`;
+    }
+    classifHtml+=`<div class="aposta-card">
+      <div style="font-size:22px">${flag(meuPalpite)}</div>
+      <div class="aposta-info">
+        <div class="aposta-jogo">${meuPalpite}</div>
+        <div class="aposta-placar">${LABEL_ESPECIAL[chave]}</div>
+      </div>
+      ${resultado}
+    </div>`;
+  });
+
+  list.innerHTML = html + (classifHtml ? `<div style="font-size:15px;font-weight:700;margin:20px 0 8px">Palpites de classificação</div>${classifHtml}` : '');
+}
+
+// ─── FORMULÁRIO DE APOSTA ────────────────────────────────────────────────────
+window.abrirAposta = (jogoId) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  const aposta = apostasData[jogoId] || {};
+  const wrap = document.getElementById('apostas-form-wrap');
+  wrap.innerHTML=`<div class="card" id="form-aposta-${jogoId}">
+    <div style="font-weight:700;margin-bottom:12px">${flag(jogo.timeA)} ${jogo.timeA} × ${jogo.timeB} ${flag(jogo.timeB)}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="text-align:center;flex:1">${jogo.timeA}</div>
+      <input class="score-input" id="apA" type="number" min="0" max="99" value="${aposta.gA??''}" placeholder="0"/>
+      <div style="font-size:20px;font-weight:700">×</div>
+      <input class="score-input" id="apB" type="number" min="0" max="99" value="${aposta.gB??''}" placeholder="0"/>
+      <div style="text-align:center;flex:1">${jogo.timeB}</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="salvarAposta('${jogoId}')">Salvar palpite</button>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('apostas-form-wrap').innerHTML=''">Cancelar</button>
+    </div>
+  </div>`;
+  document.getElementById('apostas-form-wrap').scrollIntoView({behavior:'smooth'});
+  switchTab('apostas');
+};
+
+window.salvarAposta = async (jogoId) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  const now=Date.now();
+  if(now >= jogo.ts - 5*60*1000){ alert('Palpite bloqueado — o jogo está prestes a começar.'); return; }
+  const gA = parseInt(document.getElementById('apA').value);
+  const gB = parseInt(document.getElementById('apB').value);
+  if(isNaN(gA)||isNaN(gB)){ alert('Informe placar válido.'); return; }
+  await setDoc(doc(db,`apostas/${currentUser.uid}/jogos`,jogoId),{ gA, gB, ts:now });
+  document.getElementById('apostas-form-wrap').innerHTML='';
+  alert('Palpite salvo!');
+};
+
+// ─── CLASSIFICAÇÃO ───────────────────────────────────────────────────────────
+
+// Retorna o pool de times disponíveis para uma fase, baseado nos palpites
+// da fase anterior do PRÓPRIO participante (encadeamento cascata)
+function poolParaFase(fase){
+  const ordem = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  const idx = ordem.indexOf(fase);
+  if(idx <= 0){
+    // 16-avos: pool = todos os times cadastrados nos grupos (máx 4 por grupo)
+    const gruposMap = obterTimesporGrupo();
+    const pool = [];
+    GRUPOS_ORDEM.forEach(g=>{ (gruposMap[g]||[]).forEach(t=>{ if(!pool.includes(t)) pool.push(t); }); });
+    return pool;
+  }
+  // Demais fases: pool = o que o participante escolheu na fase anterior
+  const faseAnterior = ordem[idx-1];
+  return classificadosData[faseAnterior] || [];
+}
+
+function renderClassif(){
+  const now=Date.now();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const bloqueado = now >= abertura - 5*60*1000;
+  const el = document.getElementById('classif-content');
+
+  if(bloqueado){
+    el.innerHTML=`<div class="alert alert-warn">⏱ Palpites de classificação encerrados.</div>`;
+    // Mostra palpites feitos em modo leitura
+    const gruposMapR = obterTimesporGrupo();
+    let roHtml='<div style="margin-top:16px">';
+    FASES_CLASSIF.forEach(fase=>{
+      const selecionados = classificadosData[fase]||[];
+      if(!selecionados.length) return;
+      const confirmados = classifsData[fase]?.times||[];
+      roHtml+=`<div class="classif-fase-bloco">
+        <div class="classif-fase-header">
+          <span class="classif-fase-title">${FASES_LABEL[fase]||fase}</span>
+          <span class="classif-fase-bonus">+${BONUS_CLASSIF[fase]} pts/acerto</span>
+        </div>
+        <div class="classif-fase-body">`;
+      if(fase==='16avos'){
+        roHtml+=`<div class="grupos-grade">`;
+        GRUPOS_ORDEM.forEach(g=>{
+          const times=(gruposMapR[g]||[]).slice(0,4).filter(t=>selecionados.includes(t));
+          if(!times.length) return;
+          roHtml+=`<div class="grupo-bloco"><div class="grupo-header">Grupo ${g}</div>`;
+          times.forEach(time=>{
+            const conf=confirmados.length>0&&confirmados.includes(time);
+            const errado=confirmados.length>0&&!confirmados.includes(time);
+            let cls='grupo-time bloqueado'+(conf?' correto':errado?' errado':' selecionado');
+            roHtml+=`<div class="${cls}"><span class="gt-flag">${flag(time)}</span><span class="gt-nome">${time}</span><span class="gt-check">✓</span></div>`;
+          });
+          roHtml+=`</div>`;
+        });
+        roHtml+=`</div>`;
+      } else {
+        roHtml+=`<div class="fase-times-grid">`;
+        selecionados.forEach(time=>{
+          const conf=confirmados.length>0&&confirmados.includes(time);
+          const errado=confirmados.length>0&&!confirmados.includes(time);
+          let cls='fase-time bloqueado'+(conf?' correto':errado?' errado':' selecionado');
+          roHtml+=`<div class="${cls}"><span class="ft-flag">${flag(time)}</span><span class="ft-nome">${time}</span><span class="ft-check">✓</span></div>`;
+        });
+        roHtml+=`</div>`;
+      }
+      roHtml+=`</div></div>`;
+    });
+    roHtml+='</div>';
+    el.innerHTML+=roHtml;
+    el.innerHTML+=renderEspecialBlocos(true);
+    return;
+  }
+
+  const gruposMap = obterTimesporGrupo();
+  const todasSelecoes = obterTodasSelecoes();
+  if(!todasSelecoes.length){ el.innerHTML='<div class="empty-state">Aguardando cadastro dos times.</div>'; return; }
+
+  let html='';
+  FASES_CLASSIF.forEach(fase=>{
+    const selecionados = classificadosData[fase] || [];
+    const confirmados = classifsData[fase]?.times || [];
+    const limite = LIMITES_CLASSIF[fase];
+    const pool = poolParaFase(fase);
+    const pct = Math.round((selecionados.length/limite)*100);
+
+    // Aviso se fase anterior não preenchida
+    const faseAnteriorIdx = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'].indexOf(fase) - 1;
+    const faseAnteriorNome = faseAnteriorIdx >= 0 ? FASES_LABEL[['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'][faseAnteriorIdx]] : null;
+    const semPool = fase !== '16avos' && pool.length === 0;
+
+    html+=`<div class="classif-fase-bloco">
+      <div class="classif-fase-header">
+        <span class="classif-fase-title">${FASES_LABEL[fase]||fase}</span>
+        <div class="classif-fase-meta">
+          <span class="classif-fase-bonus">+${BONUS_CLASSIF[fase]} pts/acerto</span>
+          <span class="classif-fase-count">${selecionados.length}/${limite}</span>
+        </div>
+      </div>
+      <div class="classif-fase-body">
+        <div class="classif-progress"><div class="classif-progress-bar" style="width:${pct}%"></div></div>`;
+
+    if(semPool){
+      html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>${faseAnteriorNome}</strong>.</div>`;
+    } else if(fase === '16avos'){
+      // Grade de grupos estilo Globo: 4 colunas, cada grupo com 4 times em lista vertical
+      html+=`<div class="grupos-grade">`;
+      GRUPOS_ORDEM.forEach(g=>{
+        const times = (gruposMap[g] || []).slice(0,4); // máx 4 por grupo
+        if(!times.length) return;
+        html+=`<div class="grupo-bloco"><div class="grupo-header">Grupo ${g}</div>`;
+        times.forEach(time=>{
+          const sel = selecionados.includes(time);
+          const conf = confirmados.length>0 && confirmados.includes(time);
+          const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+          let cls='grupo-time';
+          if(errado) cls+=' errado';
+          else if(conf&&sel) cls+=' correto';
+          else if(sel) cls+=' selecionado';
+          html+=`<div class="${cls}" onclick="toggleClassif('${fase}','${time}')">
+            <span class="gt-flag">${flag(time)}</span>
+            <span class="gt-nome">${time}</span>
+            <span class="gt-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    } else {
+      // Fases posteriores: apenas os times que o participante escolheu na fase anterior
+      html+=`<div class="fase-times-grid">`;
+      pool.forEach(time=>{
+        const sel = selecionados.includes(time);
+        const conf = confirmados.length>0 && confirmados.includes(time);
+        const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+        let cls='fase-time';
+        if(errado) cls+=' errado';
+        else if(conf&&sel) cls+=' correto';
+        else if(sel) cls+=' selecionado';
+        html+=`<div class="${cls}" onclick="toggleClassif('${fase}','${time}')">
+          <span class="ft-flag">${flag(time)}</span>
+          <span class="ft-nome">${time}</span>
+          <span class="ft-check">✓</span>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  });
+
+  el.innerHTML=html+`<button class="btn btn-primary" style="margin-top:16px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
+
+  // Adiciona blocos especiais: 3º lugar e campeão
+  el.innerHTML += renderEspecialBlocos(false);
+}
+
+function renderEspecialBlocos(readonly=false){
+  // Pool: semifinalistas escolhidos pelo participante
+  const pool = classificadosData['Semifinal'] || [];
+  let html='';
+
+  ['TerceiroLugar','Campeao'].forEach(chave=>{
+    const isCampeao = chave === 'Campeao';
+    const selecionado = classificadosData[chave] || null; // string ou null
+    const confirmado = classifsData[chave]?.time || null;
+    const acertou = confirmado && selecionado === confirmado;
+    const errou = confirmado && selecionado && selecionado !== confirmado;
+
+    html+=`<div class="especial-bloco">
+      <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
+        <span style="font-size:14px;font-weight:700">${LABEL_ESPECIAL[chave]}</span>
+        <span style="font-size:12px;font-weight:600;opacity:0.9">+${BONUS_ESPECIAL[chave]} pts se acertar</span>
+      </div>
+      <div class="especial-body">`;
+
+    if(pool.length === 0){
+      html+=`<div class="especial-aviso">Preencha primeiro os palpites de <strong>Semifinal</strong>.</div>`;
+    } else {
+      html+=`<div class="especial-times">`;
+      pool.forEach(time=>{
+        const sel = selecionado === time;
+        const conf = confirmado === time;
+        const err = errou && sel;
+        let cls='especial-time';
+        if(readonly) cls+=' bloqueado';
+        if(err) cls+=' errado';
+        else if(conf&&sel) cls+=' correto';
+        else if(sel) cls+=' selecionado';
+        const onclick = readonly ? '' : `onclick="toggleEspecial('${chave}','${time}')"`;
+        html+=`<div class="${cls}" ${onclick}>
+          <span class="et-flag">${flag(time)}</span>
+          <span class="et-nome">${time}</span>
+          <span class="et-check">✓</span>
+        </div>`;
+      });
+      html+=`</div>`;
+      if(acertou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-green">✓ Acertou! +${BONUS_ESPECIAL[chave]} pts</span></div>`;
+      else if(errou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-gray">Errou — era ${flag(confirmado)} ${confirmado}</span></div>`;
+    }
+    html+=`</div></div>`;
+  });
+  return html;
+}
+
+
+function formatarDataJogo(j){
+  // Deriva sempre do ts — nunca depende dos campos data/hora separados
+  const ts = typeof j.ts === 'number' ? j.ts : parseInt(j.ts);
+  if(!ts || isNaN(ts)) return 'Data a confirmar';
+  const dt = new Date(ts);
+  return dt.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})
+    + ' ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function obterTimesporGrupo(){
+  // Retorna os grupos fixos definidos na constante GRUPOS_FIXOS
+  return GRUPOS_FIXOS;
+}
+
+function obterTodasSelecoes(){
+  // Todas as 48 seleções, na ordem dos grupos A→L
+  const times = [];
+  GRUPOS_ORDEM.forEach(g=>{
+    (GRUPOS_FIXOS[g]||[]).forEach(t=>{ if(!times.includes(t)) times.push(t); });
+  });
+  return times;
+}
+
+window.toggleClassif = (fase, time) => {
+  const now=Date.now();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  if(now >= abertura - 5*60*1000) return;
+  const arr = classificadosData[fase] || [];
+  const idx = arr.indexOf(time);
+  if(idx>=0){
+    arr.splice(idx,1);
+    // Cascata: remove o time das fases posteriores se estava selecionado lá
+    const ordemFases = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+    const faseIdx = ordemFases.indexOf(fase);
+    for(let i=faseIdx+1; i<ordemFases.length; i++){
+      const f = ordemFases[i];
+      const a = classificadosData[f]||[];
+      const j = a.indexOf(time);
+      if(j>=0){ a.splice(j,1); classificadosData[f]=a; }
+    }
+  } else {
+    if(arr.length >= LIMITES_CLASSIF[fase]){ alert(`Limite de ${LIMITES_CLASSIF[fase]} seleções para ${FASES_LABEL[fase]||fase}.`); return; }
+    arr.push(time);
+  }
+  classificadosData[fase]=arr;
+  renderClassif();
+};
+
+window.toggleEspecial = (chave, time) => {
+  const now=Date.now();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  if(now >= abertura - 5*60*1000) return;
+  // Toggle: se já selecionado, deseleciona; senão seleciona
+  if(classificadosData[chave] === time){
+    classificadosData[chave] = null;
+  } else {
+    classificadosData[chave] = time;
+  }
+  renderClassif();
+};
+
+window.salvarClassif = async () => {
+  await setDoc(doc(db,'classificacoes',currentUser.uid), {...classificadosData, uid:currentUser.uid, nome:currentUser.displayName||'', email:currentUser.email||'', foto:currentUser.photoURL||'' });
+  alert('Classificação salva!');
+};
+
+// ─── PALPITES PÚBLICOS ───────────────────────────────────────────────────────
+window.renderPublico = () => {
+  const el = document.getElementById('publico-list');
+  const filtroFase = document.getElementById('publico-filtro-fase')?.value || '';
+  const filtroTipo = document.getElementById('publico-filtro-tipo')?.value || 'jogos';
+
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  if(!aprovados.length){ el.innerHTML='<div class="empty-state">Nenhum participante.</div>'; return; }
+
+  if(filtroTipo === 'classif'){
+    renderPublicoClassif(el, aprovados, filtroFase);
+    return;
+  }
+
+  // Palpites de placar
+  // Jogos já bloqueados (ts - 5min <= agora)
+  const now = Date.now();
+  let jogosVisiveis = jogosData.filter(j => now >= j.ts - 5*60*1000);
+  if(filtroFase) jogosVisiveis = jogosVisiveis.filter(j=>j.fase===filtroFase);
+  jogosVisiveis.sort((a,b)=>a.ts-b.ts);
+
+  if(!jogosVisiveis.length){
+    el.innerHTML='<div class="empty-state">Nenhum palpite disponível ainda. Os palpites aparecem após o bloqueio de cada jogo.</div>';
+    return;
+  }
+
+  // Busca todas as apostas dos aprovados - precisamos ouvir subcoleções individualmente
+  // Usamos os dados já carregados via apostasData para o usuário atual
+  // Para todos, vamos carregar via getDocs
+  el.innerHTML='<div class="loading">Carregando palpites...</div>';
+  carregarTodosOsPalpites(aprovados, jogosVisiveis).then(todosPalpites=>{
+    let html='';
+    const sorted = [...aprovados].sort((a,b)=>(b.pts||0)-(a.pts||0));
+    sorted.forEach(u=>{
+      const palpitesUsuario = todosPalpites[u.uid] || {};
+      const temAlgum = jogosVisiveis.some(j=>palpitesUsuario[j.id]);
+      if(!temAlgum) return;
+      const foto = u.foto ?
+        `<img src="${u.foto}" class="publico-avatar">` :
+        `<div class="publico-avatar-placeholder">${u.nome[0]}</div>`;
+      html+=`<div class="publico-participante">
+        <div class="publico-header" onclick="togglePublicoDetalhes(this)">
+          ${foto}
+          <div class="publico-nome">${u.nome}</div>
+          <div class="publico-pts">${u.pts||0} pts</div>
+          <div class="publico-toggle">▼</div>
+        </div>
+        <div class="publico-palpites">`;
+      jogosVisiveis.forEach(j=>{
+        const p = palpitesUsuario[j.id];
+        if(!p) return;
+        let ptsBadge = '';
+        if(p.pts!==undefined){
+          const cor = p.pts>0?'pts-badge-green':'pts-badge-gray';
+          ptsBadge=`<span class="publico-pts-badge ${cor}">+${p.pts}</span>`;
+        }
+        const resultadoReal = j.encerrado ? ` (${j.gA}×${j.gB})` : '';
+        html+=`<div class="publico-jogo-row">
+          <span class="publico-jogo-nome">${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}${resultadoReal}</span>
+          <span class="publico-placar">${p.gA}×${p.gB}</span>
+          ${ptsBadge}
+        </div>`;
+      });
+      html+=`</div></div>`;
+    });
+    el.innerHTML = html || '<div class="empty-state">Nenhum palpite disponível ainda.</div>';
+  });
+};
+
+async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
+  const resultado = {};
+  await Promise.all(aprovados.map(async u=>{
+    const snap = await getDocs(collection(db,`apostas/${u.uid}/jogos`));
+    resultado[u.uid]={};
+    snap.docs.forEach(d=>{ resultado[u.uid][d.id]=d.data(); });
+  }));
+  return resultado;
+}
+
+function renderPublicoClassif(el, aprovados, filtroFase){
+  const now = Date.now();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const bloqueado = now >= abertura - 5*60*1000;
+  if(!bloqueado){
+    el.innerHTML='<div class="empty-state">Palpites de classificação ficam visíveis após o início da Copa (11/06).</div>';
+    return;
+  }
+
+  const fasesVisiveis = filtroFase ? [filtroFase].filter(f=>FASES_CLASSIF.includes(f)) : FASES_CLASSIF;
+  const sorted = [...aprovados].sort((a,b)=>(b.pts||0)-(a.pts||0));
+
+  let html='';
+  sorted.forEach(u=>{
+    const classifU = allApostasData[u.uid] || {};
+    const temAlgum = fasesVisiveis.some(f=>(classifU[f]||[]).length>0);
+    if(!temAlgum) return;
+    const foto = u.foto ?
+      `<img src="${u.foto}" class="publico-avatar">` :
+      `<div class="publico-avatar-placeholder">${u.nome[0]}</div>`;
+    html+=`<div class="publico-participante">
+      <div class="publico-header" onclick="togglePublicoDetalhes(this)">
+        ${foto}
+        <div class="publico-nome">${u.nome}</div>
+        <div class="publico-pts">${u.pts||0} pts</div>
+        <div class="publico-toggle">▼</div>
+      </div>
+      <div class="publico-palpites">`;
+    fasesVisiveis.forEach(fase=>{
+      const times = classifU[fase]||[];
+      if(!times.length) return;
+      const confirmados = classifsData[fase]?.times||[];
+      html+=`<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 6px;text-transform:uppercase">${FASES_LABEL[fase]||fase}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">`;
+      times.forEach(time=>{
+        const conf=confirmados.length>0&&confirmados.includes(time);
+        const errado=confirmados.length>0&&!confirmados.includes(time);
+        const cls = conf?'pts-badge-green':errado?'pts-badge-gray':'';
+        html+=`<span class="publico-pts-badge ${cls}">${flag(time)} ${time}${conf?' ✓':''}</span>`;
+      });
+      html+=`</div>`;
+    });
+    html+=`</div></div>`;
+  });
+  el.innerHTML = html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>';
+}
+
+window.togglePublicoDetalhes = (header) => {
+  const palpites = header.nextElementSibling;
+  const toggle = header.querySelector('.publico-toggle');
+  palpites.classList.toggle('aberto');
+  toggle.textContent = palpites.classList.contains('aberto') ? '▲' : '▼';
+};
+
+// ─── ADMIN: PARTICIPANTES ────────────────────────────────────────────────────
+function renderAdminParticipantes(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-participantes-list');
+  const todos = Object.values(usuariosData).sort((a,b)=>a.criadoEm-b.criadoEm);
+  if(!todos.length){ el.innerHTML='<div class="empty-state">Nenhum usuário.</div>'; return; }
+
+  const pendentes = todos.filter(u=>u.status==='pendente');
+  const aprovados = todos.filter(u=>u.status==='aprovado');
+  const rejeitados = todos.filter(u=>u.status==='rejeitado');
+
+  let html='';
+  if(pendentes.length){
+    html+=`<div class="alert alert-warn" style="margin-bottom:12px">⚠️ ${pendentes.length} participante(s) aguardando aprovação</div>`;
+  }
+
+  [...pendentes,...aprovados,...rejeitados].forEach(u=>{
+    const foto = u.foto?`<img src="${u.foto}" class="participante-avatar">`:`<div class="participante-placeholder">${u.nome[0]}</div>`;
+    const statusCls = u.status==='aprovado'?'status-aprovado':u.status==='rejeitado'?'status-rejeitado':'status-pendente';
+    const statusTxt = u.status==='aprovado'?'Aprovado':u.status==='rejeitado'?'Rejeitado':'Pendente';
+    let botoes='';
+    if(u.status==='pendente'){
+      botoes=`<button class="btn-warn btn-sm" onclick="aprovarUser('${u.uid}','aprovado')">✅ Aprovar</button>
+              <button class="btn btn-danger btn-sm" onclick="aprovarUser('${u.uid}','rejeitado')">❌ Rejeitar</button>`;
+    } else if(u.status==='aprovado'){
+      botoes=`<button class="btn btn-danger btn-sm" onclick="aprovarUser('${u.uid}','rejeitado')">Revogar</button>`;
+    } else {
+      botoes=`<button class="btn-warn btn-sm" onclick="aprovarUser('${u.uid}','aprovado')">Aprovar</button>`;
+    }
+    html+=`<div class="participante-row">
+      ${foto}
+      <div style="flex:1">
+        <div class="participante-nome">${u.nome}</div>
+        <div class="participante-email">${u.email}</div>
+      </div>
+      <span class="status-badge ${statusCls}">${statusTxt}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${botoes}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+window.aprovarUser = async (uid, status) => {
+  await updateDoc(doc(db,'usuarios',uid),{ status });
+};
+
+// ─── ADMIN: JOGOS ─────────────────────────────────────────────────────────────
+function renderAdminJogos(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-jogos-list');
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+  el.innerHTML = sorted.map(j=>`<div class="game-card">
+    <div class="game-header">
+      <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
+      <span class="game-date">${formatarDataJogo(j)}</span>
+    </div>
+    ${j.encerrado ? `<div style="margin-bottom:8px"><span class="encerrado-badge">✅ Resultado: ${j.gA}×${j.gB}</span></div>` : ''}
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input id="adm-gA-${j.id}" type="number" min="0" value="${j.gA??''}" style="width:50px;padding:6px;text-align:center" placeholder="0"/>
+      <span>×</span>
+      <input id="adm-gB-${j.id}" type="number" min="0" value="${j.gB??''}" style="width:50px;padding:6px;text-align:center" placeholder="0"/>
+      <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
+      ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
+      <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
+    </div>
+  </div>`).join('');
+}
+
+window.addJogo = async () => {
+  const timeA = document.getElementById('j-timeA').value.trim();
+  const timeB = document.getElementById('j-timeB').value.trim();
+  const data = document.getElementById('j-data').value;
+  const hora = document.getElementById('j-hora').value;
+  const fase = document.getElementById('j-fase').value;
+  const grupo = document.getElementById('j-grupo').value.trim().toUpperCase();
+  if(!timeA||!timeB||!data||!hora){ alert('Preencha todos os campos.'); return; }
+  const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+  const id = `${timeA.replace(/\s/g,'_')}_${timeB.replace(/\s/g,'_')}_${ts}`;
+  await setDoc(doc(db,'jogos',id),{ timeA, timeB, data, hora, fase, grupo, ts, encerrado:false });
+  ['j-timeA','j-timeB','j-data','j-hora','j-grupo'].forEach(id=>document.getElementById(id).value='');
+  alert('Jogo salvo!');
+};
+
+window.salvarResultado = async (jogoId) => {
+  const gA = parseInt(document.getElementById(`adm-gA-${jogoId}`).value);
+  const gB = parseInt(document.getElementById(`adm-gB-${jogoId}`).value);
+  if(isNaN(gA)||isNaN(gB)){ alert('Informe o placar.'); return; }
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){
+    const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
+    const aSnap = await getDoc(aRef);
+    if(!aSnap.exists()) continue;
+    const a = aSnap.data();
+    const pts = calcularPts(a.gA,a.gB,gA,gB,jogo.fase);
+    let resultado='';
+    if(a.gA===gA&&a.gB===gB) resultado='exato';
+    else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
+      if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
+      else resultado='vencedor';
+    } else if(gA===gB&&a.gA===a.gB) resultado='empate';
+    else resultado='erro';
+    await updateDoc(aRef,{ pts, resultado });
+    await recalcularPtsUsuario(u.uid);
+  }
+  // Propaga vencedor/perdedor para jogos placeholder da próxima fase (mata-mata)
+  if(jogo && jogo.gerado && jogo.fase !== 'Fase de grupos'){
+    const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
+    const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
+    if(vencedor && jogo.fase === 'Semifinal'){
+      const jogo3 = jogosData.find(j=>j.fase==='Terceiro lugar'&&j.placeholder);
+      if(jogo3 && perdedor){
+        if(!jogo3.timeA || jogo3.timeA.includes('Perdedor')) await updateDoc(doc(db,'jogos',jogo3.id),{timeA:perdedor});
+        else await updateDoc(doc(db,'jogos',jogo3.id),{timeB:perdedor});
+      }
+      const jogoFinal = jogosData.find(j=>j.fase==='Final'&&j.placeholder);
+      if(jogoFinal){
+        if(!jogoFinal.timeA || jogoFinal.timeA.includes('Vencedor')) await updateDoc(doc(db,'jogos',jogoFinal.id),{timeA:vencedor});
+        else await updateDoc(doc(db,'jogos',jogoFinal.id),{timeB:vencedor});
+      }
+    }
+  }
+  alert('✅ Resultado salvo e pontos calculados!');
+};
+
+function calcularPts(pA,pB,rA,rB,fase){
+  const m = MULT[fase]||1;
+  if(pA===rA&&pB===rB) return Math.round(10*m);
+  const vencedorReal = rA>rB?'A':rA<rB?'B':'E';
+  const vencedorPalp = pA>pB?'A':pA<pB?'B':'E';
+  if(vencedorReal!==vencedorPalp) return 0;
+  if(vencedorReal==='E') return Math.round(3*m);
+  if(rA-rB===pA-pB) return Math.round(7*m);
+  return Math.round(5*m);
+}
+
+async function recalcularPtsUsuario(uid){
+  let total=0;
+  const jogosSnap = await getDocs(collection(db,`apostas/${uid}/jogos`));
+  jogosSnap.docs.forEach(d=>{ total+=(d.data().pts||0); });
+  // Bônus de classificação por fase
+  const classifSnap = await getDoc(doc(db,'classificacoes',uid));
+  if(classifSnap.exists()){
+    const c = classifSnap.data();
+    FASES_CLASSIF.forEach(fase=>{
+      const confirmados = classifsData[fase]?.times||[];
+      const palpites = c[fase]||[];
+      palpites.forEach(time=>{ if(confirmados.includes(time)) total+=BONUS_CLASSIF[fase]; });
+    });
+    // Bônus especiais: 3º lugar e campeão
+    ['TerceiroLugar','Campeao'].forEach(chave=>{
+      const confirmado = classifsData[chave]?.time||null;
+      const palpite = c[chave]||null;
+      if(confirmado && palpite === confirmado) total+=BONUS_ESPECIAL[chave];
+    });
+  }
+  await updateDoc(doc(db,'usuarios',uid),{ pts:total });
+}
+
+// Jogos oficiais da fase de grupos — Copa 2026
+// Formato: [timeA, timeB, 'YYYY-MM-DD', 'HH:MM', 'Grupo']
+// Horários em Brasília (UTC-3)
+const JOGOS_GRUPOS_OFICIAIS = [
+  ['México','África do Sul','2026-06-11','16:00','A'],
+  ['Coreia do Sul','Tchéquia','2026-06-11','23:00','A'],
+  ['Canadá','Bósnia','2026-06-12','16:00','B'],
+  ['Estados Unidos','Paraguai','2026-06-12','22:00','D'],
+  ['Catar','Suíça','2026-06-13','16:00','B'],
+  ['Brasil','Marrocos','2026-06-13','19:00','C'],
+  ['Haiti','Escócia','2026-06-13','22:00','C'],
+  ['Austrália','Turquia','2026-06-14','01:00','D'],
+  ['Alemanha','Curaçao','2026-06-14','14:00','E'],
+  ['Holanda','Japão','2026-06-14','17:00','F'],
+  ['Costa do Marfim','Equador','2026-06-14','20:00','E'],
+  ['Suécia','Tunísia','2026-06-14','23:00','F'],
+  ['Espanha','Cabo Verde','2026-06-15','13:00','H'],
+  ['Bélgica','Egito','2026-06-15','16:00','G'],
+  ['Arábia Saudita','Uruguai','2026-06-15','19:00','H'],
+  ['Irã','Nova Zelândia','2026-06-15','22:00','G'],
+  ['França','Senegal','2026-06-16','16:00','I'],
+  ['Iraque','Noruega','2026-06-16','19:00','I'],
+  ['Argentina','Argélia','2026-06-16','22:00','J'],
+  ['Áustria','Jordânia','2026-06-17','01:00','J'],
+  ['Portugal','RD Congo','2026-06-17','14:00','K'],
+  ['Inglaterra','Croácia','2026-06-17','17:00','L'],
+  ['Gana','Panamá','2026-06-17','20:00','L'],
+  ['Uzbequistão','Colômbia','2026-06-17','23:00','K'],
+  ['Tchéquia','África do Sul','2026-06-18','13:00','A'],
+  ['Suíça','Bósnia','2026-06-18','16:00','B'],
+  ['Canadá','Catar','2026-06-18','19:00','B'],
+  ['México','Coreia do Sul','2026-06-18','22:00','A'],
+  ['Estados Unidos','Austrália','2026-06-19','16:00','D'],
+  ['Escócia','Marrocos','2026-06-19','19:00','C'],
+  ['Brasil','Haiti','2026-06-19','21:30','C'],
+  ['Turquia','Paraguai','2026-06-20','00:00','D'],
+  ['Holanda','Suécia','2026-06-20','14:00','F'],
+  ['Alemanha','Costa do Marfim','2026-06-20','17:00','E'],
+  ['Equador','Curaçao','2026-06-20','21:00','E'],
+  ['Tunísia','Japão','2026-06-21','01:00','F'],
+  ['Espanha','Arábia Saudita','2026-06-21','13:00','H'],
+  ['Bélgica','Irã','2026-06-21','16:00','G'],
+  ['Uruguai','Cabo Verde','2026-06-21','19:00','H'],
+  ['Nova Zelândia','Egito','2026-06-21','22:00','G'],
+  ['Argentina','Áustria','2026-06-22','14:00','J'],
+  ['França','Iraque','2026-06-22','18:00','I'],
+  ['Noruega','Senegal','2026-06-22','21:00','I'],
+  ['Jordânia','Argélia','2026-06-23','00:00','J'],
+  ['Portugal','Uzbequistão','2026-06-23','14:00','K'],
+  ['Inglaterra','Gana','2026-06-23','17:00','L'],
+  ['Panamá','Croácia','2026-06-23','20:00','L'],
+  ['Colômbia','RD Congo','2026-06-23','23:00','K'],
+  ['Suíça','Canadá','2026-06-24','16:00','B'],
+  ['Bósnia','Catar','2026-06-24','16:00','B'],
+  ['Marrocos','Haiti','2026-06-24','19:00','C'],
+  ['Escócia','Brasil','2026-06-24','19:00','C'],
+  ['Tchéquia','México','2026-06-24','22:00','A'],
+  ['África do Sul','Coreia do Sul','2026-06-24','22:00','A'],
+  ['Curaçao','Costa do Marfim','2026-06-25','17:00','E'],
+  ['Equador','Alemanha','2026-06-25','17:00','E'],
+  ['Japão','Suécia','2026-06-25','20:00','F'],
+  ['Tunísia','Holanda','2026-06-25','20:00','F'],
+  ['Paraguai','Austrália','2026-06-25','23:00','D'],
+  ['Turquia','Estados Unidos','2026-06-25','23:00','D'],
+  ['Senegal','Iraque','2026-06-26','16:00','I'],
+  ['Noruega','França','2026-06-26','16:00','I'],
+  ['Cabo Verde','Arábia Saudita','2026-06-26','21:00','H'],
+  ['Uruguai','Espanha','2026-06-26','21:00','H'],
+  ['Nova Zelândia','Bélgica','2026-06-27','00:00','G'],
+  ['Egito','Irã','2026-06-27','00:00','G'],
+  ['Panamá','Inglaterra','2026-06-27','18:00','L'],
+  ['Croácia','Gana','2026-06-27','18:00','L'],
+  ['RD Congo','Uzbequistão','2026-06-27','20:30','K'],
+  ['Colômbia','Portugal','2026-06-27','20:30','K'],
+  ['Argélia','Áustria','2026-06-27','23:00','J'],
+  ['Jordânia','Argentina','2026-06-27','23:00','J'],
+];
+
+window.migrarJogosGrupos = async () => {
+  if(!confirm('Isso vai APAGAR todos os jogos da fase de grupos existentes e recadastrar os 72 jogos corretos.\n\nJogos do mata-mata NÃO serão afetados.\n\nConfirmar?')) return;
+  
+  // 1. Apaga jogos da fase de grupos existentes
+  const jogosGrupos = jogosData.filter(j=>j.fase==='Fase de grupos');
+  let apagados = 0;
+  for(const j of jogosGrupos){
+    await deleteDoc(doc(db,'jogos',j.id));
+    apagados++;
+  }
+  
+  // 2. Cadastra os 72 jogos corretos
+  let cadastrados = 0;
+  for(const [timeA, timeB, data, hora, grupo] of JOGOS_GRUPOS_OFICIAIS){
+    const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+    const id = `${timeA.replace(/\s/g,'_')}_${timeB.replace(/\s/g,'_')}_${ts}`;
+    await setDoc(doc(db,'jogos',id),{
+      timeA, timeB, data, hora, grupo, fase:'Fase de grupos', ts, encerrado:false
+    });
+    cadastrados++;
+  }
+  
+  alert(`✅ Concluído!\n\n${apagados} jogos antigos removidos.\n${cadastrados} jogos corretos cadastrados.`);
+};
+
+window.reabrirJogo = async (jogoId) => {
+  if(!confirm('Reabrir jogo e remover resultado?')) return;
+  await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
+};
+
+window.deletarJogo = async (jogoId) => {
+  if(!confirm('Excluir este jogo?')) return;
+  await deleteDoc(doc(db,'jogos',jogoId));
+};
+
+// ─── ADMIN: CLASSIFICADOS ────────────────────────────────────────────────────
+function renderAdminClassif(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-classif-list');
+  const gruposMap = obterTimesporGrupo();
+
+  let html='';
+  FASES_CLASSIF.forEach(fase=>{
+    const confirmados = classifsData[fase]?.times||[];
+    const primeiros = classifsData[fase]?.primeiros||{};
+    const segundos  = classifsData[fase]?.segundos||{};
+
+    html+=`<div class="classif-fase-bloco">
+      <div class="classif-fase-header">
+        <span class="classif-fase-title">${FASES_LABEL[fase]||fase}</span>
+        <span class="classif-fase-count">${confirmados.length} confirmados</span>
+      </div>
+      <div class="classif-fase-body">`;
+
+    if(fase==='16avos'){
+      const terceiros = classifsData[fase]?.terceiros||{};
+      const pts3os    = classifsData[fase]?.pts3os||{};  // pontuação dos 3os para ranking
+      html+=`<div style="font-size:12px;color:#666;margin-bottom:12px">
+        Defina <strong>1º</strong>, <strong>2º</strong> e <strong>3º</strong> de cada grupo.<br>
+        Os 8 melhores 3os colocados classificam junto com os 24 diretos (1º e 2º de cada grupo).
+      </div>`;
+      html+=`<div class="grupos-grade">`;
+      GRUPOS_ORDEM.forEach(g=>{
+        const times = gruposMap[g]||[];
+        if(!times.length) return;
+        const prim  = primeiros[g]||null;
+        const seg   = segundos[g]||null;
+        const terc  = terceiros[g]||null;
+        html+=`<div class="grupo-bloco"><div class="grupo-header">Grupo ${g}</div>`;
+        times.forEach(time=>{
+          const isPrim = prim===time;
+          const isSeg  = seg===time;
+          const isTerc = terc===time;
+          let cls='grupo-time';
+          if(isPrim) cls+=' selecionado';
+          else if(isSeg) cls+=' correto';
+          else if(isTerc) cls+=' errado'; // usa estilo diferente para 3o
+          html+=`<div class="${cls}">
+            <span class="gt-flag">${flag(time)}</span>
+            <span class="gt-nome" style="font-size:11px;flex:1">${time}</span>
+            <div style="display:flex;gap:2px;flex-shrink:0">
+              <button onclick="setPos('${g}','${time}','1')" style="font-size:9px;padding:2px 4px;border-radius:3px;border:1px solid #2d6a4f;background:${isPrim?'#2d6a4f':'transparent'};color:${isPrim?'#fff':'#2d6a4f'};cursor:pointer;font-weight:700">1º</button>
+              <button onclick="setPos('${g}','${time}','2')" style="font-size:9px;padding:2px 4px;border-radius:3px;border:1px solid #888;background:${isSeg?'#888':'transparent'};color:${isSeg?'#fff':'#888'};cursor:pointer;font-weight:700">2º</button>
+              <button onclick="setPos('${g}','${time}','3')" style="font-size:9px;padding:2px 4px;border-radius:3px;border:1px solid #e67e22;background:${isTerc?'#e67e22':'transparent'};color:${isTerc?'#fff':'#e67e22'};cursor:pointer;font-weight:700">3º</button>
+            </div>
+          </div>`;
+        });
+        html+=`<div style="font-size:10px;padding:4px 8px;background:#f5f5f5;color:#555;line-height:1.6">
+          1º: ${prim?`${flag(prim)} ${prim}`:'—'}<br>
+          2º: ${seg?`${flag(seg)} ${seg}`:'—'}<br>
+          3º: ${terc?`${flag(terc)} ${terc}`:'—'}
+        </div>`;
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+
+      // Seção de ranking dos 3os colocados
+      const terceirosList = Object.entries(terceiros).filter(([g,t])=>t).map(([g,t])=>({g,t,pts:pts3os[g]||0}));
+      html+=`<div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700">🏅 Ranking dos 3os colocados <span style="font-weight:400;color:#888">(${terceirosList.length}/12 grupos definidos)</span></div>
+          <button class="btn btn-primary btn-sm" onclick="calcularRankingAuto()" style="font-size:12px">⚡ Calcular automaticamente</button>
+        </div>`;
+      if(terceirosList.length > 0){
+        // Ordena por pontuação
+        const sorted3 = [...terceirosList].sort((a,b)=>b.pts-a.pts);
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:8px">Informe a pontuação de cada 3º colocado para definir os 8 melhores. Os 8 primeiros do ranking passam.</div>`;
+        html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">`;
+        sorted3.forEach(({g,t,pts},idx)=>{
+          const passa = idx < 8;
+          html+=`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:${passa?'#e8f5e9':'#fff'};border:1.5px solid ${passa?'#2d6a4f':'#eee'}">
+            <span style="font-size:13px;font-weight:700;color:${passa?'#2d6a4f':'#aaa'};width:20px">${idx+1}º</span>
+            <span style="font-size:16px">${flag(t)}</span>
+            <span style="font-size:12px;font-weight:600;flex:1">${t}<br><span style="color:#888;font-weight:400">Grupo ${g}</span></span>
+            <input type="number" min="0" max="9" value="${pts}" onchange="setPts3('${g}',this.value)"
+              style="width:40px;padding:4px;text-align:center;font-size:12px;border:1px solid #ddd;border-radius:4px">
+            <span style="font-size:11px;font-weight:600;color:${passa?'#2d6a4f':'#aaa'}">${passa?'✅ Passa':'—'}</span>
+          </div>`;
+        });
+        html+=`</div>`;
+        const melhores8 = sorted3.slice(0,8).map(({t})=>t);
+        html+=`<div style="font-size:12px;margin-top:10px;padding:8px 12px;background:#e3f2fd;border-radius:8px;color:#1565c0">
+          <strong>8 melhores 3os:</strong> ${melhores8.map(t=>`${flag(t)} ${t}`).join(' · ')||'Defina as pontuações acima'}
+        </div>`;
+      } else {
+        html+=`<div style="color:#aaa;font-size:13px">Defina o 3º colocado de cada grupo acima para ver o ranking.</div>`;
+      }
+      html+=`</div>`;
+
+      html+=`<div class="alert alert-info" style="font-size:12px;margin-top:12px">
+        🏆 <strong>Chaveamento oficial dos 16-avos (Copa 2026):</strong><br>
+        1ºE×T1 · 1ºI×T2 · 2ºA×2ºB · 1ºF×2ºC · 2ºK×2ºL · 1ºH×2ºJ · 1ºD×T3 · 1ºG×T4<br>
+        1ºC×2ºF · 2ºE×2ºI · 1ºA×T5 · 1ºL×T6 · 1ºJ×2ºH · 2ºD×2ºG · 1ºB×T7 · 1ºK×T8<br>
+        <span style="color:#888">(T1–T8 = 8 melhores 3os colocados por pontuação)</span>
+      </div>`;
+    } else {
+      // Demais fases: seleção simples dos classificados
+      const selecoes = obterTodasSelecoes();
+      // Para fases após os grupos, mostra só times dos jogos daquela fase
+      const timesNaFase = [...new Set(
+        jogosData.filter(j=>j.fase===faseAnteriorDe(fase)).flatMap(j=>[j.timeA,j.timeB])
+          .filter(t=>!t.startsWith('Vencedor')&&!t.startsWith('Perdedor'))
+      )];
+      const pool = timesNaFase.length > 0 ? timesNaFase : selecoes;
+      html+=`<div class="fase-times-grid">`;
+      pool.forEach(time=>{
+        const sel=confirmados.includes(time);
+        html+=`<div class="fase-time${sel?' selecionado':''}" onclick="toggleAdminClassif('${fase}','${time}')">
+          <span class="ft-flag">${flag(time)}</span>
+          <span class="ft-nome">${time}</span>
+          <span class="ft-check">✓</span>
+        </div>`;
+      });
+      html+=`</div>`;
+      html+=`<div style="font-size:12px;color:#888;margin-top:8px">Selecione os ${LIMITES_CLASSIF[fase]} classificados para ${FASES_LABEL[fase]||fase}. Os jogos da próxima fase serão gerados automaticamente.</div>`;
+    }
+
+    html+=`<button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarClassifAdmin('${fase}')">
+      ✅ Confirmar + Gerar jogos
+    </button></div></div>`;
+  });
+
+  // Blocos especiais: vencedor do 3º lugar e campeão
+  const todasSel = obterTodasSelecoes();
+  ['TerceiroLugar','Campeao'].forEach(chave=>{
+    const isCampeao = chave==='Campeao';
+    const confirmado = classifsData[chave]?.time||null;
+    // Pool: times que jogaram 3º lugar ou final
+    const jogoEspecial = jogosData.find(j=>j.fase===(isCampeao?'Final':'Terceiro lugar'));
+    const poolEspecial = jogoEspecial
+      ? [jogoEspecial.timeA, jogoEspecial.timeB].filter(t=>!t.startsWith('Vencedor')&&!t.startsWith('Perdedor'))
+      : todasSel;
+    html+=`<div class="especial-bloco">
+      <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
+        <span style="font-size:14px;font-weight:700">${LABEL_ESPECIAL[chave]}</span>
+        <span style="font-size:12px;opacity:0.9">${confirmado?`✅ ${flag(confirmado)} ${confirmado}`:'Não confirmado'}</span>
+      </div>
+      <div class="especial-body">
+        <div class="especial-times">`;
+    poolEspecial.forEach(time=>{
+      const sel=confirmado===time;
+      html+=`<div class="especial-time${sel?' selecionado':''}" onclick="setAdminEspecial('${chave}','${time}')">
+        <span class="et-flag">${flag(time)}</span>
+        <span class="et-nome">${time}</span>
+        <span class="et-check">✓</span>
+      </div>`;
+    });
+    html+=`</div>
+        <button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarEspecialAdmin('${chave}')">
+          Confirmar ${LABEL_ESPECIAL[chave]}
+        </button>
+      </div></div>`;
+  });
+
+  el.innerHTML=html;
+}
+
+function faseAnteriorDe(fase){
+  const map = {'Oitavas':'16avos','Quartas':'Oitavas','Semifinal':'Quartas','Terceiro lugar':'Semifinal','Final':'Semifinal'};
+  return map[fase]||'16avos';
+}
+
+// Define 1º ou 2º de um grupo no admin
+window.setPos = (grupo, time, pos) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.primeiros) d.primeiros={};
+  if(!d.segundos)  d.segundos={};
+  if(!d.terceiros) d.terceiros={};
+  if(!d.pts3os)    d.pts3os={};
+
+  // Remove time de qualquer posição antes de atribuir nova
+  if(d.primeiros[grupo]===time) d.primeiros[grupo]=null;
+  if(d.segundos[grupo]===time)  d.segundos[grupo]=null;
+  if(d.terceiros[grupo]===time) d.terceiros[grupo]=null;
+
+  if(pos==='1') d.primeiros[grupo] = d.primeiros[grupo]===time ? null : time;
+  else if(pos==='2') d.segundos[grupo] = d.segundos[grupo]===time ? null : time;
+  else if(pos==='3') d.terceiros[grupo] = d.terceiros[grupo]===time ? null : time;
+
+  // times = 1os + 2os + 8 melhores 3os (por pontuação)
+  const todos12 = Object.values(d.primeiros).concat(Object.values(d.segundos)).filter(Boolean);
+  const todos3 = Object.entries(d.terceiros)
+    .filter(([g,t])=>t)
+    .sort((a,b)=>(d.pts3os[b[0]]||0)-(d.pts3os[a[0]]||0))
+    .slice(0,8).map(([g,t])=>t);
+  d.times = [...new Set([...todos12, ...todos3])];
+  renderAdminClassif();
+};
+
+window.setPts3 = (grupo, valor) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.pts3os) d.pts3os={};
+  d.pts3os[grupo] = parseInt(valor)||0;
+  const todos12 = Object.values(d.primeiros||{}).concat(Object.values(d.segundos||{})).filter(Boolean);
+  const todos3 = Object.entries(d.terceiros||{})
+    .filter(([g,t])=>t)
+    .sort((a,b)=>(d.pts3os[b[0]]||0)-(d.pts3os[a[0]]||0))
+    .slice(0,8).map(([g,t])=>t);
+  d.times = [...new Set([...todos12,...todos3])];
+  renderAdminClassif();
+};
+
+// Calcula automaticamente a tabela de classificação de cada grupo
+// com base nos resultados registrados no Firebase
+function calcularTabelaGrupos(){
+  const tabela = {}; // { grupo: { time: {pts,vit,emp,der,gp,gc,sg} } }
+  GRUPOS_ORDEM.forEach(g=>{
+    tabela[g]={};
+    (GRUPOS_FIXOS[g]||[]).forEach(t=>{
+      tabela[g][t]={pts:0,vit:0,emp:0,der:0,gp:0,gc:0,sg:0};
+    });
+  });
+
+  // Processa jogos encerrados da fase de grupos
+  jogosData.filter(j=>j.fase==='Fase de grupos'&&j.encerrado&&j.gA!==null&&j.gB!==null).forEach(j=>{
+    const g = j.grupo?.toUpperCase();
+    if(!g||!tabela[g]) return;
+    const tA = tabela[g][j.timeA];
+    const tB = tabela[g][j.timeB];
+    if(!tA||!tB) return;
+
+    tA.gp+=j.gA; tA.gc+=j.gB; tA.sg+=j.gA-j.gB;
+    tB.gp+=j.gB; tB.gc+=j.gA; tB.sg+=j.gB-j.gA;
+
+    if(j.gA>j.gB){
+      tA.pts+=3; tA.vit++;
+      tB.der++;
+    } else if(j.gA<j.gB){
+      tB.pts+=3; tB.vit++;
+      tA.der++;
+    } else {
+      tA.pts+=1; tA.emp++;
+      tB.pts+=1; tB.emp++;
+    }
+  });
+  return tabela;
+}
+
+// Retorna os 3os colocados de cada grupo ordenados: pontos, saldo, gols pro
+function calcularRanking3os(){
+  const tabela = calcularTabelaGrupos();
+  const terceiros = classifsData['16avos']?.terceiros||{};
+  const resultado = [];
+
+  GRUPOS_ORDEM.forEach(g=>{
+    const timeTerc = terceiros[g];
+    if(!timeTerc) return;
+    const stats = tabela[g]?.[timeTerc]||{pts:0,sg:0,gp:0};
+    resultado.push({g, t:timeTerc, pts:stats.pts, sg:stats.sg, gp:stats.gp});
+  });
+
+  // Ordena: pontos > saldo de gols > gols pró
+  resultado.sort((a,b)=>{
+    if(b.pts!==a.pts) return b.pts-a.pts;
+    if(b.sg!==a.sg) return b.sg-a.sg;
+    return b.gp-a.gp;
+  });
+  return resultado;
+}
+
+// Calcula e aplica ranking automático dos 3os
+window.calcularRankingAuto = () => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{}};
+  const d = classifsData['16avos'];
+
+  const ranking = calcularRanking3os();
+  if(ranking.length === 0){
+    alert('Nenhum 3º colocado definido ainda. Defina o 3º de cada grupo primeiro.');
+    return;
+  }
+
+  // Atualiza pts3os com os pontos calculados automaticamente
+  if(!d.pts3os) d.pts3os={};
+  ranking.forEach(({g, pts, sg, gp})=>{
+    d.pts3os[g] = pts; // usa pontos reais como critério primário
+  });
+
+  // Atualiza lista de classificados (top 8)
+  const todos12 = Object.values(d.primeiros||{}).concat(Object.values(d.segundos||{})).filter(Boolean);
+  const top8 = ranking.slice(0,8).map(r=>r.t);
+  d.times = [...new Set([...todos12,...top8])];
+
+  renderAdminClassif();
+  alert(`✅ Ranking calculado automaticamente!\nCritérios: pontos > saldo de gols > gols marcados\n\nTop 8: ${ranking.slice(0,8).map((r,i)=>`${i+1}º ${r.t} (${r.pts}pts, SG:${r.sg})`).join('\n')}`);
+};
+
+// Tabela oficial FIFA: dado os grupos dos 8 melhores 3os (conjunto de letras),
+// mapeia para os slots T1..T8 do chaveamento
+// Fonte: https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_knockout_stage
+// Slots: T1=3ABCDF, T2=3CDFGH, T3=3BEFIJ, T4=3AEHIJ, T5=3CEFHI, T6=3EHIJK, T7=3EFGIJ, T8=3DEIJL
+const SLOTS_3OS = [
+  { slot:'T1', grupos:'ABCDF' },
+  { slot:'T2', grupos:'CDFGH' },
+  { slot:'T3', grupos:'BEFIJ' },
+  { slot:'T4', grupos:'AEHIJ' },
+  { slot:'T5', grupos:'CEFHI' },
+  { slot:'T6', grupos:'EHIJK' },
+  { slot:'T7', grupos:'EFGIJ' },
+  { slot:'T8', grupos:'DEIJL' },
+];
+
+// Dado os grupos dos 8 classificados 3os, retorna mapa slot→time
+// seguindo a tabela oficial da FIFA para Copa 2026
+function mapearSlots3os(ranking8){
+  // ranking8 = [{g, t, pts...}] — os 8 melhores 3os em ordem
+  const gruposClassificados = ranking8.map(r=>r.g).sort().join(''); // ex: 'ABCDEFGH'
+  const mapSlot = {};
+
+  // A FIFA define qual slot recebe qual 3o dependendo dos grupos classificados
+  // A tabela completa da FIFA para 12 grupos ainda não foi publicada oficialmente
+  // Usamos a lógica: cada slot tem afinidade com grupos específicos
+  // Atribuímos o 3o do grupo mais bem colocado no ranking a cada slot compatível
+
+  const gruposOrdenados = [...ranking8]; // já ordenado por pontuação
+
+  SLOTS_3OS.forEach(({slot, grupos})=>{
+    // Encontra o melhor 3o disponível que vem de um dos grupos compatíveis
+    const compativel = gruposOrdenados.find(r=>grupos.includes(r.g) && !Object.values(mapSlot).includes(r.t));
+    mapSlot[slot] = compativel ? compativel.t : `3º Melhor (${grupos})`;
+  });
+
+  return mapSlot;
+}
+
+window.toggleAdminClassif = (fase,time) => {
+  if(!classifsData[fase]) classifsData[fase]={times:[]};
+  const arr = classifsData[fase].times;
+  const idx=arr.indexOf(time);
+  if(idx>=0) arr.splice(idx,1); else arr.push(time);
+  renderAdminClassif();
+};
+
+window.salvarClassifAdmin = async (fase) => {
+  const d = classifsData[fase]||{};
+  const times    = d.times||[];
+  const primeiros = d.primeiros||{};
+  const segundos  = d.segundos||{};
+  const terceiros = d.terceiros||{};
+  const pts3os    = d.pts3os||{};
+
+  await setDoc(doc(db,'classificados_confirmados',fase),{
+    times, primeiros, segundos, terceiros, pts3os, fase
+  });
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+
+  // Gera jogos do mata-mata automaticamente
+  if(fase==='16avos') await gerarJogos16avos(primeiros, segundos, terceiros, pts3os);
+  else if(fase==='Oitavas') await gerarJogosFase(times,'Oitavas');
+  else if(fase==='Quartas') await gerarJogosFase(times,'Quartas');
+  else if(fase==='Semifinal') await gerarJogosFase(times,'Semifinal',null,null,true);
+
+  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Jogos da próxima fase gerados.`);
+};
+
+// Gera os 16 jogos dos 16-avos — chaveamento oficial Copa 2026
+async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
+  const p = primeiros||{};
+  const s = segundos||{};
+  const P = (g) => p[g]||`1º Grupo ${g}`;
+  const S = (g) => s[g]||`2º Grupo ${g}`;
+
+  // Ranking automático dos 3os (usa resultados reais ou pts3os como fallback)
+  let ranking = calcularRanking3os();
+  if(ranking.length > 0 && ranking.every(r=>r.pts===0 && r.sg===0)){
+    // Sem resultados — usa pts3os manual como fallback
+    ranking.forEach(r=>{ r.pts = pts3os[r.g]||0; });
+    ranking.sort((a,b)=> b.pts!==a.pts ? b.pts-a.pts : b.sg-a.sg);
+  }
+  const top8 = ranking.slice(0,8);
+  const mapSlot = mapearSlots3os(top8);
+  const T = (slot) => mapSlot[slot] || `3º (${slot})`;
+
+  // 16 confrontos oficiais Copa 2026 — fonte: FIFA/FOX Sports
+  const jogos16 = [
+    { timeA:S('A'),  timeB:S('B'),  data:'2026-06-28', hora:'16:00' },
+    { timeA:P('C'),  timeB:S('F'),  data:'2026-06-29', hora:'14:00' },
+    { timeA:P('E'),  timeB:T('T1'), data:'2026-06-29', hora:'17:30' },
+    { timeA:P('F'),  timeB:S('C'),  data:'2026-06-29', hora:'22:00' },
+    { timeA:S('E'),  timeB:S('I'),  data:'2026-06-30', hora:'14:00' },
+    { timeA:P('I'),  timeB:T('T2'), data:'2026-06-30', hora:'18:00' },
+    { timeA:P('A'),  timeB:T('T5'), data:'2026-06-30', hora:'22:00' },
+    { timeA:P('L'),  timeB:T('T6'), data:'2026-07-01', hora:'13:00' },
+    { timeA:P('G'),  timeB:T('T4'), data:'2026-07-01', hora:'17:00' },
+    { timeA:P('D'),  timeB:T('T3'), data:'2026-07-01', hora:'21:00' },
+    { timeA:P('H'),  timeB:S('J'),  data:'2026-07-02', hora:'16:00' },
+    { timeA:S('K'),  timeB:S('L'),  data:'2026-07-02', hora:'20:00' },
+    { timeA:P('B'),  timeB:T('T7'), data:'2026-07-03', hora:'00:00' },
+    { timeA:S('D'),  timeB:S('G'),  data:'2026-07-03', hora:'15:00' },
+    { timeA:P('J'),  timeB:S('H'),  data:'2026-07-03', hora:'19:00' },
+    { timeA:P('K'),  timeB:T('T8'), data:'2026-07-03', hora:'22:30' },
+  ];
+
+  let criados = 0, atualizados = 0;
+  for(let i=0; i<jogos16.length; i++){
+    const {timeA, timeB, data, hora} = jogos16[i];
+    const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+    const id = `mata_16avos_jogo${i+1}_${ts}`;
+    const existing = await getDoc(doc(db,'jogos',id));
+    if(!existing.exists()){
+      await setDoc(doc(db,'jogos',id),{ timeA, timeB, data, hora, fase:'16avos', grupo:'', ts, encerrado:false, gerado:true });
+      criados++;
+    } else {
+      await updateDoc(doc(db,'jogos',id),{ timeA, timeB });
+      atualizados++;
+    }
+  }
+  const slotsInfo = Object.entries(mapSlot).map(([sl,t])=>`${sl}: ${t}`).join(' | ');
+  alert(`🏆 16-avos gerados!\n${criados} novos · ${atualizados} atualizados\n\nSlots 3os:\n${slotsInfo}`);
+}
+
+// Datas e horários reais de cada fase do mata-mata Copa 2026
+const DATAS_MATA_MATA = {
+  'Oitavas': [
+    ['2026-07-04','14:00'],['2026-07-04','18:00'],
+    ['2026-07-05','17:00'],['2026-07-05','21:00'],
+    ['2026-07-06','16:00'],['2026-07-06','21:00'],
+    ['2026-07-07','13:00'],['2026-07-07','17:00'],
+  ],
+  'Quartas': [
+    ['2026-07-09','17:00'],['2026-07-10','16:00'],
+    ['2026-07-11','18:00'],['2026-07-11','22:00'],
+  ],
+  'Semifinal': [
+    ['2026-07-14','16:00'],
+    ['2026-07-15','16:00'],
+  ],
+  'Terceiro lugar': [
+    ['2026-07-18','18:00'],
+  ],
+  'Final': [
+    ['2026-07-19','16:00'],
+  ],
+};
+
+async function gerarJogosFase(times, proximaFase, _dataInicio, _qtdJogos, gerarTerceiro=false){
+  const datas = DATAS_MATA_MATA[proximaFase] || [];
+  if(!datas.length){ console.warn('Sem datas para fase', proximaFase); return; }
+
+  let criados = 0;
+  for(let i=0; i<Math.floor(times.length/2); i++){
+    const timeA = times[i*2];
+    const timeB = times[i*2+1];
+    if(!timeA||!timeB) break;
+    const [data, hora] = datas[i] || datas[0];
+    const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+    const id = `mata_${proximaFase.replace(/\s/g,'_')}_jogo${i+1}_${ts}`;
+    const jaExiste = jogosData.some(j=>
+      j.fase===proximaFase && j.gerado &&
+      ((j.timeA===timeA&&j.timeB===timeB)||(j.timeA===timeB&&j.timeB===timeA))
+    );
+    if(!jaExiste){
+      await setDoc(doc(db,'jogos',id),{
+        timeA, timeB, data, hora, fase:proximaFase, grupo:'', ts, encerrado:false, gerado:true
+      });
+      criados++;
+    }
+  }
+
+  // Após semifinal: cria placeholders para 3º lugar e final com datas corretas
+  if(gerarTerceiro){
+    const [dataTerceiro, horaTerceiro] = DATAS_MATA_MATA['Terceiro lugar'][0];
+    const [dataFinal, horaFinal]       = DATAS_MATA_MATA['Final'][0];
+
+    const jogo3 = jogosData.find(j=>j.fase==='Terceiro lugar'&&j.gerado);
+    if(!jogo3){
+      const ts3 = new Date(`${dataTerceiro}T${horaTerceiro}:00-03:00`).getTime();
+      await setDoc(doc(db,'jogos',`mata_Terceiro_lugar_${ts3}`),{
+        timeA:'Perdedor Semi 1', timeB:'Perdedor Semi 2',
+        data:dataTerceiro, hora:horaTerceiro, fase:'Terceiro lugar',
+        grupo:'', ts:ts3, encerrado:false, gerado:true, placeholder:true
+      });
+    }
+    const jogoFinal = jogosData.find(j=>j.fase==='Final'&&j.gerado);
+    if(!jogoFinal){
+      const tsF = new Date(`${dataFinal}T${horaFinal}:00-03:00`).getTime();
+      await setDoc(doc(db,'jogos',`mata_Final_${tsF}`),{
+        timeA:'Vencedor Semi 1', timeB:'Vencedor Semi 2',
+        data:dataFinal, hora:horaFinal, fase:'Final',
+        grupo:'', ts:tsF, encerrado:false, gerado:true, placeholder:true
+      });
+    }
+  }
+
+  if(criados > 0) alert(`🏆 ${criados} jogo(s) de ${FASES_LABEL[proximaFase]||proximaFase} gerados!`);
+}
+
+window.salvarEspecialAdmin = async (chave) => {
+  if(!classifsData[chave]) classifsData[chave]={};
+  classifsData[chave].time = classifsData[chave].time === time ? null : time;
+  renderAdminClassif();
+};
+
+window.salvarEspecialAdmin = async (chave) => {
+  const time = classifsData[chave]?.time||null;
+  if(!time){ alert('Selecione um time primeiro.'); return; }
+  await setDoc(doc(db,'classificados_confirmados',chave),{ time, chave });
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
+};
+
+</script>
+</body>
+</html>
