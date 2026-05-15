@@ -1156,8 +1156,66 @@ function renderClassif(){
         html+=`</div>`;
       });
       html+=`</div>`;
+    } else if(fase === 'Terceiro lugar'){
+      // Participante escolhe 2 dos 4 semifinalistas — os outros 2 são os finalistas automaticamente
+      const semifinalistas = classificadosData['Semifinal'] || [];
+      const tercLugar = classificadosData['Terceiro lugar'] || [];
+      const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+      if(semifinalistas.length < 4){
+        html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>Semifinal</strong> (4 times).</div>`;
+      } else {
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:10px">Escolha os 2 times que vão disputar o <strong>3º lugar</strong> (perdedores das semifinais). Os outros 2 serão automaticamente os finalistas.</div>`;
+        html+=`<div class="fase-times-grid">`;
+        semifinalistas.forEach(time=>{
+          const sel = tercLugar.includes(time);
+          const conf = confirmados.length>0 && confirmados.includes(time);
+          const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+          let cls='fase-time';
+          if(errado) cls+=' errado';
+          else if(conf&&sel) cls+=' correto';
+          else if(sel) cls+=' selecionado';
+          html+=`<div class="${cls}" onclick="toggleClassif('Terceiro lugar','${time}')">
+            <span class="ft-flag">${flag(time)}</span>
+            <span class="ft-nome">${time}</span>
+            <span class="ft-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+        if(finalistas.length > 0){
+          html+=`<div style="margin-top:12px;padding:10px 12px;background:#e8f5e9;border-radius:8px;border-left:3px solid #2d6a4f">
+            <div style="font-size:12px;font-weight:700;color:#2d6a4f;margin-bottom:6px">🏆 Finalistas (automático)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              ${finalistas.map(t=>`<span style="font-size:13px;font-weight:600">${flag(t)} ${t}</span>`).join('<span style="color:#aaa">vs</span>')}
+            </div>
+          </div>`;
+        }
+      }
+    } else if(fase === 'Final'){
+      // Final é gerada automaticamente dos semifinalistas não escolhidos para o 3º lugar
+      const semifinalistas = classificadosData['Semifinal'] || [];
+      const tercLugar = classificadosData['Terceiro lugar'] || [];
+      const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+      const confirmadosFinal = classifsData['Final']?.times || [];
+      if(finalistas.length < 2){
+        html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>Disputa de 3º lugar</strong>.</div>`;
+      } else {
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:10px">Finalistas definidos automaticamente pelos semifinalistas não escolhidos para o 3º lugar.</div>`;
+        html+=`<div class="fase-times-grid">`;
+        finalistas.forEach(time=>{
+          const conf = confirmadosFinal.length>0 && confirmadosFinal.includes(time);
+          const sel = finalistas.includes(time); // sempre selecionado
+          let cls='fase-time selecionado bloqueado';
+          if(conf) cls='fase-time correto bloqueado';
+          html+=`<div class="${cls}">
+            <span class="ft-flag">${flag(time)}</span>
+            <span class="ft-nome">${time}</span>
+            <span class="ft-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+      }
     } else {
-      // Fases posteriores: apenas os times que o participante escolheu na fase anterior
+      // Fases intermediárias: apenas os times que o participante escolheu na fase anterior
       html+=`<div class="fase-times-grid">`;
       pool.forEach(time=>{
         const sel = selecionados.includes(time);
@@ -1185,12 +1243,15 @@ function renderClassif(){
 }
 
 function renderEspecialBlocos(readonly=false){
-  // Pool: semifinalistas escolhidos pelo participante
-  const pool = classificadosData['Semifinal'] || [];
+  const semifinalistas = classificadosData['Semifinal'] || [];
+  const tercLugar = classificadosData['Terceiro lugar'] || [];
+  const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
   let html='';
 
   ['TerceiroLugar','Campeao'].forEach(chave=>{
     const isCampeao = chave === 'Campeao';
+    // Pool correto: 3º lugar usa os 2 do 3º, Campeão usa os 2 finalistas
+    const pool = isCampeao ? finalistas : tercLugar;
     const selecionado = classificadosData[chave] || null;
     const confirmado = classifsData[chave]?.time || null;
     const acertou = confirmado && selecionado === confirmado;
@@ -1199,8 +1260,8 @@ function renderEspecialBlocos(readonly=false){
     const selecionadoOutro = classificadosData[outroChave] || null;
 
     const instrucao = isCampeao
-      ? 'Escolha 1 time dentre os semifinalistas que você acha que vai <strong>vencer a final</strong>.'
-      : 'Escolha 1 time dentre os semifinalistas que você acha que vai <strong>vencer a disputa de 3º lugar</strong>.';
+      ? 'Dentre os 2 finalistas que você escolheu, quem vai <strong>vencer a final</strong>?'
+      : 'Dentre os 2 times que disputam o 3º lugar, quem vai <strong>vencer</strong>?';
 
     html+=`<div class="especial-bloco">
       <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
