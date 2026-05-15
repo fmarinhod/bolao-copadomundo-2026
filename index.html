@@ -1482,7 +1482,9 @@ function renderAdminJogos(){
   if(!isAdmin) return;
   const el = document.getElementById('admin-jogos-list');
   const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
-  el.innerHTML = sorted.map(j=>`<div class="game-card">
+  el.innerHTML = sorted.map(j=>{
+    const isMata = j.fase !== 'Fase de grupos';
+    return `<div class="game-card">
     <div class="game-header">
       <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
       <span class="game-date">${formatarDataJogo(j)}</span>
@@ -1494,10 +1496,39 @@ function renderAdminJogos(){
       <input id="adm-gB-${j.id}" type="number" min="0" value="${j.gB??''}" style="width:50px;padding:6px;text-align:center" placeholder="0"/>
       <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
       ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
+      ${isMata?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')" style="background:#7c5cbf;border-color:#7c5cbf;color:#fff">✏️ Editar</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
     </div>
-  </div>`).join('');
+    ${isMata?`<div id="edit-confronto-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#f5f0ff;border-radius:8px;border:1px solid #c9b8f0">
+      <div style="font-size:12px;font-weight:600;color:#5a3d9a;margin-bottom:8px">✏️ Corrigir confronto</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <input id="edit-tA-${j.id}" type="text" value="${j.timeA}" placeholder="Time A"
+          style="flex:1;min-width:120px;padding:6px 8px;border:1px solid #c9b8f0;border-radius:6px;font-size:13px"/>
+        <span style="font-weight:600">×</span>
+        <input id="edit-tB-${j.id}" type="text" value="${j.timeB}" placeholder="Time B"
+          style="flex:1;min-width:120px;padding:6px 8px;border:1px solid #c9b8f0;border-radius:6px;font-size:13px"/>
+        <button class="btn btn-primary btn-sm" onclick="salvarConfrontoMata('${j.id}')" style="background:#5a3d9a;border-color:#5a3d9a">Salvar</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')">Cancelar</button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:6px">⚠️ Apostas já registradas não são alteradas.</div>
+    </div>`:''}
+  </div>`;
+  }).join('');
 }
+
+window.toggleEditarConfrontoMata = (jogoId) => {
+  const el = document.getElementById(`edit-confronto-${jogoId}`);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+};
+
+window.salvarConfrontoMata = async (jogoId) => {
+  const timeA = document.getElementById(`edit-tA-${jogoId}`).value.trim();
+  const timeB = document.getElementById(`edit-tB-${jogoId}`).value.trim();
+  if(!timeA||!timeB){ alert('Preencha os dois times.'); return; }
+  await updateDoc(doc(db,'jogos',jogoId),{ timeA, timeB });
+  toggleEditarConfrontoMata(jogoId);
+  alert('✅ Confronto atualizado!');
+};
 
 window.addJogo = async () => {
   const timeA = document.getElementById('j-timeA').value.trim();
