@@ -1478,13 +1478,9 @@ window.aprovarUser = async (uid, status) => {
 };
 
 // ─── ADMIN: JOGOS ─────────────────────────────────────────────────────────────
-function renderAdminJogos(){
-  if(!isAdmin) return;
-  const el = document.getElementById('admin-jogos-list');
-  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
-  el.innerHTML = sorted.map(j=>{
-    const isMata = j.fase !== 'Fase de grupos';
-    return `<div class="game-card">
+function gameCardAdminHTML(j){
+  const isMata = j.fase !== 'Fase de grupos';
+  return `<div class="game-card">
     <div class="game-header">
       <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
       <span class="game-date">${formatarDataJogo(j)}</span>
@@ -1513,8 +1509,61 @@ function renderAdminJogos(){
       <div style="font-size:11px;color:#888;margin-top:6px">⚠️ Apostas já registradas não são alteradas.</div>
     </div>`:''}
   </div>`;
-  }).join('');
 }
+
+function renderAdminJogos(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-jogos-list');
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+
+  const FASES_ORDEM = ['Fase de grupos','16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  const FASE_CONFIG = {
+    'Fase de grupos': { label:'⚽ Fase de Grupos', cor:'#1a5f3c', bg:'#e8f5e9' },
+    '16avos':         { label:'⚔️ 16-avos de Final', cor:'#1565c0', bg:'#e3f2fd' },
+    'Oitavas':        { label:'🏆 Oitavas de Final', cor:'#6a1b9a', bg:'#f3e5f5' },
+    'Quartas':        { label:'🏆 Quartas de Final', cor:'#e65100', bg:'#fff3e0' },
+    'Semifinal':      { label:'🏆 Semifinal', cor:'#b71c1c', bg:'#ffebee' },
+    'Terceiro lugar': { label:'🥉 Disputa de 3º Lugar', cor:'#4e342e', bg:'#efebe9' },
+    'Final':          { label:'🥇 Final', cor:'#f57f17', bg:'#fffde7' },
+  };
+
+  let html = '';
+  FASES_ORDEM.forEach(fase => {
+    const jogos = sorted.filter(j => j.fase === fase);
+    if(!jogos.length) return;
+    const cfg = FASE_CONFIG[fase] || { label: fase, cor:'#333', bg:'#f5f5f5' };
+    const total = jogos.length;
+    const encerrados = jogos.filter(j=>j.encerrado).length;
+
+    html += `<div style="margin-bottom:24px">
+      <div onclick="toggleFaseAdmin('${fase}')" style="
+        display:flex;justify-content:space-between;align-items:center;
+        padding:10px 14px;border-radius:10px;cursor:pointer;
+        background:${cfg.bg};border-left:4px solid ${cfg.cor};margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:${cfg.cor}">${cfg.label}</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:${cfg.cor};opacity:0.8">${encerrados}/${total} encerrados</span>
+          <span id="seta-fase-${fase.replace(/\s/g,'_')}" style="font-size:12px;color:${cfg.cor}">▼</span>
+        </div>
+      </div>
+      <div id="fase-admin-${fase.replace(/\s/g,'_')}">
+        ${jogos.map(j => gameCardAdminHTML(j)).join('')}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html || '<div class="empty-state">Nenhum jogo cadastrado.</div>';
+}
+
+window.toggleFaseAdmin = (fase) => {
+  const id = fase.replace(/\s/g,'_');
+  const el = document.getElementById(`fase-admin-${id}`);
+  const seta = document.getElementById(`seta-fase-${id}`);
+  if(!el) return;
+  const aberto = el.style.display !== 'none';
+  el.style.display = aberto ? 'none' : 'block';
+  if(seta) seta.textContent = aberto ? '▶' : '▼';
+};
 
 window.toggleEditarConfrontoMata = (jogoId) => {
   const el = document.getElementById(`edit-confronto-${jogoId}`);
