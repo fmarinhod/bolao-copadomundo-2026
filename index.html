@@ -1191,17 +1191,24 @@ function renderEspecialBlocos(readonly=false){
 
   ['TerceiroLugar','Campeao'].forEach(chave=>{
     const isCampeao = chave === 'Campeao';
-    const selecionado = classificadosData[chave] || null; // string ou null
+    const selecionado = classificadosData[chave] || null;
     const confirmado = classifsData[chave]?.time || null;
     const acertou = confirmado && selecionado === confirmado;
     const errou = confirmado && selecionado && selecionado !== confirmado;
+    const outroChave = isCampeao ? 'TerceiroLugar' : 'Campeao';
+    const selecionadoOutro = classificadosData[outroChave] || null;
+
+    const instrucao = isCampeao
+      ? 'Escolha 1 time dentre os semifinalistas que você acha que vai <strong>vencer a final</strong>.'
+      : 'Escolha 1 time dentre os semifinalistas que você acha que vai <strong>vencer a disputa de 3º lugar</strong>.';
 
     html+=`<div class="especial-bloco">
       <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
         <span style="font-size:14px;font-weight:700">${LABEL_ESPECIAL[chave]}</span>
         <span style="font-size:12px;font-weight:600;opacity:0.9">+${BONUS_ESPECIAL[chave]} pts se acertar</span>
       </div>
-      <div class="especial-body">`;
+      <div class="especial-body">
+        <div style="font-size:12px;color:#666;margin-bottom:12px">${instrucao}</div>`;
 
     if(pool.length === 0){
       html+=`<div class="especial-aviso">Preencha primeiro os palpites de <strong>Semifinal</strong>.</div>`;
@@ -1211,19 +1218,23 @@ function renderEspecialBlocos(readonly=false){
         const sel = selecionado === time;
         const conf = confirmado === time;
         const err = errou && sel;
+        // Time já escolhido no outro bloco — bloqueia visualmente
+        const bloqueadoPorOutro = !readonly && !sel && selecionadoOutro === time;
         let cls='especial-time';
-        if(readonly) cls+=' bloqueado';
+        if(readonly || bloqueadoPorOutro) cls+=' bloqueado';
         if(err) cls+=' errado';
         else if(conf&&sel) cls+=' correto';
         else if(sel) cls+=' selecionado';
-        const onclick = readonly ? '' : `onclick="toggleEspecial('${chave}','${time}')"`;
-        html+=`<div class="${cls}" ${onclick}>
+        const onclick = (readonly || bloqueadoPorOutro) ? '' : `onclick="toggleEspecial('${chave}','${time}')"`;
+        const bloqHint = bloqueadoPorOutro ? `title="Já escolhido como ${isCampeao?'vencedor do 3º lugar':'campeão'}"` : '';
+        html+=`<div class="${cls}" ${onclick} ${bloqHint} style="${bloqueadoPorOutro?'opacity:0.35;cursor:not-allowed':''}">
           <span class="et-flag">${flag(time)}</span>
           <span class="et-nome">${time}</span>
-          <span class="et-check">✓</span>
+          <span class="et-check">${bloqueadoPorOutro?'🚫':'✓'}</span>
         </div>`;
       });
       html+=`</div>`;
+      if(selecionado && !confirmado) html+=`<div style="margin-top:8px;font-size:12px;color:#2d6a4f">✅ Escolhido: ${flag(selecionado)} <strong>${selecionado}</strong></div>`;
       if(acertou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-green">✓ Acertou! +${BONUS_ESPECIAL[chave]} pts</span></div>`;
       else if(errou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-gray">Errou — era ${flag(confirmado)} ${confirmado}</span></div>`;
     }
@@ -1289,6 +1300,9 @@ window.toggleEspecial = (chave, time) => {
     classificadosData[chave] = null;
   } else {
     classificadosData[chave] = time;
+    // Se o mesmo time estava selecionado no outro bloco, remove de lá
+    const outro = chave === 'TerceiroLugar' ? 'Campeao' : 'TerceiroLugar';
+    if(classificadosData[outro] === time) classificadosData[outro] = null;
   }
   renderClassif();
 };
