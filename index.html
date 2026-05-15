@@ -606,18 +606,52 @@ function initListeners(){
   // Jogos
   onSnapshot(collection(db,'jogos'), snap => {
     const firestoreJogos = snap.docs.map(d=>({id:d.id,...d.data()}));
-    // Jogos do mata-mata vêm do Firestore normalmente
-    const mataMata = firestoreJogos.filter(j=>j.fase!=='Fase de grupos');
-    // Fase de grupos: sempre usa JOGOS_GRUPOS_OFICIAIS (fonte de verdade)
+
+    // ── Fase de grupos: sempre do HTML (fonte de verdade) ──
     const grupos = JOGOS_GRUPOS_OFICIAIS.map(([timeA,timeB,data,hora,grupo])=>({
       id: (timeA+'_'+timeB+'_'+data+'_'+hora).replace(/[^a-zA-Z0-9_]/g,'_'),
       timeA, timeB, data, hora, grupo,
       fase: 'Fase de grupos',
       ts: new Date(data+'T'+hora+':00-03:00').getTime(),
       encerrado: false,
-      // mescla resultado do Firestore se existir
       ...( firestoreJogos.find(j=>j.timeA===timeA && j.timeB===timeB && j.data===data) || {} )
     }));
+
+    // ── Mata-mata: mescla Firestore com datas/horas corretas do HTML ──
+    const firestoreMata = firestoreJogos.filter(j=>j.fase!=='Fase de grupos');
+
+    // Corrige datas e horas dos 16-avos usando a posição (id termina em jogoN_ts)
+    const mataMata = firestoreMata.map(j=>{
+      if(j.fase==='16avos'){
+        const m = j.id && j.id.match(/jogo(\d+)_/);
+        if(m){
+          const idx = parseInt(m[1])-1;
+          const datas16 = [
+            ['2026-06-28','16:00'],['2026-06-29','14:00'],['2026-06-29','17:30'],['2026-06-29','22:00'],
+            ['2026-06-30','14:00'],['2026-06-30','18:00'],['2026-06-30','22:00'],['2026-07-01','13:00'],
+            ['2026-07-01','17:00'],['2026-07-01','21:00'],['2026-07-02','16:00'],['2026-07-02','20:00'],
+            ['2026-07-03','00:00'],['2026-07-03','15:00'],['2026-07-03','19:00'],['2026-07-03','22:30'],
+          ];
+          if(datas16[idx]){
+            const [data,hora] = datas16[idx];
+            return {...j, data, hora, ts: new Date(data+'T'+hora+':00-03:00').getTime()};
+          }
+        }
+      }
+      if(DATAS_MATA_MATA[j.fase]){
+        const m = j.id && j.id.match(/jogo(\d+)_/);
+        if(m){
+          const idx = parseInt(m[1])-1;
+          const par = DATAS_MATA_MATA[j.fase][idx];
+          if(par){
+            const [data,hora] = par;
+            return {...j, data, hora, ts: new Date(data+'T'+hora+':00-03:00').getTime()};
+          }
+        }
+      }
+      return j;
+    });
+
     jogosData = [...grupos, ...mataMata];
     renderJogos();
     renderAdminJogos();
