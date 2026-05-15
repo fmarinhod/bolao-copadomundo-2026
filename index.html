@@ -617,40 +617,85 @@ function initListeners(){
       ...( firestoreJogos.find(j=>j.timeA===timeA && j.timeB===timeB && j.data===data) || {} )
     }));
 
-    // ── Mata-mata: mescla Firestore com datas/horas corretas do HTML ──
+    // ── Mata-mata: base fixa do HTML, times preenchidos pelo Firestore quando disponível ──
     const firestoreMata = firestoreJogos.filter(j=>j.fase!=='Fase de grupos');
 
-    // Corrige datas e horas dos 16-avos usando a posição (id termina em jogoN_ts)
-    const mataMata = firestoreMata.map(j=>{
-      if(j.fase==='16avos'){
-        const m = j.id && j.id.match(/jogo(\d+)_/);
-        if(m){
-          const idx = parseInt(m[1])-1;
-          const datas16 = [
-            ['2026-06-28','16:00'],['2026-06-29','14:00'],['2026-06-29','17:30'],['2026-06-29','22:00'],
-            ['2026-06-30','14:00'],['2026-06-30','18:00'],['2026-06-30','22:00'],['2026-07-01','13:00'],
-            ['2026-07-01','17:00'],['2026-07-01','21:00'],['2026-07-02','16:00'],['2026-07-02','20:00'],
-            ['2026-07-03','00:00'],['2026-07-03','15:00'],['2026-07-03','19:00'],['2026-07-03','22:30'],
-          ];
-          if(datas16[idx]){
-            const [data,hora] = datas16[idx];
-            return {...j, data, hora, ts: new Date(data+'T'+hora+':00-03:00').getTime()};
-          }
-        }
-      }
-      if(DATAS_MATA_MATA[j.fase]){
-        const m = j.id && j.id.match(/jogo(\d+)_/);
-        if(m){
-          const idx = parseInt(m[1])-1;
-          const par = DATAS_MATA_MATA[j.fase][idx];
-          if(par){
-            const [data,hora] = par;
-            return {...j, data, hora, ts: new Date(data+'T'+hora+':00-03:00').getTime()};
-          }
-        }
-      }
-      return j;
-    });
+    // Chaveamento fixo dos 16-avos com times genéricos
+    const MATA_16AVOS_FIXO = [
+      {timeA:'2º Grupo A', timeB:'2º Grupo B', data:'2026-06-28', hora:'16:00'},
+      {timeA:'1º Grupo C', timeB:'2º Grupo F', data:'2026-06-29', hora:'14:00'},
+      {timeA:'1º Grupo E', timeB:'3º (ABCDF)', data:'2026-06-29', hora:'17:30'},
+      {timeA:'1º Grupo F', timeB:'2º Grupo C', data:'2026-06-29', hora:'22:00'},
+      {timeA:'2º Grupo E', timeB:'2º Grupo I', data:'2026-06-30', hora:'14:00'},
+      {timeA:'1º Grupo I', timeB:'3º (CDFGH)', data:'2026-06-30', hora:'18:00'},
+      {timeA:'1º Grupo A', timeB:'3º (CEFHI)', data:'2026-06-30', hora:'22:00'},
+      {timeA:'1º Grupo L', timeB:'3º (EHIJK)', data:'2026-07-01', hora:'13:00'},
+      {timeA:'1º Grupo G', timeB:'3º (AEHIJ)', data:'2026-07-01', hora:'17:00'},
+      {timeA:'1º Grupo D', timeB:'3º (BEFIJ)', data:'2026-07-01', hora:'21:00'},
+      {timeA:'1º Grupo H', timeB:'2º Grupo J', data:'2026-07-02', hora:'16:00'},
+      {timeA:'2º Grupo K', timeB:'2º Grupo L', data:'2026-07-02', hora:'20:00'},
+      {timeA:'1º Grupo B', timeB:'3º (EFGIJ)', data:'2026-07-03', hora:'00:00'},
+      {timeA:'2º Grupo D', timeB:'2º Grupo G', data:'2026-07-03', hora:'15:00'},
+      {timeA:'1º Grupo J', timeB:'2º Grupo H', data:'2026-07-03', hora:'19:00'},
+      {timeA:'1º Grupo K', timeB:'3º (DEIJL)', data:'2026-07-03', hora:'22:30'},
+    ];
+
+    const MATA_OITAVAS_FIXO = [
+      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 1', data:'2026-07-04', hora:'14:00'},
+      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'18:00'},
+      {timeA:'Venc. Jogo 5', timeB:'Venc. Jogo 6', data:'2026-07-05', hora:'17:00'},
+      {timeA:'Venc. Jogo 7', timeB:'Venc. Jogo 8', data:'2026-07-05', hora:'21:00'},
+      {timeA:'Venc. Jogo 9', timeB:'Venc. Jogo 10', data:'2026-07-06', hora:'16:00'},
+      {timeA:'Venc. Jogo 11', timeB:'Venc. Jogo 12', data:'2026-07-06', hora:'21:00'},
+      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
+      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
+    ];
+
+    const MATA_QUARTAS_FIXO = [
+      {timeA:'Venc. Oitavas 2', timeB:'Venc. Oitavas 1', data:'2026-07-09', hora:'17:00'},
+      {timeA:'Venc. Oitavas 6', timeB:'Venc. Oitavas 5', data:'2026-07-10', hora:'16:00'},
+      {timeA:'Venc. Oitavas 4', timeB:'Venc. Oitavas 3', data:'2026-07-11', hora:'18:00'},
+      {timeA:'Venc. Oitavas 8', timeB:'Venc. Oitavas 7', data:'2026-07-11', hora:'22:00'},
+    ];
+
+    const MATA_SEMIS_FIXO = [
+      {timeA:'Venc. Quartas 1', timeB:'Venc. Quartas 2', data:'2026-07-14', hora:'16:00'},
+      {timeA:'Venc. Quartas 3', timeB:'Venc. Quartas 4', data:'2026-07-15', hora:'16:00'},
+    ];
+
+    const MATA_TERCEIRO_FIXO = [
+      {timeA:'Perdedor Semi 1', timeB:'Perdedor Semi 2', data:'2026-07-18', hora:'18:00'},
+    ];
+
+    const MATA_FINAL_FIXO = [
+      {timeA:'Venc. Semi 1', timeB:'Venc. Semi 2', data:'2026-07-19', hora:'16:00'},
+    ];
+
+    function buildMata(fixos, fase) {
+      return fixos.map((base, i) => {
+        const id = `mata_${fase.replace(/\s/g,'_')}_jogo${i+1}`;
+        const fs = firestoreMata.find(j=>j.fase===fase && j.id && j.id.startsWith(id));
+        return {
+          ...base,
+          id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          fase,
+          grupo: '',
+          ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          encerrado: false,
+          // Se Firestore tem times reais, usa — mantém data/hora do HTML
+          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB} : {}),
+        };
+      });
+    }
+
+    const mataMata = [
+      ...buildMata(MATA_16AVOS_FIXO,   '16avos'),
+      ...buildMata(MATA_OITAVAS_FIXO,  'Oitavas'),
+      ...buildMata(MATA_QUARTAS_FIXO,  'Quartas'),
+      ...buildMata(MATA_SEMIS_FIXO,    'Semifinal'),
+      ...buildMata(MATA_TERCEIRO_FIXO, 'Terceiro lugar'),
+      ...buildMata(MATA_FINAL_FIXO,    'Final'),
+    ];
 
     jogosData = [...grupos, ...mataMata];
     renderJogos();
