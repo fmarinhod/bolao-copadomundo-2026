@@ -1765,45 +1765,53 @@ function renderAdminClassif(){
       });
       html+=`</div>`;
 
-      // Seção de ranking dos 3os colocados
-      const terceirosList = Object.entries(terceiros).filter(([g,t])=>t).map(([g,t])=>({g,t,pts:pts3os[g]||0}));
+      // Seleção manual dos 3os para cada slot do chaveamento
+      const slots3os = classifsData['16avos']?.slots3os || {};
+      const terceirosList = Object.entries(terceiros).filter(([g,t])=>t).map(([g,t])=>t);
+
+      // Jogos dos 16-avos que têm 3o colocado
+      const JOGOS_COM_3O = [
+        { jogo: 3,  slot:'T1', desc:'Jogo 3 — 1ºE x 3º(ABCDF)' },
+        { jogo: 6,  slot:'T2', desc:'Jogo 6 — 1ºI x 3º(CDFGH)' },
+        { jogo: 7,  slot:'T5', desc:'Jogo 7 — 1ºA x 3º(CEFHI)' },
+        { jogo: 8,  slot:'T6', desc:'Jogo 8 — 1ºL x 3º(EHIJK)' },
+        { jogo: 9,  slot:'T4', desc:'Jogo 9 — 1ºG x 3º(AEHIJ)' },
+        { jogo: 10, slot:'T3', desc:'Jogo 10 — 1ºD x 3º(BEFIJ)' },
+        { jogo: 13, slot:'T7', desc:'Jogo 13 — 1ºB x 3º(EFGIJ)' },
+        { jogo: 16, slot:'T8', desc:'Jogo 16 — 1ºK x 3º(DEIJL)' },
+      ];
+
       html+=`<div style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700">🏅 Ranking dos 3os colocados <span style="font-weight:400;color:#888">(${terceirosList.length}/12 grupos definidos)</span></div>
-          <button class="btn btn-primary btn-sm" onclick="calcularRankingAuto()" style="font-size:12px">⚡ Calcular automaticamente</button>
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">🏅 Definir 3os colocados para cada jogo dos 16-avos</div>
+        <div style="font-size:12px;color:#666;margin-bottom:12px">
+          Selecione manualmente qual 3º colocado enfrenta cada 1º colocado no chaveamento.<br>
+          Defina primeiro o 3º de cada grupo na tabela acima.
         </div>`;
-      if(terceirosList.length > 0){
-        // Ordena por pontuação
-        const sorted3 = [...terceirosList].sort((a,b)=>b.pts-a.pts);
-        html+=`<div style="font-size:12px;color:#666;margin-bottom:8px">Informe a pontuação de cada 3º colocado para definir os 8 melhores. Os 8 primeiros do ranking passam.</div>`;
-        html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">`;
-        sorted3.forEach(({g,t,pts},idx)=>{
-          const passa = idx < 8;
-          html+=`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:${passa?'#e8f5e9':'#fff'};border:1.5px solid ${passa?'#2d6a4f':'#eee'}">
-            <span style="font-size:13px;font-weight:700;color:${passa?'#2d6a4f':'#aaa'};width:20px">${idx+1}º</span>
-            <span style="font-size:16px">${flag(t)}</span>
-            <span style="font-size:12px;font-weight:600;flex:1">${t}<br><span style="color:#888;font-weight:400">Grupo ${g}</span></span>
-            <input type="number" min="0" max="9" value="${pts}" onchange="setPts3('${g}',this.value)"
-              style="width:40px;padding:4px;text-align:center;font-size:12px;border:1px solid #ddd;border-radius:4px">
-            <span style="font-size:11px;font-weight:600;color:${passa?'#2d6a4f':'#aaa'}">${passa?'✅ Passa':'—'}</span>
+
+      if(terceirosList.length === 0){
+        html+=`<div style="color:#aaa;font-size:13px">Defina o 3º colocado de cada grupo acima primeiro.</div>`;
+      } else {
+        html+=`<div style="display:flex;flex-direction:column;gap:8px">`;
+        JOGOS_COM_3O.forEach(({jogo, slot, desc})=>{
+          const selecionado = slots3os[slot]||'';
+          html+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;border:1px solid #eee">
+            <span style="font-size:12px;font-weight:600;min-width:220px;color:#333">${desc}</span>
+            <select onchange="setSlot3('${slot}',this.value)"
+              style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px;background:#fff">
+              <option value="">— Selecionar 3º colocado —</option>
+              ${terceirosList.map(t=>`<option value="${t}" ${selecionado===t?'selected':''}>${flag(t)} ${t}</option>`).join('')}
+            </select>
+            <span style="font-size:13px">${selecionado ? flag(selecionado)+' '+selecionado : '—'}</span>
           </div>`;
         });
         html+=`</div>`;
-        const melhores8 = sorted3.slice(0,8).map(({t})=>t);
-        html+=`<div style="font-size:12px;margin-top:10px;padding:8px 12px;background:#e3f2fd;border-radius:8px;color:#1565c0">
-          <strong>8 melhores 3os:</strong> ${melhores8.map(t=>`${flag(t)} ${t}`).join(' · ')||'Defina as pontuações acima'}
+
+        const definidos = JOGOS_COM_3O.filter(({slot})=>slots3os[slot]).length;
+        html+=`<div style="font-size:12px;margin-top:10px;padding:8px 12px;background:${definidos===8?'#e8f5e9':'#fff8e1'};border-radius:8px;color:${definidos===8?'#2d6a4f':'#f57c00'}">
+          ${definidos===8?'✅ Todos os 8 slots definidos — pronto para gerar os 16-avos!':'⚠️ '+definidos+'/8 slots definidos. Defina todos antes de confirmar.'}
         </div>`;
-      } else {
-        html+=`<div style="color:#aaa;font-size:13px">Defina o 3º colocado de cada grupo acima para ver o ranking.</div>`;
       }
       html+=`</div>`;
-
-      html+=`<div class="alert alert-info" style="font-size:12px;margin-top:12px">
-        🏆 <strong>Chaveamento oficial dos 16-avos (Copa 2026):</strong><br>
-        1ºE×T1 · 1ºI×T2 · 2ºA×2ºB · 1ºF×2ºC · 2ºK×2ºL · 1ºH×2ºJ · 1ºD×T3 · 1ºG×T4<br>
-        1ºC×2ºF · 2ºE×2ºI · 1ºA×T5 · 1ºL×T6 · 1ºJ×2ºH · 2ºD×2ºG · 1ºB×T7 · 1ºK×T8<br>
-        <span style="color:#888">(T1–T8 = 8 melhores 3os colocados por pontuação)</span>
-      </div>`;
     } else {
       // Demais fases: seleção simples dos classificados
       const selecoes = obterTodasSelecoes();
@@ -1904,11 +1912,17 @@ window.setPts3 = (grupo, valor) => {
   const d = classifsData['16avos'];
   if(!d.pts3os) d.pts3os={};
   d.pts3os[grupo] = parseInt(valor)||0;
+  renderAdminClassif();
+};
+
+window.setSlot3 = (slot, time) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{},slots3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.slots3os) d.slots3os={};
+  d.slots3os[slot] = time;
+  // Atualiza lista de classificados: 1os + 2os + 3os dos slots
   const todos12 = Object.values(d.primeiros||{}).concat(Object.values(d.segundos||{})).filter(Boolean);
-  const todos3 = Object.entries(d.terceiros||{})
-    .filter(([g,t])=>t)
-    .sort((a,b)=>(d.pts3os[b[0]]||0)-(d.pts3os[a[0]]||0))
-    .slice(0,8).map(([g,t])=>t);
+  const todos3  = Object.values(d.slots3os).filter(Boolean);
   d.times = [...new Set([...todos12,...todos3])];
   renderAdminClassif();
 };
@@ -2050,9 +2064,19 @@ window.salvarClassifAdmin = async (fase) => {
   const segundos  = d.segundos||{};
   const terceiros = d.terceiros||{};
   const pts3os    = d.pts3os||{};
+  const slots3os  = d.slots3os||{};
+
+  // Validação: para 16avos, exige 8 slots definidos
+  if(fase==='16avos'){
+    const definidos = Object.values(slots3os).filter(Boolean).length;
+    if(definidos < 8){
+      alert(`⚠️ Defina os 8 slots dos 3os colocados antes de confirmar.\nAtualmente ${definidos}/8 definidos.`);
+      return;
+    }
+  }
 
   await setDoc(doc(db,'classificados_confirmados',fase),{
-    times, primeiros, segundos, terceiros, pts3os, fase
+    times, primeiros, segundos, terceiros, pts3os, slots3os, fase
   });
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
@@ -2073,16 +2097,9 @@ async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
   const P = (g) => p[g]||`1º Grupo ${g}`;
   const S = (g) => s[g]||`2º Grupo ${g}`;
 
-  // Ranking automático dos 3os (usa resultados reais ou pts3os como fallback)
-  let ranking = calcularRanking3os();
-  if(ranking.length > 0 && ranking.every(r=>r.pts===0 && r.sg===0)){
-    // Sem resultados — usa pts3os manual como fallback
-    ranking.forEach(r=>{ r.pts = pts3os[r.g]||0; });
-    ranking.sort((a,b)=> b.pts!==a.pts ? b.pts-a.pts : b.sg-a.sg);
-  }
-  const top8 = ranking.slice(0,8);
-  const mapSlot = mapearSlots3os(top8);
-  const T = (slot) => mapSlot[slot] || `3º (${slot})`;
+  // Usa seleção manual dos slots feita pelo admin
+  const slots3os = classifsData['16avos']?.slots3os || {};
+  const T = (slot) => slots3os[slot] || `3º (${slot})`;
 
   // 16 confrontos oficiais Copa 2026 — fonte: FIFA/FOX Sports
   const jogos16 = [
