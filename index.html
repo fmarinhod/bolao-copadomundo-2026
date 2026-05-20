@@ -392,8 +392,8 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
       </div>
 
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Registrar resultados</div>
-      <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 48 jogos corretos da fase de grupos.</div>
-      <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 48 jogos da fase de grupos</button>
+      <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 72 jogos corretos da fase de grupos.</div>
+      <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 72 jogos da fase de grupos</button>
       <div id="admin-jogos-list"><div class="loading">Carregando...</div></div>
 
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Confirmar classificados</div>
@@ -483,8 +483,8 @@ const GRUPOS_ORDEM = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
 // Grupos fixos da Copa 2026 (fonte: configuração oficial do bolão)
 const GRUPOS_FIXOS = {
-  'A': ['México', 'África do Sul', 'Coreia do Sul', 'República Tcheca'],
-  'B': ['Canadá', 'Bósnia', 'Qatar', 'Suíça'],
+  'A': ['México', 'África do Sul', 'Coreia do Sul', 'Tchéquia'],
+  'B': ['Canadá', 'Bósnia', 'Catar', 'Suíça'],
   'C': ['Brasil', 'Marrocos', 'Haiti', 'Escócia'],
   'D': ['Estados Unidos', 'Paraguai', 'Austrália', 'Turquia'],
   'E': ['Alemanha', 'Curaçao', 'Costa do Marfim', 'Equador'],
@@ -513,7 +513,7 @@ const FLAGS = {
   'Ucrânia':'🇺🇦','Haiti':'🇭🇹','Panamá':'🇵🇦','Paraguai':'🇵🇾','Equador':'🇪🇨',
   'Peru':'🇵🇪','Venezuela':'🇻🇪','Chile':'🇨🇱','Bolívia':'🇧🇴','Honduras':'🇭🇳',
   'Costa Rica':'🇨🇷','Jamaica':'🇯🇲','El Salvador':'🇸🇻','Tunísia':'🇹🇳','Argélia':'🇩🇿',
-  'Nova Zelândia':'🇳🇿','Curação':'🇨🇼','Coreia do Sul':'🇰🇷',
+  'Nova Zelândia':'🇳🇿','Curaçao':'🇨🇼','Coreia do Sul':'🇰🇷',
   'Finlândia':'🇫🇮','Grécia':'🇬🇷','Islândia':'🇮🇸','Israel':'🇮🇱','Bulgária':'🇧🇬'
 };
 
@@ -605,7 +605,99 @@ onAuthStateChanged(auth, async user => {
 function initListeners(){
   // Jogos
   onSnapshot(collection(db,'jogos'), snap => {
-    jogosData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const firestoreJogos = snap.docs.map(d=>({id:d.id,...d.data()}));
+
+    // ── Fase de grupos: sempre do HTML (fonte de verdade) ──
+    const grupos = JOGOS_GRUPOS_OFICIAIS.map(([timeA,timeB,data,hora,grupo])=>({
+      id: (timeA+'_'+timeB+'_'+data+'_'+hora).replace(/[^a-zA-Z0-9_]/g,'_'),
+      timeA, timeB, data, hora, grupo,
+      fase: 'Fase de grupos',
+      ts: new Date(data+'T'+hora+':00-03:00').getTime(),
+      encerrado: false,
+      ...( firestoreJogos.find(j=>j.timeA===timeA && j.timeB===timeB && j.data===data) || {} )
+    }));
+
+    // ── Mata-mata: base fixa do HTML, times preenchidos pelo Firestore quando disponível ──
+    const firestoreMata = firestoreJogos.filter(j=>j.fase!=='Fase de grupos');
+
+    // Chaveamento fixo dos 16-avos com times genéricos
+    const MATA_16AVOS_FIXO = [
+      {timeA:'2º Grupo A', timeB:'2º Grupo B', data:'2026-06-28', hora:'16:00'},
+      {timeA:'1º Grupo C', timeB:'2º Grupo F', data:'2026-06-29', hora:'14:00'},
+      {timeA:'1º Grupo E', timeB:'3º (ABCDF)', data:'2026-06-29', hora:'17:30'},
+      {timeA:'1º Grupo F', timeB:'2º Grupo C', data:'2026-06-29', hora:'22:00'},
+      {timeA:'2º Grupo E', timeB:'2º Grupo I', data:'2026-06-30', hora:'14:00'},
+      {timeA:'1º Grupo I', timeB:'3º (CDFGH)', data:'2026-06-30', hora:'18:00'},
+      {timeA:'1º Grupo A', timeB:'3º (CEFHI)', data:'2026-06-30', hora:'22:00'},
+      {timeA:'1º Grupo L', timeB:'3º (EHIJK)', data:'2026-07-01', hora:'13:00'},
+      {timeA:'1º Grupo G', timeB:'3º (AEHIJ)', data:'2026-07-01', hora:'17:00'},
+      {timeA:'1º Grupo D', timeB:'3º (BEFIJ)', data:'2026-07-01', hora:'21:00'},
+      {timeA:'1º Grupo H', timeB:'2º Grupo J', data:'2026-07-02', hora:'16:00'},
+      {timeA:'2º Grupo K', timeB:'2º Grupo L', data:'2026-07-02', hora:'20:00'},
+      {timeA:'1º Grupo B', timeB:'3º (EFGIJ)', data:'2026-07-03', hora:'00:00'},
+      {timeA:'2º Grupo D', timeB:'2º Grupo G', data:'2026-07-03', hora:'15:00'},
+      {timeA:'1º Grupo J', timeB:'2º Grupo H', data:'2026-07-03', hora:'19:00'},
+      {timeA:'1º Grupo K', timeB:'3º (DEIJL)', data:'2026-07-03', hora:'22:30'},
+    ];
+
+    const MATA_OITAVAS_FIXO = [
+      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 1', data:'2026-07-04', hora:'14:00'},
+      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'18:00'},
+      {timeA:'Venc. Jogo 5', timeB:'Venc. Jogo 6', data:'2026-07-05', hora:'17:00'},
+      {timeA:'Venc. Jogo 7', timeB:'Venc. Jogo 8', data:'2026-07-05', hora:'21:00'},
+      {timeA:'Venc. Jogo 9', timeB:'Venc. Jogo 10', data:'2026-07-06', hora:'16:00'},
+      {timeA:'Venc. Jogo 11', timeB:'Venc. Jogo 12', data:'2026-07-06', hora:'21:00'},
+      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
+      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
+    ];
+
+    const MATA_QUARTAS_FIXO = [
+      {timeA:'Venc. Oitavas 2', timeB:'Venc. Oitavas 1', data:'2026-07-09', hora:'17:00'},
+      {timeA:'Venc. Oitavas 6', timeB:'Venc. Oitavas 5', data:'2026-07-10', hora:'16:00'},
+      {timeA:'Venc. Oitavas 4', timeB:'Venc. Oitavas 3', data:'2026-07-11', hora:'18:00'},
+      {timeA:'Venc. Oitavas 8', timeB:'Venc. Oitavas 7', data:'2026-07-11', hora:'22:00'},
+    ];
+
+    const MATA_SEMIS_FIXO = [
+      {timeA:'Venc. Quartas 1', timeB:'Venc. Quartas 2', data:'2026-07-14', hora:'16:00'},
+      {timeA:'Venc. Quartas 3', timeB:'Venc. Quartas 4', data:'2026-07-15', hora:'16:00'},
+    ];
+
+    const MATA_TERCEIRO_FIXO = [
+      {timeA:'Perdedor Semi 1', timeB:'Perdedor Semi 2', data:'2026-07-18', hora:'18:00'},
+    ];
+
+    const MATA_FINAL_FIXO = [
+      {timeA:'Venc. Semi 1', timeB:'Venc. Semi 2', data:'2026-07-19', hora:'16:00'},
+    ];
+
+    function buildMata(fixos, fase) {
+      return fixos.map((base, i) => {
+        const id = `mata_${fase.replace(/\s/g,'_')}_jogo${i+1}`;
+        const fs = firestoreMata.find(j=>j.fase===fase && j.id && j.id.startsWith(id));
+        return {
+          ...base,
+          id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          fase,
+          grupo: '',
+          ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          encerrado: false,
+          // Se Firestore tem times reais, usa — mantém data/hora do HTML
+          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB} : {}),
+        };
+      });
+    }
+
+    const mataMata = [
+      ...buildMata(MATA_16AVOS_FIXO,   '16avos'),
+      ...buildMata(MATA_OITAVAS_FIXO,  'Oitavas'),
+      ...buildMata(MATA_QUARTAS_FIXO,  'Quartas'),
+      ...buildMata(MATA_SEMIS_FIXO,    'Semifinal'),
+      ...buildMata(MATA_TERCEIRO_FIXO, 'Terceiro lugar'),
+      ...buildMata(MATA_FINAL_FIXO,    'Final'),
+    ];
+
+    jogosData = [...grupos, ...mataMata];
     renderJogos();
     renderAdminJogos();
     renderAdminClassif();
@@ -698,26 +790,36 @@ function renderJogos(){
   const el = document.getElementById('jogos-list');
   if(!jogosData.length){ el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>'; return; }
   const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
-  const grupos = {};
-  sorted.forEach(j=>{
-    const key = j.fase==='Fase de grupos' ? `Grupo ${j.grupo||'?'}` : j.fase;
-    if(!grupos[key]) grupos[key]=[];
-    grupos[key].push(j);
-  });
+
+  const jogosGrupos = sorted.filter(j=>j.fase==='Fase de grupos');
+  const jogosMata   = sorted.filter(j=>j.fase!=='Fase de grupos');
+
   let html='';
-  // Fase de grupos primeiro
-  GRUPOS_ORDEM.forEach(g=>{
-    const key=`Grupo ${g}`;
-    if(!grupos[key]) return;
-    html+=`<div class="grupo-titulo">Grupo ${g}</div>`;
-    grupos[key].forEach(j=>{ html+=gameCardHTML(j); });
-  });
-  // Mata-mata
+
+  // Fase de grupos: ordem cronologica agrupada por data
+  if(jogosGrupos.length){
+    html+='<div class="grupo-titulo">Fase de grupos</div>';
+    let dataAtual='';
+    jogosGrupos.forEach(j=>{
+      if(j.data !== dataAtual){
+        dataAtual = j.data;
+        const parts = j.data.split('-');
+        const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(j.data+'T12:00:00').getDay()];
+        html+=`<div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.6px;margin:14px 0 6px;padding:0 0 4px;border-bottom:1px solid #e0e0e0">${parts[2]}/${parts[1]} &middot; ${diaSemana}</div>`;
+      }
+      html+=gameCardHTML(j);
+    });
+  }
+
+  // Mata-mata: por fase
+  const gruposMata = {};
+  jogosMata.forEach(j=>{ if(!gruposMata[j.fase]) gruposMata[j.fase]=[]; gruposMata[j.fase].push(j); });
   FASES_MATA_ORDEM.forEach(f=>{
-    if(!grupos[f]) return;
+    if(!gruposMata[f]) return;
     html+=`<div class="mata-titulo">${FASES_LABEL[f]||f}</div>`;
-    grupos[f].forEach(j=>{ html+=gameCardHTML(j); });
+    gruposMata[f].forEach(j=>{ html+=gameCardHTML(j); });
   });
+
   el.innerHTML=html;
 }
 
@@ -1054,8 +1156,66 @@ function renderClassif(){
         html+=`</div>`;
       });
       html+=`</div>`;
+    } else if(fase === 'Terceiro lugar'){
+      // Participante escolhe 2 dos 4 semifinalistas — os outros 2 são os finalistas automaticamente
+      const semifinalistas = classificadosData['Semifinal'] || [];
+      const tercLugar = classificadosData['Terceiro lugar'] || [];
+      const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+      if(semifinalistas.length < 4){
+        html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>Semifinal</strong> (4 times).</div>`;
+      } else {
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:10px">Escolha os 2 times que vão disputar o <strong>3º lugar</strong> (perdedores das semifinais). Os outros 2 serão automaticamente os finalistas.</div>`;
+        html+=`<div class="fase-times-grid">`;
+        semifinalistas.forEach(time=>{
+          const sel = tercLugar.includes(time);
+          const conf = confirmados.length>0 && confirmados.includes(time);
+          const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+          let cls='fase-time';
+          if(errado) cls+=' errado';
+          else if(conf&&sel) cls+=' correto';
+          else if(sel) cls+=' selecionado';
+          html+=`<div class="${cls}" onclick="toggleClassif('Terceiro lugar','${time}')">
+            <span class="ft-flag">${flag(time)}</span>
+            <span class="ft-nome">${time}</span>
+            <span class="ft-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+        if(finalistas.length > 0){
+          html+=`<div style="margin-top:12px;padding:10px 12px;background:#e8f5e9;border-radius:8px;border-left:3px solid #2d6a4f">
+            <div style="font-size:12px;font-weight:700;color:#2d6a4f;margin-bottom:6px">🏆 Finalistas (automático)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              ${finalistas.map(t=>`<span style="font-size:13px;font-weight:600">${flag(t)} ${t}</span>`).join('<span style="color:#aaa">vs</span>')}
+            </div>
+          </div>`;
+        }
+      }
+    } else if(fase === 'Final'){
+      // Final é gerada automaticamente dos semifinalistas não escolhidos para o 3º lugar
+      const semifinalistas = classificadosData['Semifinal'] || [];
+      const tercLugar = classificadosData['Terceiro lugar'] || [];
+      const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+      const confirmadosFinal = classifsData['Final']?.times || [];
+      if(finalistas.length < 2){
+        html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>Disputa de 3º lugar</strong>.</div>`;
+      } else {
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:10px">Finalistas definidos automaticamente pelos semifinalistas não escolhidos para o 3º lugar.</div>`;
+        html+=`<div class="fase-times-grid">`;
+        finalistas.forEach(time=>{
+          const conf = confirmadosFinal.length>0 && confirmadosFinal.includes(time);
+          const sel = finalistas.includes(time); // sempre selecionado
+          let cls='fase-time selecionado bloqueado';
+          if(conf) cls='fase-time correto bloqueado';
+          html+=`<div class="${cls}">
+            <span class="ft-flag">${flag(time)}</span>
+            <span class="ft-nome">${time}</span>
+            <span class="ft-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+      }
     } else {
-      // Fases posteriores: apenas os times que o participante escolheu na fase anterior
+      // Fases intermediárias: apenas os times que o participante escolheu na fase anterior
       html+=`<div class="fase-times-grid">`;
       pool.forEach(time=>{
         const sel = selecionados.includes(time);
@@ -1083,23 +1243,33 @@ function renderClassif(){
 }
 
 function renderEspecialBlocos(readonly=false){
-  // Pool: semifinalistas escolhidos pelo participante
-  const pool = classificadosData['Semifinal'] || [];
+  const semifinalistas = classificadosData['Semifinal'] || [];
+  const tercLugar = classificadosData['Terceiro lugar'] || [];
+  const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
   let html='';
 
   ['TerceiroLugar','Campeao'].forEach(chave=>{
     const isCampeao = chave === 'Campeao';
-    const selecionado = classificadosData[chave] || null; // string ou null
+    // Pool correto: 3º lugar usa os 2 do 3º, Campeão usa os 2 finalistas
+    const pool = isCampeao ? finalistas : tercLugar;
+    const selecionado = classificadosData[chave] || null;
     const confirmado = classifsData[chave]?.time || null;
     const acertou = confirmado && selecionado === confirmado;
     const errou = confirmado && selecionado && selecionado !== confirmado;
+    const outroChave = isCampeao ? 'TerceiroLugar' : 'Campeao';
+    const selecionadoOutro = classificadosData[outroChave] || null;
+
+    const instrucao = isCampeao
+      ? 'Dentre os 2 finalistas que você escolheu, quem vai <strong>vencer a final</strong>?'
+      : 'Dentre os 2 times que disputam o 3º lugar, quem vai <strong>vencer</strong>?';
 
     html+=`<div class="especial-bloco">
       <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
         <span style="font-size:14px;font-weight:700">${LABEL_ESPECIAL[chave]}</span>
         <span style="font-size:12px;font-weight:600;opacity:0.9">+${BONUS_ESPECIAL[chave]} pts se acertar</span>
       </div>
-      <div class="especial-body">`;
+      <div class="especial-body">
+        <div style="font-size:12px;color:#666;margin-bottom:12px">${instrucao}</div>`;
 
     if(pool.length === 0){
       html+=`<div class="especial-aviso">Preencha primeiro os palpites de <strong>Semifinal</strong>.</div>`;
@@ -1109,19 +1279,23 @@ function renderEspecialBlocos(readonly=false){
         const sel = selecionado === time;
         const conf = confirmado === time;
         const err = errou && sel;
+        // Time já escolhido no outro bloco — bloqueia visualmente
+        const bloqueadoPorOutro = !readonly && !sel && selecionadoOutro === time;
         let cls='especial-time';
-        if(readonly) cls+=' bloqueado';
+        if(readonly || bloqueadoPorOutro) cls+=' bloqueado';
         if(err) cls+=' errado';
         else if(conf&&sel) cls+=' correto';
         else if(sel) cls+=' selecionado';
-        const onclick = readonly ? '' : `onclick="toggleEspecial('${chave}','${time}')"`;
-        html+=`<div class="${cls}" ${onclick}>
+        const onclick = (readonly || bloqueadoPorOutro) ? '' : `onclick="toggleEspecial('${chave}','${time}')"`;
+        const bloqHint = bloqueadoPorOutro ? `title="Já escolhido como ${isCampeao?'vencedor do 3º lugar':'campeão'}"` : '';
+        html+=`<div class="${cls}" ${onclick} ${bloqHint} style="${bloqueadoPorOutro?'opacity:0.35;cursor:not-allowed':''}">
           <span class="et-flag">${flag(time)}</span>
           <span class="et-nome">${time}</span>
-          <span class="et-check">✓</span>
+          <span class="et-check">${bloqueadoPorOutro?'🚫':'✓'}</span>
         </div>`;
       });
       html+=`</div>`;
+      if(selecionado && !confirmado) html+=`<div style="margin-top:8px;font-size:12px;color:#2d6a4f">✅ Escolhido: ${flag(selecionado)} <strong>${selecionado}</strong></div>`;
       if(acertou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-green">✓ Acertou! +${BONUS_ESPECIAL[chave]} pts</span></div>`;
       else if(errou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-gray">Errou — era ${flag(confirmado)} ${confirmado}</span></div>`;
     }
@@ -1187,6 +1361,9 @@ window.toggleEspecial = (chave, time) => {
     classificadosData[chave] = null;
   } else {
     classificadosData[chave] = time;
+    // Se o mesmo time estava selecionado no outro bloco, remove de lá
+    const outro = chave === 'TerceiroLugar' ? 'Campeao' : 'TerceiroLugar';
+    if(classificadosData[outro] === time) classificadosData[outro] = null;
   }
   renderClassif();
 };
@@ -1376,11 +1553,9 @@ window.aprovarUser = async (uid, status) => {
 };
 
 // ─── ADMIN: JOGOS ─────────────────────────────────────────────────────────────
-function renderAdminJogos(){
-  if(!isAdmin) return;
-  const el = document.getElementById('admin-jogos-list');
-  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
-  el.innerHTML = sorted.map(j=>`<div class="game-card">
+function gameCardAdminHTML(j){
+  const isMata = j.fase !== 'Fase de grupos';
+  return `<div class="game-card">
     <div class="game-header">
       <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
       <span class="game-date">${formatarDataJogo(j)}</span>
@@ -1392,10 +1567,92 @@ function renderAdminJogos(){
       <input id="adm-gB-${j.id}" type="number" min="0" value="${j.gB??''}" style="width:50px;padding:6px;text-align:center" placeholder="0"/>
       <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
       ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
+      ${isMata?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')" style="background:#7c5cbf;border-color:#7c5cbf;color:#fff">✏️ Editar</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
     </div>
-  </div>`).join('');
+    ${isMata?`<div id="edit-confronto-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#f5f0ff;border-radius:8px;border:1px solid #c9b8f0">
+      <div style="font-size:12px;font-weight:600;color:#5a3d9a;margin-bottom:8px">✏️ Corrigir confronto</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <input id="edit-tA-${j.id}" type="text" value="${j.timeA}" placeholder="Time A"
+          style="flex:1;min-width:120px;padding:6px 8px;border:1px solid #c9b8f0;border-radius:6px;font-size:13px"/>
+        <span style="font-weight:600">×</span>
+        <input id="edit-tB-${j.id}" type="text" value="${j.timeB}" placeholder="Time B"
+          style="flex:1;min-width:120px;padding:6px 8px;border:1px solid #c9b8f0;border-radius:6px;font-size:13px"/>
+        <button class="btn btn-primary btn-sm" onclick="salvarConfrontoMata('${j.id}')" style="background:#5a3d9a;border-color:#5a3d9a">Salvar</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')">Cancelar</button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:6px">⚠️ Apostas já registradas não são alteradas.</div>
+    </div>`:''}
+  </div>`;
 }
+
+function renderAdminJogos(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-jogos-list');
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+
+  const FASES_ORDEM = ['Fase de grupos','16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  const FASE_CONFIG = {
+    'Fase de grupos': { label:'⚽ Fase de Grupos', cor:'#1a5f3c', bg:'#e8f5e9' },
+    '16avos':         { label:'⚔️ 16-avos de Final', cor:'#1565c0', bg:'#e3f2fd' },
+    'Oitavas':        { label:'🏆 Oitavas de Final', cor:'#6a1b9a', bg:'#f3e5f5' },
+    'Quartas':        { label:'🏆 Quartas de Final', cor:'#e65100', bg:'#fff3e0' },
+    'Semifinal':      { label:'🏆 Semifinal', cor:'#b71c1c', bg:'#ffebee' },
+    'Terceiro lugar': { label:'🥉 Disputa de 3º Lugar', cor:'#4e342e', bg:'#efebe9' },
+    'Final':          { label:'🥇 Final', cor:'#f57f17', bg:'#fffde7' },
+  };
+
+  let html = '';
+  FASES_ORDEM.forEach(fase => {
+    const jogos = sorted.filter(j => j.fase === fase);
+    if(!jogos.length) return;
+    const cfg = FASE_CONFIG[fase] || { label: fase, cor:'#333', bg:'#f5f5f5' };
+    const total = jogos.length;
+    const encerrados = jogos.filter(j=>j.encerrado).length;
+
+    html += `<div style="margin-bottom:24px">
+      <div onclick="toggleFaseAdmin('${fase}')" style="
+        display:flex;justify-content:space-between;align-items:center;
+        padding:10px 14px;border-radius:10px;cursor:pointer;
+        background:${cfg.bg};border-left:4px solid ${cfg.cor};margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:${cfg.cor}">${cfg.label}</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:${cfg.cor};opacity:0.8">${encerrados}/${total} encerrados</span>
+          <span id="seta-fase-${fase.replace(/\s/g,'_')}" style="font-size:12px;color:${cfg.cor}">▼</span>
+        </div>
+      </div>
+      <div id="fase-admin-${fase.replace(/\s/g,'_')}">
+        ${jogos.map(j => gameCardAdminHTML(j)).join('')}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html || '<div class="empty-state">Nenhum jogo cadastrado.</div>';
+}
+
+window.toggleFaseAdmin = (fase) => {
+  const id = fase.replace(/\s/g,'_');
+  const el = document.getElementById(`fase-admin-${id}`);
+  const seta = document.getElementById(`seta-fase-${id}`);
+  if(!el) return;
+  const aberto = el.style.display !== 'none';
+  el.style.display = aberto ? 'none' : 'block';
+  if(seta) seta.textContent = aberto ? '▶' : '▼';
+};
+
+window.toggleEditarConfrontoMata = (jogoId) => {
+  const el = document.getElementById(`edit-confronto-${jogoId}`);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+};
+
+window.salvarConfrontoMata = async (jogoId) => {
+  const timeA = document.getElementById(`edit-tA-${jogoId}`).value.trim();
+  const timeB = document.getElementById(`edit-tB-${jogoId}`).value.trim();
+  if(!timeA||!timeB){ alert('Preencha os dois times.'); return; }
+  await updateDoc(doc(db,'jogos',jogoId),{ timeA, timeB });
+  toggleEditarConfrontoMata(jogoId);
+  alert('✅ Confronto atualizado!');
+};
 
 window.addJogo = async () => {
   const timeA = document.getElementById('j-timeA').value.trim();
@@ -1493,90 +1750,78 @@ async function recalcularPtsUsuario(uid){
 // Formato: [timeA, timeB, 'YYYY-MM-DD', 'HH:MM', 'Grupo']
 // Horários em Brasília (UTC-3)
 const JOGOS_GRUPOS_OFICIAIS = [
-  // GRUPO A
   ['México','África do Sul','2026-06-11','16:00','A'],
-  ['Coreia do Sul','República Tcheca','2026-06-11','23:00','A'],
-  ['República Tcheca','África do Sul','2026-06-18','13:00','A'],
-  ['México','Coreia do Sul','2026-06-18','22:00','A'],
-  ['México','República Tcheca','2026-06-24','22:00','A'],
-  ['África do Sul','Coreia do Sul','2026-06-24','22:00','A'],
-  // GRUPO B
+  ['Coreia do Sul','Tchéquia','2026-06-11','23:00','A'],
   ['Canadá','Bósnia','2026-06-12','16:00','B'],
-  ['Qatar','Suíça','2026-06-13','16:00','B'],
-  ['Suíça','Canadá','2026-06-18','16:00','B'],
-  ['Bósnia','Qatar','2026-06-18','19:00','B'],
-  ['Canadá','Qatar','2026-06-24','16:00','B'],
-  ['Suíça','Bósnia','2026-06-24','16:00','B'],
-  // GRUPO C
+  ['Estados Unidos','Paraguai','2026-06-12','22:00','D'],
+  ['Catar','Suíça','2026-06-13','16:00','B'],
   ['Brasil','Marrocos','2026-06-13','19:00','C'],
   ['Haiti','Escócia','2026-06-13','22:00','C'],
-  ['Brasil','Haiti','2026-06-19','21:30','C'],
-  ['Marrocos','Escócia','2026-06-19','18:00','C'],
-  ['Brasil','Escócia','2026-06-24','19:00','C'],
-  ['Marrocos','Haiti','2026-06-24','19:00','C'],
-  // GRUPO D
-  ['Estados Unidos','Paraguai','2026-06-12','22:00','D'],
   ['Austrália','Turquia','2026-06-14','01:00','D'],
-  ['Estados Unidos','Austrália','2026-06-19','22:00','D'],
-  ['Paraguai','Turquia','2026-06-19','19:00','D'],
-  ['Estados Unidos','Turquia','2026-06-25','22:00','D'],
-  ['Paraguai','Austrália','2026-06-25','22:00','D'],
-  // GRUPO E
-  ['Alemanha','Equador','2026-06-14','16:00','E'],
-  ['Curaçao','Costa do Marfim','2026-06-14','19:00','E'],
-  ['Alemanha','Curaçao','2026-06-20','16:00','E'],
-  ['Equador','Costa do Marfim','2026-06-20','19:00','E'],
-  ['Alemanha','Costa do Marfim','2026-06-25','16:00','E'],
-  ['Equador','Curaçao','2026-06-25','16:00','E'],
-  // GRUPO F
-  ['Holanda','Japão','2026-06-14','22:00','F'],
-  ['Suécia','Tunísia','2026-06-15','01:00','F'],
-  ['Holanda','Suécia','2026-06-20','22:00','F'],
-  ['Japão','Tunísia','2026-06-21','01:00','F'],
-  ['Holanda','Tunísia','2026-06-25','22:00','F'],
-  ['Japão','Suécia','2026-06-25','22:00','F'],
-  // GRUPO G
+  ['Alemanha','Curaçao','2026-06-14','14:00','E'],
+  ['Holanda','Japão','2026-06-14','17:00','F'],
+  ['Costa do Marfim','Equador','2026-06-14','20:00','E'],
+  ['Suécia','Tunísia','2026-06-14','23:00','F'],
+  ['Espanha','Cabo Verde','2026-06-15','13:00','H'],
   ['Bélgica','Egito','2026-06-15','16:00','G'],
-  ['Irã','Nova Zelândia','2026-06-15','19:00','G'],
-  ['Bélgica','Irã','2026-06-21','16:00','G'],
-  ['Egito','Nova Zelândia','2026-06-21','19:00','G'],
-  ['Bélgica','Nova Zelândia','2026-06-26','16:00','G'],
-  ['Egito','Irã','2026-06-26','16:00','G'],
-  // GRUPO H
-  ['Espanha','Uruguai','2026-06-15','22:00','H'],
-  ['Cabo Verde','Arábia Saudita','2026-06-16','01:00','H'],
-  ['Espanha','Cabo Verde','2026-06-21','22:00','H'],
-  ['Uruguai','Arábia Saudita','2026-06-22','01:00','H'],
-  ['Espanha','Arábia Saudita','2026-06-26','22:00','H'],
-  ['Uruguai','Cabo Verde','2026-06-26','22:00','H'],
-  // GRUPO I
+  ['Arábia Saudita','Uruguai','2026-06-15','19:00','H'],
+  ['Irã','Nova Zelândia','2026-06-15','22:00','G'],
   ['França','Senegal','2026-06-16','16:00','I'],
   ['Iraque','Noruega','2026-06-16','19:00','I'],
-  ['França','Iraque','2026-06-22','16:00','I'],
-  ['Senegal','Noruega','2026-06-22','19:00','I'],
-  ['França','Noruega','2026-06-26','19:00','I'],
-  ['Senegal','Iraque','2026-06-26','19:00','I'],
-  // GRUPO J
-  ['Argentina','Jordânia','2026-06-16','22:00','J'],
-  ['Áustria','Argélia','2026-06-17','01:00','J'],
-  ['Argentina','Áustria','2026-06-22','22:00','J'],
-  ['Jordânia','Argélia','2026-06-23','01:00','J'],
-  ['Argentina','Argélia','2026-06-27','22:00','J'],
-  ['Áustria','Jordânia','2026-06-27','22:00','J'],
-  // GRUPO K
-  ['Portugal','Uzbequistão','2026-06-17','16:00','K'],
-  ['Colômbia','RD Congo','2026-06-17','19:00','K'],
-  ['Portugal','RD Congo','2026-06-23','14:00','K'],
-  ['Colômbia','Uzbequistão','2026-06-23','23:00','K'],
-  ['Colômbia','Portugal','2026-06-27','19:00','K'],
-  ['RD Congo','Uzbequistão','2026-06-27','19:00','K'],
-  // GRUPO L
+  ['Argentina','Argélia','2026-06-16','22:00','J'],
+  ['Áustria','Jordânia','2026-06-17','01:00','J'],
+  ['Portugal','RD Congo','2026-06-17','14:00','K'],
   ['Inglaterra','Croácia','2026-06-17','17:00','L'],
   ['Gana','Panamá','2026-06-17','20:00','L'],
+  ['Uzbequistão','Colômbia','2026-06-17','23:00','K'],
+  ['Tchéquia','África do Sul','2026-06-18','13:00','A'],
+  ['Suíça','Bósnia','2026-06-18','16:00','B'],
+  ['Canadá','Catar','2026-06-18','19:00','B'],
+  ['México','Coreia do Sul','2026-06-18','22:00','A'],
+  ['Estados Unidos','Austrália','2026-06-19','16:00','D'],
+  ['Escócia','Marrocos','2026-06-19','19:00','C'],
+  ['Brasil','Haiti','2026-06-19','21:30','C'],
+  ['Turquia','Paraguai','2026-06-20','00:00','D'],
+  ['Holanda','Suécia','2026-06-20','14:00','F'],
+  ['Alemanha','Costa do Marfim','2026-06-20','17:00','E'],
+  ['Equador','Curaçao','2026-06-20','21:00','E'],
+  ['Tunísia','Japão','2026-06-21','01:00','F'],
+  ['Espanha','Arábia Saudita','2026-06-21','13:00','H'],
+  ['Bélgica','Irã','2026-06-21','16:00','G'],
+  ['Uruguai','Cabo Verde','2026-06-21','19:00','H'],
+  ['Nova Zelândia','Egito','2026-06-21','22:00','G'],
+  ['Argentina','Áustria','2026-06-22','14:00','J'],
+  ['França','Iraque','2026-06-22','18:00','I'],
+  ['Noruega','Senegal','2026-06-22','21:00','I'],
+  ['Jordânia','Argélia','2026-06-23','00:00','J'],
+  ['Portugal','Uzbequistão','2026-06-23','14:00','K'],
   ['Inglaterra','Gana','2026-06-23','17:00','L'],
   ['Panamá','Croácia','2026-06-23','20:00','L'],
-  ['Inglaterra','Panamá','2026-06-27','18:00','L'],
+  ['Colômbia','RD Congo','2026-06-23','23:00','K'],
+  ['Suíça','Canadá','2026-06-24','16:00','B'],
+  ['Bósnia','Catar','2026-06-24','16:00','B'],
+  ['Marrocos','Haiti','2026-06-24','19:00','C'],
+  ['Escócia','Brasil','2026-06-24','19:00','C'],
+  ['Tchéquia','México','2026-06-24','22:00','A'],
+  ['África do Sul','Coreia do Sul','2026-06-24','22:00','A'],
+  ['Curaçao','Costa do Marfim','2026-06-25','17:00','E'],
+  ['Equador','Alemanha','2026-06-25','17:00','E'],
+  ['Japão','Suécia','2026-06-25','20:00','F'],
+  ['Tunísia','Holanda','2026-06-25','20:00','F'],
+  ['Paraguai','Austrália','2026-06-25','23:00','D'],
+  ['Turquia','Estados Unidos','2026-06-25','23:00','D'],
+  ['Senegal','Iraque','2026-06-26','16:00','I'],
+  ['Noruega','França','2026-06-26','16:00','I'],
+  ['Cabo Verde','Arábia Saudita','2026-06-26','21:00','H'],
+  ['Uruguai','Espanha','2026-06-26','21:00','H'],
+  ['Nova Zelândia','Bélgica','2026-06-27','00:00','G'],
+  ['Egito','Irã','2026-06-27','00:00','G'],
+  ['Panamá','Inglaterra','2026-06-27','18:00','L'],
   ['Croácia','Gana','2026-06-27','18:00','L'],
+  ['RD Congo','Uzbequistão','2026-06-27','20:30','K'],
+  ['Colômbia','Portugal','2026-06-27','20:30','K'],
+  ['Argélia','Áustria','2026-06-27','23:00','J'],
+  ['Jordânia','Argentina','2026-06-27','23:00','J'],
 ];
 
 window.migrarJogosGrupos = async () => {
@@ -1675,45 +1920,53 @@ function renderAdminClassif(){
       });
       html+=`</div>`;
 
-      // Seção de ranking dos 3os colocados
-      const terceirosList = Object.entries(terceiros).filter(([g,t])=>t).map(([g,t])=>({g,t,pts:pts3os[g]||0}));
+      // Seleção manual dos 3os para cada slot do chaveamento
+      const slots3os = classifsData['16avos']?.slots3os || {};
+      const terceirosList = Object.entries(terceiros).filter(([g,t])=>t).map(([g,t])=>t);
+
+      // Jogos dos 16-avos que têm 3o colocado
+      const JOGOS_COM_3O = [
+        { jogo: 3,  slot:'T1', desc:'Jogo 3 — 1ºE x 3º(ABCDF)' },
+        { jogo: 6,  slot:'T2', desc:'Jogo 6 — 1ºI x 3º(CDFGH)' },
+        { jogo: 7,  slot:'T5', desc:'Jogo 7 — 1ºA x 3º(CEFHI)' },
+        { jogo: 8,  slot:'T6', desc:'Jogo 8 — 1ºL x 3º(EHIJK)' },
+        { jogo: 9,  slot:'T4', desc:'Jogo 9 — 1ºG x 3º(AEHIJ)' },
+        { jogo: 10, slot:'T3', desc:'Jogo 10 — 1ºD x 3º(BEFIJ)' },
+        { jogo: 13, slot:'T7', desc:'Jogo 13 — 1ºB x 3º(EFGIJ)' },
+        { jogo: 16, slot:'T8', desc:'Jogo 16 — 1ºK x 3º(DEIJL)' },
+      ];
+
       html+=`<div style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700">🏅 Ranking dos 3os colocados <span style="font-weight:400;color:#888">(${terceirosList.length}/12 grupos definidos)</span></div>
-          <button class="btn btn-primary btn-sm" onclick="calcularRankingAuto()" style="font-size:12px">⚡ Calcular automaticamente</button>
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">🏅 Definir 3os colocados para cada jogo dos 16-avos</div>
+        <div style="font-size:12px;color:#666;margin-bottom:12px">
+          Selecione manualmente qual 3º colocado enfrenta cada 1º colocado no chaveamento.<br>
+          Defina primeiro o 3º de cada grupo na tabela acima.
         </div>`;
-      if(terceirosList.length > 0){
-        // Ordena por pontuação
-        const sorted3 = [...terceirosList].sort((a,b)=>b.pts-a.pts);
-        html+=`<div style="font-size:12px;color:#666;margin-bottom:8px">Informe a pontuação de cada 3º colocado para definir os 8 melhores. Os 8 primeiros do ranking passam.</div>`;
-        html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">`;
-        sorted3.forEach(({g,t,pts},idx)=>{
-          const passa = idx < 8;
-          html+=`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:${passa?'#e8f5e9':'#fff'};border:1.5px solid ${passa?'#2d6a4f':'#eee'}">
-            <span style="font-size:13px;font-weight:700;color:${passa?'#2d6a4f':'#aaa'};width:20px">${idx+1}º</span>
-            <span style="font-size:16px">${flag(t)}</span>
-            <span style="font-size:12px;font-weight:600;flex:1">${t}<br><span style="color:#888;font-weight:400">Grupo ${g}</span></span>
-            <input type="number" min="0" max="9" value="${pts}" onchange="setPts3('${g}',this.value)"
-              style="width:40px;padding:4px;text-align:center;font-size:12px;border:1px solid #ddd;border-radius:4px">
-            <span style="font-size:11px;font-weight:600;color:${passa?'#2d6a4f':'#aaa'}">${passa?'✅ Passa':'—'}</span>
+
+      if(terceirosList.length === 0){
+        html+=`<div style="color:#aaa;font-size:13px">Defina o 3º colocado de cada grupo acima primeiro.</div>`;
+      } else {
+        html+=`<div style="display:flex;flex-direction:column;gap:8px">`;
+        JOGOS_COM_3O.forEach(({jogo, slot, desc})=>{
+          const selecionado = slots3os[slot]||'';
+          html+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;border:1px solid #eee">
+            <span style="font-size:12px;font-weight:600;min-width:220px;color:#333">${desc}</span>
+            <select onchange="setSlot3('${slot}',this.value)"
+              style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px;background:#fff">
+              <option value="">— Selecionar 3º colocado —</option>
+              ${terceirosList.map(t=>`<option value="${t}" ${selecionado===t?'selected':''}>${flag(t)} ${t}</option>`).join('')}
+            </select>
+            <span style="font-size:13px">${selecionado ? flag(selecionado)+' '+selecionado : '—'}</span>
           </div>`;
         });
         html+=`</div>`;
-        const melhores8 = sorted3.slice(0,8).map(({t})=>t);
-        html+=`<div style="font-size:12px;margin-top:10px;padding:8px 12px;background:#e3f2fd;border-radius:8px;color:#1565c0">
-          <strong>8 melhores 3os:</strong> ${melhores8.map(t=>`${flag(t)} ${t}`).join(' · ')||'Defina as pontuações acima'}
+
+        const definidos = JOGOS_COM_3O.filter(({slot})=>slots3os[slot]).length;
+        html+=`<div style="font-size:12px;margin-top:10px;padding:8px 12px;background:${definidos===8?'#e8f5e9':'#fff8e1'};border-radius:8px;color:${definidos===8?'#2d6a4f':'#f57c00'}">
+          ${definidos===8?'✅ Todos os 8 slots definidos — pronto para gerar os 16-avos!':'⚠️ '+definidos+'/8 slots definidos. Defina todos antes de confirmar.'}
         </div>`;
-      } else {
-        html+=`<div style="color:#aaa;font-size:13px">Defina o 3º colocado de cada grupo acima para ver o ranking.</div>`;
       }
       html+=`</div>`;
-
-      html+=`<div class="alert alert-info" style="font-size:12px;margin-top:12px">
-        🏆 <strong>Chaveamento oficial dos 16-avos (Copa 2026):</strong><br>
-        1ºE×T1 · 1ºI×T2 · 2ºA×2ºB · 1ºF×2ºC · 2ºK×2ºL · 1ºH×2ºJ · 1ºD×T3 · 1ºG×T4<br>
-        1ºC×2ºF · 2ºE×2ºI · 1ºA×T5 · 1ºL×T6 · 1ºJ×2ºH · 2ºD×2ºG · 1ºB×T7 · 1ºK×T8<br>
-        <span style="color:#888">(T1–T8 = 8 melhores 3os colocados por pontuação)</span>
-      </div>`;
     } else {
       // Demais fases: seleção simples dos classificados
       const selecoes = obterTodasSelecoes();
@@ -1814,11 +2067,17 @@ window.setPts3 = (grupo, valor) => {
   const d = classifsData['16avos'];
   if(!d.pts3os) d.pts3os={};
   d.pts3os[grupo] = parseInt(valor)||0;
+  renderAdminClassif();
+};
+
+window.setSlot3 = (slot, time) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{},slots3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.slots3os) d.slots3os={};
+  d.slots3os[slot] = time;
+  // Atualiza lista de classificados: 1os + 2os + 3os dos slots
   const todos12 = Object.values(d.primeiros||{}).concat(Object.values(d.segundos||{})).filter(Boolean);
-  const todos3 = Object.entries(d.terceiros||{})
-    .filter(([g,t])=>t)
-    .sort((a,b)=>(d.pts3os[b[0]]||0)-(d.pts3os[a[0]]||0))
-    .slice(0,8).map(([g,t])=>t);
+  const todos3  = Object.values(d.slots3os).filter(Boolean);
   d.times = [...new Set([...todos12,...todos3])];
   renderAdminClassif();
 };
@@ -1960,9 +2219,19 @@ window.salvarClassifAdmin = async (fase) => {
   const segundos  = d.segundos||{};
   const terceiros = d.terceiros||{};
   const pts3os    = d.pts3os||{};
+  const slots3os  = d.slots3os||{};
+
+  // Validação: para 16avos, exige 8 slots definidos
+  if(fase==='16avos'){
+    const definidos = Object.values(slots3os).filter(Boolean).length;
+    if(definidos < 8){
+      alert(`⚠️ Defina os 8 slots dos 3os colocados antes de confirmar.\nAtualmente ${definidos}/8 definidos.`);
+      return;
+    }
+  }
 
   await setDoc(doc(db,'classificados_confirmados',fase),{
-    times, primeiros, segundos, terceiros, pts3os, fase
+    times, primeiros, segundos, terceiros, pts3os, slots3os, fase
   });
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
@@ -1983,35 +2252,28 @@ async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
   const P = (g) => p[g]||`1º Grupo ${g}`;
   const S = (g) => s[g]||`2º Grupo ${g}`;
 
-  // Ranking automático dos 3os (usa resultados reais ou pts3os como fallback)
-  let ranking = calcularRanking3os();
-  if(ranking.length > 0 && ranking.every(r=>r.pts===0 && r.sg===0)){
-    // Sem resultados — usa pts3os manual como fallback
-    ranking.forEach(r=>{ r.pts = pts3os[r.g]||0; });
-    ranking.sort((a,b)=> b.pts!==a.pts ? b.pts-a.pts : b.sg-a.sg);
-  }
-  const top8 = ranking.slice(0,8);
-  const mapSlot = mapearSlots3os(top8);
-  const T = (slot) => mapSlot[slot] || `3º (${slot})`;
+  // Usa seleção manual dos slots feita pelo admin
+  const slots3os = classifsData['16avos']?.slots3os || {};
+  const T = (slot) => slots3os[slot] || `3º (${slot})`;
 
   // 16 confrontos oficiais Copa 2026 — fonte: FIFA/FOX Sports
   const jogos16 = [
-    { timeA:S('A'),  timeB:S('B'),  data:'2026-06-28', hora:'19:00' },
-    { timeA:P('C'),  timeB:S('F'),  data:'2026-06-29', hora:'17:00' },
-    { timeA:P('E'),  timeB:T('T1'), data:'2026-06-29', hora:'20:30' },
-    { timeA:P('I'),  timeB:T('T2'), data:'2026-06-30', hora:'21:00' },
-    { timeA:P('F'),  timeB:S('C'),  data:'2026-06-30', hora:'01:00' },
-    { timeA:S('E'),  timeB:S('I'),  data:'2026-07-01', hora:'17:00' },
-    { timeA:P('A'),  timeB:T('T5'), data:'2026-07-01', hora:'01:00' },
-    { timeA:P('G'),  timeB:T('T4'), data:'2026-07-01', hora:'20:00' },
-    { timeA:P('D'),  timeB:T('T3'), data:'2026-07-02', hora:'00:00' },
-    { timeA:S('K'),  timeB:S('L'),  data:'2026-07-02', hora:'23:00' },
-    { timeA:P('H'),  timeB:S('J'),  data:'2026-07-02', hora:'19:00' },
-    { timeA:P('L'),  timeB:T('T6'), data:'2026-07-02', hora:'22:00' },
-    { timeA:P('J'),  timeB:S('H'),  data:'2026-07-03', hora:'17:00' },
-    { timeA:S('D'),  timeB:S('G'),  data:'2026-07-03', hora:'22:00' },
-    { timeA:P('B'),  timeB:T('T7'), data:'2026-07-03', hora:'22:00' },
-    { timeA:P('K'),  timeB:T('T8'), data:'2026-07-04', hora:'22:00' },
+    { timeA:S('A'),  timeB:S('B'),  data:'2026-06-28', hora:'16:00' },
+    { timeA:P('C'),  timeB:S('F'),  data:'2026-06-29', hora:'14:00' },
+    { timeA:P('E'),  timeB:T('T1'), data:'2026-06-29', hora:'17:30' },
+    { timeA:P('F'),  timeB:S('C'),  data:'2026-06-29', hora:'22:00' },
+    { timeA:S('E'),  timeB:S('I'),  data:'2026-06-30', hora:'14:00' },
+    { timeA:P('I'),  timeB:T('T2'), data:'2026-06-30', hora:'18:00' },
+    { timeA:P('A'),  timeB:T('T5'), data:'2026-06-30', hora:'22:00' },
+    { timeA:P('L'),  timeB:T('T6'), data:'2026-07-01', hora:'13:00' },
+    { timeA:P('G'),  timeB:T('T4'), data:'2026-07-01', hora:'17:00' },
+    { timeA:P('D'),  timeB:T('T3'), data:'2026-07-01', hora:'21:00' },
+    { timeA:P('H'),  timeB:S('J'),  data:'2026-07-02', hora:'16:00' },
+    { timeA:S('K'),  timeB:S('L'),  data:'2026-07-02', hora:'20:00' },
+    { timeA:P('B'),  timeB:T('T7'), data:'2026-07-03', hora:'00:00' },
+    { timeA:S('D'),  timeB:S('G'),  data:'2026-07-03', hora:'15:00' },
+    { timeA:P('J'),  timeB:S('H'),  data:'2026-07-03', hora:'19:00' },
+    { timeA:P('K'),  timeB:T('T8'), data:'2026-07-03', hora:'22:30' },
   ];
 
   let criados = 0, atualizados = 0;
@@ -2035,21 +2297,21 @@ async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
 // Datas e horários reais de cada fase do mata-mata Copa 2026
 const DATAS_MATA_MATA = {
   'Oitavas': [
-    ['2026-07-04','16:00'],['2026-07-04','22:00'],
-    ['2026-07-05','16:00'],['2026-07-05','22:00'],
-    ['2026-07-06','16:00'],['2026-07-06','22:00'],
-    ['2026-07-07','16:00'],['2026-07-07','22:00'],
+    ['2026-07-04','14:00'],['2026-07-04','18:00'],
+    ['2026-07-05','17:00'],['2026-07-05','21:00'],
+    ['2026-07-06','16:00'],['2026-07-06','21:00'],
+    ['2026-07-07','13:00'],['2026-07-07','17:00'],
   ],
   'Quartas': [
-    ['2026-07-10','16:00'],['2026-07-10','22:00'],
-    ['2026-07-11','16:00'],['2026-07-11','22:00'],
+    ['2026-07-09','17:00'],['2026-07-10','16:00'],
+    ['2026-07-11','18:00'],['2026-07-11','22:00'],
   ],
   'Semifinal': [
     ['2026-07-14','16:00'],
     ['2026-07-15','16:00'],
   ],
   'Terceiro lugar': [
-    ['2026-07-18','16:00'],
+    ['2026-07-18','18:00'],
   ],
   'Final': [
     ['2026-07-19','16:00'],
