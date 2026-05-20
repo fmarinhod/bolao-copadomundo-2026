@@ -291,11 +291,11 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
     <div class="tabs">
       <button class="tab active" onclick="switchTab('ranking')">Ranking</button>
       <button class="tab" onclick="switchTab('apostas')">Meus palpites</button>
-      <button class="tab" onclick="switchTab('classif')">Classificação</button>
-      <button class="tab" onclick="switchTab('jogos')">Jogos</button>
-      <button class="tab" onclick="switchTab('publico')">Palpites públicos</button>
+      <button class="tab" onclick="switchTab('classif')">Classificação/Seleções</button>
+      <button class="tab" onclick="switchTab('jogos')">Palpites</button>
+      <button class="tab" onclick="switchTab('publico')">Palpites participantes</button>
       <button class="tab admin-only" onclick="switchTab('admin')" style="display:none">Admin</button>
-      <button class="tab" onclick="switchTab('regras')">Pontuação</button>
+      <button class="tab" onclick="switchTab('regras')">Regras</button>
     </div>
 
     <!-- Ranking -->
@@ -402,41 +402,31 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 
     <!-- Regras -->
     <div id="tab-regras" class="section">
-      <div class="card">
-        <div class="section-title" style="margin-bottom:12px">Pontuação por acerto de placar</div>
-        <div class="pts-rule"><span>Placar exato</span><span class="pts-val">10 pts × mult.</span></div>
-        <div class="pts-rule"><span>Vencedor + saldo de gols certo</span><span class="pts-val">7 pts × mult.</span></div>
-        <div class="pts-rule"><span>Vencedor certo (placar errado)</span><span class="pts-val">5 pts × mult.</span></div>
-        <div class="pts-rule"><span>Empate previsto (placar errado)</span><span class="pts-val">3 pts × mult.</span></div>
+
+      <!-- Visualização pública das regras -->
+      <div id="regras-view">
+        <div id="regras-conteudo"><!-- preenchido pelo JS --></div>
+        <div id="regras-edit-btn-wrap" style="display:none;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="abrirEdicaoRegras()">✏️ Editar regras</button>
+        </div>
       </div>
-      <div class="card">
-        <div class="section-title" style="margin-bottom:12px">Multiplicador por fase</div>
-        <div class="pts-rule"><span>Fase de grupos</span><span class="pts-val">× 1</span></div>
-        <div class="pts-rule"><span>16-avos de final</span><span class="pts-val">× 1.5</span></div>
-        <div class="pts-rule"><span>Oitavas de final</span><span class="pts-val">× 2</span></div>
-        <div class="pts-rule"><span>Quartas de final</span><span class="pts-val">× 2.5</span></div>
-        <div class="pts-rule"><span>Semifinal</span><span class="pts-val">× 3</span></div>
-        <div class="pts-rule"><span>Terceiro lugar</span><span class="pts-val">× 2</span></div>
-        <div class="pts-rule"><span>Final</span><span class="pts-val">× 4</span></div>
+
+      <!-- Formulário de edição (admin only, oculto por padrão) -->
+      <div id="regras-editor" style="display:none">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">✏️ Editar Regras do Bolão</div>
+          <div class="alert alert-warn" style="font-size:13px">As alterações ficam visíveis para todos os participantes imediatamente após salvar.</div>
+
+          <div id="regras-secoes-editor"><!-- seções dinâmicas --></div>
+
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="adicionarSecaoRegra()">＋ Nova seção</button>
+            <button class="btn btn-primary" onclick="salvarRegras()">💾 Salvar regras</button>
+            <button class="btn btn-secondary" onclick="fecharEdicaoRegras()">Cancelar</button>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="section-title" style="margin-bottom:12px">Bônus por classificação</div>
-        <div class="pts-rule"><span>Acertou seleção nos 16-avos</span><span class="pts-val">+10 pts</span></div>
-        <div class="pts-rule"><span>Acertou seleção nas oitavas</span><span class="pts-val">+15 pts</span></div>
-        <div class="pts-rule"><span>Acertou seleção nas quartas</span><span class="pts-val">+20 pts</span></div>
-        <div class="pts-rule"><span>Acertou seleção na semifinal</span><span class="pts-val">+30 pts</span></div>
-        <div class="pts-rule"><span>Acertou disputante do 3º lugar</span><span class="pts-val">+30 pts</span></div>
-        <div class="pts-rule"><span>Acertou um finalista</span><span class="pts-val">+50 pts</span></div>
-        <div class="pts-rule"><span>Acertou o vencedor do 3º lugar</span><span class="pts-val">+50 pts</span></div>
-        <div class="pts-rule"><span>Acertou o campeão</span><span class="pts-val">+100 pts</span></div>
-      </div>
-      <div class="card">
-        <div class="section-title" style="margin-bottom:8px">Prazo de palpites</div>
-        <p style="font-size:14px;color:#555;line-height:1.6">
-          <strong>Palpites de jogo:</strong> bloqueados individualmente 5 minutos antes do horário de início de cada jogo.<br/>
-          <strong>Palpites de classificação:</strong> bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 15h), para todas as fases de uma vez.
-        </p>
-      </div>
+
     </div>
   </div>
 </div>
@@ -603,6 +593,7 @@ onAuthStateChanged(auth, async user => {
 });
 
 function initListeners(){
+  carregarRegras();
   // Jogos
   onSnapshot(collection(db,'jogos'), snap => {
     const firestoreJogos = snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -2383,6 +2374,173 @@ window.salvarEspecialAdmin = async (chave) => {
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
+};
+
+// ─── REGRAS ───────────────────────────────────────────────────────────────────
+
+// Regras padrão — usadas na primeira carga se não houver nada no Firestore
+const REGRAS_PADRAO = [
+  {
+    titulo: '📋 Participação',
+    itens: [
+      'O bolão é aberto a todos os participantes aprovados pelo administrador.',
+      'Cada participante deve fazer seus palpites individualmente, sem combinação com outros.',
+      'A taxa de participação é definida pelo administrador e deve ser paga antes do início da Copa.',
+      'Qualquer irregularidade pode resultar na desclassificação do participante.'
+    ]
+  },
+  {
+    titulo: '✏️ Como fazer palpites',
+    itens: [
+      'Acesse a aba "Palpites" e registre o placar que você prevê para cada jogo.',
+      'Os palpites de placar são bloqueados individualmente 5 minutos antes do início de cada jogo.',
+      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 15h).',
+      'Após o bloqueio, não é possível alterar ou registrar palpites para aquele jogo ou fase.',
+      'Palpites não feitos valem 0 pontos — não há pontuação automática.'
+    ]
+  },
+  {
+    titulo: '🏆 Pontuação por placar',
+    itens: [
+      'Placar exato: 10 pontos × multiplicador da fase.',
+      'Vencedor certo + saldo de gols correto: 7 pontos × multiplicador.',
+      'Vencedor certo (placar errado): 5 pontos × multiplicador.',
+      'Empate previsto corretamente (placar errado): 3 pontos × multiplicador.',
+      'Resultado completamente errado: 0 pontos.'
+    ]
+  },
+  {
+    titulo: '✖️ Multiplicador por fase',
+    itens: [
+      'Fase de grupos: × 1',
+      '16-avos de final: × 1,5',
+      'Oitavas de final: × 2',
+      'Quartas de final: × 2,5',
+      'Semifinal: × 3',
+      'Terceiro lugar: × 2',
+      'Final: × 4'
+    ]
+  },
+  {
+    titulo: '🌟 Bônus por classificação',
+    itens: [
+      'Acertou seleção classificada aos 16-avos: +10 pts por seleção.',
+      'Acertou seleção classificada às oitavas: +15 pts por seleção.',
+      'Acertou seleção classificada às quartas: +20 pts por seleção.',
+      'Acertou seleção classificada à semifinal: +30 pts por seleção.',
+      'Acertou disputante do 3º lugar: +30 pts.',
+      'Acertou um finalista: +50 pts por finalista.',
+      'Acertou o vencedor do 3º lugar: +50 pts.',
+      'Acertou o campeão: +100 pts.'
+    ]
+  },
+  {
+    titulo: '🏅 Premiação',
+    itens: [
+      '1º lugar: 50% do valor total arrecadado.',
+      '2º lugar: 30% do valor total arrecadado.',
+      '3º lugar: 20% do valor total arrecadado.',
+      'Em caso de empate na pontuação final, o critério de desempate é o maior número de placares exatos.'
+    ]
+  }
+];
+
+let regrasData = null; // cache local
+
+// Carrega regras do Firestore (ou usa padrão)
+async function carregarRegras() {
+  const snap = await getDoc(doc(db, 'config', 'regras'));
+  if (snap.exists() && snap.data().secoes) {
+    regrasData = snap.data().secoes;
+  } else {
+    regrasData = REGRAS_PADRAO;
+  }
+  renderRegras();
+}
+
+function renderRegras() {
+  const el = document.getElementById('regras-conteudo');
+  if (!el || !regrasData) return;
+
+  el.innerHTML = regrasData.map(sec => `
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:12px">${sec.titulo}</div>
+      <ul style="padding-left:18px;display:flex;flex-direction:column;gap:8px">
+        ${sec.itens.map(item => `<li style="font-size:14px;color:#444;line-height:1.5">${item}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+
+  // Botão de edição visível só para admin
+  const btnWrap = document.getElementById('regras-edit-btn-wrap');
+  if (btnWrap) btnWrap.style.display = isAdmin ? 'block' : 'none';
+}
+
+window.abrirEdicaoRegras = () => {
+  document.getElementById('regras-view').style.display = 'none';
+  document.getElementById('regras-editor').style.display = 'block';
+  renderEditorRegras();
+};
+
+window.fecharEdicaoRegras = () => {
+  document.getElementById('regras-editor').style.display = 'none';
+  document.getElementById('regras-view').style.display = 'block';
+};
+
+function renderEditorRegras() {
+  const el = document.getElementById('regras-secoes-editor');
+  el.innerHTML = (regrasData || []).map((sec, si) => `
+    <div class="card" style="margin-bottom:12px;border:1px solid #ddd" id="sec-editor-${si}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:#555;text-transform:uppercase">Seção ${si+1}</span>
+        <button class="btn btn-danger btn-sm" onclick="removerSecaoRegra(${si})">🗑 Remover seção</button>
+      </div>
+      <div class="form-group">
+        <label>Título da seção</label>
+        <input type="text" id="sec-titulo-${si}" value="${escHtml(sec.titulo)}" placeholder="Ex: 🏆 Pontuação"/>
+      </div>
+      <div class="form-group">
+        <label>Itens (um por linha)</label>
+        <textarea id="sec-itens-${si}" rows="6" style="resize:vertical;font-size:13px;line-height:1.6">${sec.itens.map(escHtml).join('\n')}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+window.adicionarSecaoRegra = () => {
+  if (!regrasData) regrasData = [];
+  regrasData.push({ titulo: '📌 Nova seção', itens: ['Novo item'] });
+  renderEditorRegras();
+};
+
+window.removerSecaoRegra = (idx) => {
+  if (!confirm('Remover esta seção?')) return;
+  regrasData.splice(idx, 1);
+  renderEditorRegras();
+};
+
+window.salvarRegras = async () => {
+  const total = document.querySelectorAll('[id^="sec-titulo-"]').length;
+  const secoes = [];
+  for (let i = 0; i < total; i++) {
+    const tituloEl = document.getElementById(`sec-titulo-${i}`);
+    const itensEl  = document.getElementById(`sec-itens-${i}`);
+    if (!tituloEl || !itensEl) continue;
+    const titulo = tituloEl.value.trim();
+    const itens  = itensEl.value.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!titulo) continue;
+    secoes.push({ titulo, itens });
+  }
+  if (!secoes.length) { alert('Adicione ao menos uma seção.'); return; }
+  await setDoc(doc(db, 'config', 'regras'), { secoes, atualizadoEm: Date.now() });
+  regrasData = secoes;
+  renderRegras();
+  fecharEdicaoRegras();
+  alert('✅ Regras salvas!');
 };
 
 </script>
