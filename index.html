@@ -9,7 +9,9 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:15px}
 header{background:#1a1a2e;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
 header h1{font-size:18px;font-weight:600}
-.header-right{display:flex;align-items:center;gap:12px}
+.header-right{display:flex;align-items:center;gap:10px}
+.btn-header-admin{padding:6px 12px;background:rgba(245,197,24,0.15);color:#f5c518;border:1px solid rgba(245,197,24,0.4);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.btn-header-admin:hover{background:rgba(245,197,24,0.28)}
 .user-info{font-size:13px;opacity:0.8}
 .btn{padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s}
 .btn:hover{opacity:0.85}
@@ -280,6 +282,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
   <h1>⚽ Bolão Copa 2026</h1>
   <div class="header-right">
     <span class="user-info" id="header-user"></span>
+    <button class="btn-header-admin admin-only" id="btn-header-admin" style="display:none" onclick="switchTab('admin')">🔧 Admin</button>
     <button class="btn btn-secondary btn-sm" id="btn-logout" style="display:none" onclick="logout()">Sair</button>
   </div>
 </header>
@@ -622,7 +625,9 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('header-user').textContent = user.displayName || '';
 
   if(isAdmin){
-    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex');
+    document.querySelectorAll('.admin-only').forEach(el=>{
+      el.style.display = el.classList.contains('btn-header-admin') ? 'inline-flex' : 'flex';
+    });
   }
 
   initListeners();
@@ -2881,9 +2886,7 @@ window.confirmarResultadosStaging = async () => {
   <button class="bnav-item" id="bnav-regras" onclick="switchTab('regras')">
     <span class="bnav-icon">📖</span><span>Regras</span>
   </button>
-  <button class="bnav-item admin-only" id="bnav-admin" onclick="switchTab('admin')" style="display:none">
-    <span class="bnav-icon">🔧</span><span>Admin</span>
-  </button>
+
 </nav>
 </body>
 </html>
