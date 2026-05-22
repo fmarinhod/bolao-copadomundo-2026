@@ -957,15 +957,11 @@ function gameCardHTML(j){
       <span class="fechado-badge">⏱ Bloqueado · ${tempoStr}</span>
     </div>`;
   } else {
-    const minutos = Math.ceil((j.ts - 5*60*1000 - now) / 60000);
-    const aviso = minutos > 0 && minutos <= 60
-      ? `<div style="text-align:center;font-size:11px;color:#d97706;font-weight:700;margin-top:4px">⚠️ Fecha em ${minutos} min</div>`
-      : '';
     rodape = `
       <button onclick="salvarApostaInline('${jid}')"
         style="width:100%;padding:12px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px">
         ✅ Salvar Palpite
-      </button>${aviso}`;
+      </button>`;
   }
 
   return `
@@ -973,7 +969,7 @@ function gameCardHTML(j){
     <!-- Cabeçalho verde -->
     <div style="background:#2d6a4f;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
       <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
-        ${j.fase==='Fase de grupos'?`Grupos · ${dtStr}`:(FASES_LABEL[j.fase]||j.fase)+' · '+dtStr}
+        ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''} · ${dtStr}`:(FASES_LABEL[j.fase]||j.fase)+' · '+dtStr}
       </span>
     </div>
     <!-- Times + inputs -->
