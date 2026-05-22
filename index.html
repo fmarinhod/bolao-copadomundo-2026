@@ -888,52 +888,137 @@ function renderJogos(){
 }
 
 function gameCardHTML(j){
-  const now=Date.now();
+  const now = Date.now();
   const bloqueado = now >= j.ts - 5*60*1000;
   const aposta = apostasData[j.id];
   const temAposta = aposta && aposta.gA !== undefined;
   const dtStr = formatarDataJogo(j);
-  let scorePart='';
+  const jid = j.id;
+
+  // ── Placar central ──
+  let scorePart = '';
   if(j.encerrado){
-    scorePart=`<div class="score-display">${j.gA} × ${j.gB}</div>`;
+    scorePart = `<div class="score-display">${j.gA} × ${j.gB}</div>`;
+  } else if(bloqueado){
+    scorePart = `<div class="score-display" style="font-size:16px;color:#aaa">× </div>`;
   } else {
-    scorePart=`<div class="score-display">× </div>`;
+    // Inputs inline com valores já salvos (se houver)
+    const vA = temAposta ? aposta.gA : '';
+    const vB = temAposta ? aposta.gB : '';
+    scorePart = `
+      <div style="display:flex;align-items:center;gap:6px">
+        <input class="score-input" id="inp-gA-${jid}" type="number" min="0" max="99"
+          value="${vA}" placeholder="0"
+          style="width:52px;text-align:center;font-size:22px;font-weight:800;padding:8px 4px;border:2px solid #2d6a4f;border-radius:8px;color:#2d6a4f"/>
+        <span style="font-size:20px;font-weight:700;color:#aaa">×</span>
+        <input class="score-input" id="inp-gB-${jid}" type="number" min="0" max="99"
+          value="${vB}" placeholder="0"
+          style="width:52px;text-align:center;font-size:22px;font-weight:800;padding:8px 4px;border:2px solid #2d6a4f;border-radius:8px;color:#2d6a4f"/>
+      </div>`;
   }
-  let apostaBadge='';
-  if(temAposta){
-    const pts = aposta.pts !== undefined ? `+${aposta.pts} pts` : 'Aguardando resultado';
-    const cor = aposta.pts > 0 ? 'pts-badge-green':'pts-badge-gray';
-    apostaBadge=`<span class="publico-pts-badge ${cor}">${pts}</span>`;
-  }
-  let btnAposta='';
-  if(!j.encerrado){
-    if(bloqueado){
-      btnAposta=`<span class="fechado-badge">⏱ Bloqueado</span>`;
-    } else {
-      const txt = temAposta ? 'Alterar palpite' : 'Registrar palpite';
-      btnAposta=`<button class="btn btn-primary btn-sm" onclick="abrirAposta('${j.id}')">✏️ ${txt}</button>`;
-      const minutos = Math.ceil((j.ts - 5*60*1000 - now)/60000);
-      if(minutos > 0 && minutos < 60) btnAposta += `<div class="countdown">Fecha em ${minutos} min</div>`;
+
+  // ── Badge de pontuação do participante ──
+  let ptsBadge = '';
+  if(j.encerrado && temAposta){
+    if(aposta.pts !== undefined){
+      const cor = aposta.pts > 0 ? '#e6f4ec' : '#f0f0f0';
+      const txtCor = aposta.pts > 0 ? '#2d6a4f' : '#888';
+      let desc = '';
+      if(aposta.resultado==='exato') desc = '🎯 Placar exato';
+      else if(aposta.resultado==='vencedor_saldo') desc = '⚖️ Vencedor+saldo';
+      else if(aposta.resultado==='vencedor') desc = '✅ Vencedor certo';
+      else if(aposta.resultado==='empate') desc = '🤝 Empate certo';
+      else desc = '❌ Errou';
+      ptsBadge = `<div style="background:${cor};border-radius:8px;padding:8px 14px;text-align:center;font-size:13px;color:${txtCor};font-weight:700">
+        ${desc} · <strong>+${aposta.pts} pts</strong>
+        <span style="font-size:11px;font-weight:400;margin-left:6px;opacity:0.75">Palpite: ${aposta.gA}×${aposta.gB}</span>
+      </div>`;
     }
-  } else {
-    btnAposta=`<span class="encerrado-badge">✅ Encerrado</span>`;
+  } else if(!j.encerrado && temAposta && bloqueado){
+    ptsBadge = `<div style="background:#fff8e1;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a;font-weight:600">
+      ⏳ Pontuação deste palpite: aguardando resultado
+    </div>`;
+  } else if(!j.encerrado && !bloqueado){
+    ptsBadge = `<div style="background:#fffde7;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a">
+      Pontuação deste palpite: aguardando resultado
+    </div>`;
   }
-  return `<div class="game-card">
-    <div class="game-header">
-      <span class="phase-badge">${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:FASES_LABEL[j.fase]||j.fase}</span>
-      <span class="game-date">${dtStr}</span>
+
+  // ── Rodapé: status ou botão salvar ──
+  let rodape = '';
+  if(j.encerrado){
+    rodape = `<div style="text-align:center;padding:6px 0">
+      <span class="encerrado-badge">✅ Encerrado</span>
+    </div>`;
+  } else if(bloqueado){
+    const minutos = Math.ceil((j.ts - now) / 60000);
+    const tempoStr = minutos > 0 ? `Inicia em ${minutos} min` : 'Em andamento';
+    rodape = `<div style="text-align:center;padding:6px 0">
+      <span class="fechado-badge">⏱ Bloqueado · ${tempoStr}</span>
+    </div>`;
+  } else {
+    const minutos = Math.ceil((j.ts - 5*60*1000 - now) / 60000);
+    const aviso = minutos > 0 && minutos <= 60
+      ? `<div style="text-align:center;font-size:11px;color:#d97706;font-weight:700;margin-top:4px">⚠️ Fecha em ${minutos} min</div>`
+      : '';
+    rodape = `
+      <button onclick="salvarApostaInline('${jid}')"
+        style="width:100%;padding:12px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px">
+        ✅ Salvar Palpite
+      </button>${aviso}`;
+  }
+
+  return `
+  <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
+    <!-- Cabeçalho verde -->
+    <div style="background:#2d6a4f;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
+        ${j.fase==='Fase de grupos'?`Grupos · ${dtStr}`:(FASES_LABEL[j.fase]||j.fase)+' · '+dtStr}
+      </span>
     </div>
-    <div class="game-teams">
-      <div class="team-block"><span class="team-flag">${flag(j.timeA)}</span><div class="team-name">${j.timeA}</div></div>
-      ${scorePart}
-      <div class="team-block"><span class="team-flag">${flag(j.timeB)}</span><div class="team-name">${j.timeB}</div></div>
+    <!-- Times + inputs -->
+    <div style="padding:18px 16px 12px;background:#fff">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">${j.timeA}</div>
+          <div style="font-size:44px;line-height:1">${flag(j.timeA)}</div>
+        </div>
+        ${scorePart}
+        <div style="flex:1;text-align:center">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">${j.timeB}</div>
+          <div style="font-size:44px;line-height:1">${flag(j.timeB)}</div>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      ${btnAposta}
-      <div style="display:flex;gap:6px;align-items:center">${apostaBadge}${temAposta?`<span style="font-size:12px;color:#888">Palpite: ${aposta.gA}×${aposta.gB}</span>`:''}</div>
-    </div>
+    <!-- Badge pontuação -->
+    <div style="padding:0 16px 10px">${ptsBadge}</div>
+    <!-- Botão / status -->
+    <div style="padding:0 16px 14px">${rodape}</div>
   </div>`;
 }
+
+// Salva palpite diretamente do card inline (sem modal)
+window.salvarApostaInline = async (jogoId) => {
+  const inpA = document.getElementById(`inp-gA-${jogoId}`);
+  const inpB = document.getElementById(`inp-gB-${jogoId}`);
+  if(!inpA || !inpB){ alert('Erro ao localizar os campos.'); return; }
+  const gA = parseInt(inpA.value);
+  const gB = parseInt(inpB.value);
+  if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){
+    alert('Preencha os dois placares antes de salvar.'); return;
+  }
+  const btn = document.querySelector(`#card-${jogoId} button`);
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
+  try {
+    await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
+    apostasData[jogoId] = { gA, gB };
+    renderJogos();
+    renderApostasHistorico();
+  } catch(e) {
+    alert('Erro ao salvar: ' + e.message);
+    if(btn){ btn.disabled = false; btn.textContent = '✅ Salvar Palpite'; }
+  }
+};
 
 // ─── APOSTAS / HISTÓRICO ─────────────────────────────────────────────────────
 function renderApostasHistorico(){
