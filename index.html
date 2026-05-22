@@ -289,6 +289,21 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 .perfil-stat{background:#f7f8fa;border-radius:10px;padding:12px 8px;text-align:center}
 .perfil-stat-val{font-size:20px;font-weight:800;color:#2d6a4f}
 .perfil-stat-label{font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;font-weight:600}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:400;pointer-events:none}
+.toast{background:#2d6a4f;color:#fff;padding:12px 22px;border-radius:99px;font-size:14px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-15px);transition:opacity 0.2s,transform 0.2s;margin-bottom:8px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.toast-error{background:#c0392b}
+
+/* ── FILTROS PALPITES ── */
+.jogos-filtros{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.jogos-filtros::-webkit-scrollbar{display:none}
+.filtro-btn{padding:8px 14px;border:1.5px solid #ddd;background:#fff;color:#555;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
+.filtro-btn.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.filtro-btn:hover:not(.active){background:#f5f5f5}
+.filtro-badge{display:inline-block;background:#c0392b;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:5px;line-height:1.4}
+.filtro-btn.active .filtro-badge{background:rgba(255,255,255,0.25)}
 </style>
 </head>
 <body>
@@ -360,6 +375,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 
     <!-- Jogos -->
     <div id="tab-jogos" class="section">
+      <div class="jogos-filtros" id="jogos-filtros"></div>
       <div id="jogos-list"><div class="loading">Carregando...</div></div>
     </div>
 
@@ -570,6 +586,7 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
+let todasApostasData = null;  // cache: { jogoId: { uid: {gA,gB,pts,...} } }
 let isAdmin = false;
 let jogosData = [];
 let apostasData = {};
@@ -751,6 +768,10 @@ function initListeners(){
     updateMetrics();
     renderApostasHistorico();
     renderPublico();
+    // Carrega cache global de palpites para estatísticas e indicador admin
+    if(isAdmin || Object.keys(todasApostasData||{}).length === 0){
+      carregarCachePalpitesGlobal().catch(()=>{});
+    }
   });
 
   // Apostas do usuário atual
@@ -850,19 +871,77 @@ function renderRanking(){
 const apostasCache = {};
 
 // ─── JOGOS ───────────────────────────────────────────────────────────────────
+// Filtro ativo (persiste durante a sessão)
+let filtroJogosAtivo = 'hoje';
+
+function contarSemPalpite(jogos){
+  return jogos.filter(j => !j.encerrado && Date.now() < j.ts - 5*60*1000 && !apostasData[j.id]).length;
+}
+
 function renderJogos(){
   const el = document.getElementById('jogos-list');
-  if(!jogosData.length){ el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>'; return; }
+  const filtrosEl = document.getElementById('jogos-filtros');
+  if(!jogosData.length){
+    if(filtrosEl) filtrosEl.innerHTML = '';
+    el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>';
+    return;
+  }
   const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
 
-  const jogosGrupos = sorted.filter(j=>j.fase==='Fase de grupos');
-  const jogosMata   = sorted.filter(j=>j.fase!=='Fase de grupos');
+  // ── Definir intervalos de filtro (em milissegundos) ──
+  const agora = new Date();
+  const hojeIni = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+  const amanhaIni = hojeIni + 86400000;
+  const depoisAmanhaIni = hojeIni + 2*86400000;
+  // "Esta semana" = próximos 7 dias a partir de hoje
+  const semanaFim = hojeIni + 7*86400000;
+
+  const jogosHoje = sorted.filter(j => j.ts >= hojeIni && j.ts < amanhaIni);
+  const jogosAmanha = sorted.filter(j => j.ts >= amanhaIni && j.ts < depoisAmanhaIni);
+  const jogosSemana = sorted.filter(j => j.ts >= hojeIni && j.ts < semanaFim);
+  const jogosPendentes = sorted.filter(j => !j.encerrado && Date.now() < j.ts - 5*60*1000 && !apostasData[j.id]);
+
+  // ── Renderizar barra de filtros ──
+  const cntHoje = contarSemPalpite(jogosHoje);
+  const cntAmanha = contarSemPalpite(jogosAmanha);
+  const cntSemana = contarSemPalpite(jogosSemana);
+  const cntPend = jogosPendentes.length;
+
+  const badge = (n) => n > 0 ? `<span class="filtro-badge">${n}</span>` : '';
+
+  if(filtrosEl){
+    filtrosEl.innerHTML = `
+      <button class="filtro-btn ${filtroJogosAtivo==='hoje'?'active':''}" onclick="setFiltroJogos('hoje')">Hoje${badge(cntHoje)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='amanha'?'active':''}" onclick="setFiltroJogos('amanha')">Amanhã${badge(cntAmanha)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='semana'?'active':''}" onclick="setFiltroJogos('semana')">Esta semana${badge(cntSemana)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='pendentes'?'active':''}" onclick="setFiltroJogos('pendentes')">Pendentes${badge(cntPend)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='todos'?'active':''}" onclick="setFiltroJogos('todos')">Todos</button>
+    `;
+  }
+
+  // ── Filtrar jogos exibidos ──
+  let jogosFiltrados;
+  if(filtroJogosAtivo==='hoje') jogosFiltrados = jogosHoje;
+  else if(filtroJogosAtivo==='amanha') jogosFiltrados = jogosAmanha;
+  else if(filtroJogosAtivo==='semana') jogosFiltrados = jogosSemana;
+  else if(filtroJogosAtivo==='pendentes') jogosFiltrados = jogosPendentes;
+  else jogosFiltrados = sorted;
+
+  if(!jogosFiltrados.length){
+    let msg = 'Nenhum jogo neste filtro.';
+    if(filtroJogosAtivo==='hoje') msg = '🎉 Nenhum jogo hoje. Volte amanhã!';
+    else if(filtroJogosAtivo==='pendentes') msg = '✅ Você já palpitou em todos os jogos abertos!';
+    el.innerHTML = `<div class="empty-state">${msg}</div>`;
+    return;
+  }
+
+  const jogosGrupos = jogosFiltrados.filter(j=>j.fase==='Fase de grupos');
+  const jogosMata   = jogosFiltrados.filter(j=>j.fase!=='Fase de grupos');
 
   let html='';
 
-  // Fase de grupos: ordem cronologica agrupada por data
   if(jogosGrupos.length){
-    html+='<div class="grupo-titulo">Fase de grupos</div>';
+    if(filtroJogosAtivo==='todos') html+='<div class="grupo-titulo">Fase de grupos</div>';
     let dataAtual='';
     jogosGrupos.forEach(j=>{
       if(j.data !== dataAtual){
@@ -875,7 +954,6 @@ function renderJogos(){
     });
   }
 
-  // Mata-mata: por fase
   const gruposMata = {};
   jogosMata.forEach(j=>{ if(!gruposMata[j.fase]) gruposMata[j.fase]=[]; gruposMata[j.fase].push(j); });
   FASES_MATA_ORDEM.forEach(f=>{
@@ -885,6 +963,29 @@ function renderJogos(){
   });
 
   el.innerHTML=html;
+}
+
+window.setFiltroJogos = (f) => {
+  filtroJogosAtivo = f;
+  renderJogos();
+};
+
+// Estatística: palpite mais comum entre participantes (após bloqueio)
+function calcularPalpiteMaisComum(jogoId){
+  if(!todasApostasData || !todasApostasData[jogoId]) return null;
+  const palpites = Object.values(todasApostasData[jogoId]);
+  if(palpites.length < 2) return null;
+  const cont = {};
+  palpites.forEach(p => {
+    if(p.gA === undefined || p.gB === undefined) return;
+    const k = `${p.gA}×${p.gB}`;
+    cont[k] = (cont[k]||0) + 1;
+  });
+  let maior = null, qtd = 0;
+  Object.entries(cont).forEach(([k,v]) => { if(v > qtd){ maior=k; qtd=v; }});
+  if(!maior) return null;
+  const pct = Math.round((qtd / palpites.length) * 100);
+  return { placar: maior, pct, qtd, total: palpites.length };
 }
 
 function gameCardHTML(j){
@@ -964,9 +1065,41 @@ function gameCardHTML(j){
       </button>`;
   }
 
+  // ── Estatística "palpite mais comum" (após bloqueio) ──
+  let statsBox = '';
+  if(bloqueado || j.encerrado){
+    const stat = calcularPalpiteMaisComum(jid);
+    if(stat){
+      statsBox = `<div style="background:#f0f4f8;border-radius:8px;padding:8px 14px;font-size:12px;color:#1a1a2e;font-weight:600;margin-bottom:8px">
+        📊 Palpite mais comum: <strong>${stat.placar}</strong>
+        <span style="font-size:11px;font-weight:500;color:#666"> · ${stat.pct}% (${stat.qtd}/${stat.total})</span>
+      </div>`;
+    }
+  }
+
+  // ── Indicador admin: quem ainda não palpitou (apenas para admin, jogo ainda aberto) ──
+  let adminPendentes = '';
+  if(isAdmin && !j.encerrado && !bloqueado && todasApostasData){
+    const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+    const semPalpite = aprovados.filter(u => {
+      const apostasU = todasApostasData[jid];
+      return !apostasU || !apostasU[u.uid];
+    });
+    if(semPalpite.length){
+      const nomes = semPalpite.map(u => (u.nome||'').split(' ')[0]).join(', ');
+      adminPendentes = `<div style="background:#fef2f2;border-left:3px solid #c0392b;border-radius:6px;padding:7px 12px;font-size:12px;color:#7a1f1f;margin-bottom:8px">
+        🔧 <strong>${semPalpite.length}/${aprovados.length}</strong> ainda não palpitou: <span style="font-weight:600">${nomes}</span>
+      </div>`;
+    } else if(aprovados.length){
+      adminPendentes = `<div style="background:#e6f4ec;border-left:3px solid #2d6a4f;border-radius:6px;padding:7px 12px;font-size:12px;color:#1b5e20;margin-bottom:8px">
+        🔧 ✅ Todos os ${aprovados.length} participantes já palpitaram
+      </div>`;
+    }
+  }
+
   return `
   <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
-    <!-- Cabeçalho verde -->
+    <!-- Cabeçalho -->
     <div style="background:#1a1a2e;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
       <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
         ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''} · ${dtStr}`:(FASES_LABEL[j.fase]||j.fase)+' · '+dtStr}
@@ -986,6 +1119,10 @@ function gameCardHTML(j){
         </div>
       </div>
     </div>
+    <!-- Indicador admin -->
+    <div style="padding:0 16px">${adminPendentes}</div>
+    <!-- Estatística pública -->
+    <div style="padding:0 16px">${statsBox}</div>
     <!-- Badge pontuação -->
     <div style="padding:0 16px 10px">${ptsBadge}</div>
     <!-- Botão / status -->
@@ -1008,10 +1145,11 @@ window.salvarApostaInline = async (jogoId) => {
   try {
     await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
     apostasData[jogoId] = { gA, gB };
+    mostrarToast('Palpite salvo!');
     renderJogos();
     renderApostasHistorico();
   } catch(e) {
-    alert('Erro ao salvar: ' + e.message);
+    mostrarToast('Erro ao salvar: ' + e.message, 'error');
     if(btn){ btn.disabled = false; btn.textContent = '✅ Salvar Palpite'; }
   }
 };
@@ -1654,7 +1792,23 @@ async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
     resultado[u.uid]={};
     snap.docs.forEach(d=>{ resultado[u.uid][d.id]=d.data(); });
   }));
+  // Atualiza cache global por jogo (para estatísticas e admin)
+  todasApostasData = {};
+  Object.entries(resultado).forEach(([uid, palps])=>{
+    Object.entries(palps).forEach(([jid, p])=>{
+      if(!todasApostasData[jid]) todasApostasData[jid] = {};
+      todasApostasData[jid][uid] = { ...p, _uid: uid };
+    });
+  });
   return resultado;
+}
+
+// Carrega todas as apostas no login (para popular cache na aba palpites)
+async function carregarCachePalpitesGlobal(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  if(!aprovados.length) return;
+  await carregarTodosOsPalpites(aprovados, jogosData);
+  renderJogos();
 }
 
 function renderPublicoClassif(el, aprovados, filtroFase){
@@ -3068,5 +3222,5 @@ window.confirmarResultadosStaging = async () => {
     <div class="modal-body" id="modal-perfil-body"><div class="loading">Carregando...</div></div>
   </div>
 </div>
-</body>
+<div class="toast-container" id="toast-container"></div></body>
 </html>
