@@ -1132,19 +1132,36 @@ window.salvarApostaInline = async (jogoId) => {
   const gA = parseInt(inpA.value);
   const gB = parseInt(inpB.value);
   if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){
-    alert('Preencha os dois placares antes de salvar.'); return;
+    mostrarToast('Preencha os dois placares antes de salvar.', 'error'); return;
   }
   const btn = document.querySelector(`#card-${jogoId} button`);
-  if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
+  const txtOriginal = btn ? btn.textContent : '';
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = '⏳ Salvando...';
+  }
   try {
     await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
     apostasData[jogoId] = { gA, gB };
-    mostrarToast('Palpite salvo!');
-    renderJogos();
-    renderApostasHistorico();
+
+    // 1. Confirmação no próprio botão (sobrevive ao re-render porque é setada depois)
+    if(btn){
+      btn.textContent = '✅ Palpite salvo!';
+      btn.style.background = '#1b5e20';
+    }
+
+    // 2. Toast no topo (5 segundos)
+    mostrarToast('Palpite salvo com sucesso!');
+
+    // Aguarda 1.2s antes de re-renderizar (deixa o usuário ver a confirmação no botão)
+    setTimeout(() => {
+      renderJogos();
+      renderApostasHistorico();
+    }, 1200);
+
   } catch(e) {
     mostrarToast('Erro ao salvar: ' + e.message, 'error');
-    if(btn){ btn.disabled = false; btn.textContent = '✅ Salvar Palpite'; }
+    if(btn){ btn.disabled = false; btn.textContent = txtOriginal || '✅ Salvar Palpite'; }
   }
 };
 
