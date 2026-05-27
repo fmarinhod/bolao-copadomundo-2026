@@ -248,6 +248,12 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 .status-rejeitado{background:#fdecea;color:#c0392b}
 
 @media(max-width:500px){.form-row{grid-template-columns:1fr}header h1{font-size:15px}.historico-stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:400;pointer-events:none}
+.toast{background:#2d6a4f;color:#fff;padding:12px 22px;border-radius:99px;font-size:14px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-15px);transition:opacity 0.2s,transform 0.2s;margin-bottom:8px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.toast-error{background:#c0392b}
 </style>
 </head>
 <body>
@@ -394,26 +400,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Registrar resultados</div>
       <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 72 jogos corretos da fase de grupos.</div>
       <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 72 jogos da fase de grupos</button>
-
-      <!-- Busca automática de resultados -->
-      <div class="card" style="margin-bottom:16px;border:2px solid #2d6a4f">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:15px;font-weight:700">🤖 Busca automática de resultados</div>
-          <button class="btn btn-primary" onclick="buscarResultadosAPI()" id="btn-buscar-api">🔍 Buscar resultados</button>
-        </div>
-        <p style="font-size:13px;color:#666;line-height:1.5">Busca placares dos jogos já encerrados via API. Os resultados ficam em <strong>prévia</strong> para você revisar antes de confirmar — nenhum ponto é calculado até a confirmação.</p>
-        <div id="staging-area" style="display:none;margin-top:16px">
-          <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:#1a1a2e">📋 Prévia dos resultados encontrados</div>
-          <div class="alert alert-info" style="font-size:13px">Revise os placares abaixo. Você pode corrigir qualquer valor antes de confirmar.</div>
-          <div id="staging-list"></div>
-          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-            <button class="btn btn-primary" onclick="confirmarResultadosStaging()">✅ Confirmar e publicar</button>
-            <button class="btn btn-secondary" onclick="cancelarStaging()">Cancelar</button>
-          </div>
-        </div>
-        <div id="staging-msg" style="margin-top:10px"></div>
-      </div>
-
       <div id="admin-jogos-list"><div class="loading">Carregando...</div></div>
 
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Confirmar classificados</div>
@@ -571,13 +557,13 @@ onAuthStateChanged(auth, async user => {
   const userSnap = await getDoc(userRef);
 
   if(!userSnap.exists()){
-    // Novo usuário: cria como pendente (admin é aprovado automaticamente)
+    // Novo usuário: já entra aprovado (sem fila de aprovação)
     await setDoc(userRef, {
       uid: user.uid,
       nome: user.displayName || user.email,
       email: user.email,
       foto: user.photoURL || '',
-      status: isAdmin ? 'aprovado' : 'pendente',
+      status: 'aprovado',
       pts: 0,
       criadoEm: Date.now()
     });
@@ -587,15 +573,9 @@ onAuthStateChanged(auth, async user => {
   const snap = await getDoc(userRef);
   const userData = snap.data();
 
-  if(!isAdmin && userData.status !== 'aprovado'){
-    // Mostra tela de pendente
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='none';
-    document.getElementById('pending-screen').style.display='flex';
-    document.getElementById('pending-email').textContent = user.email;
-    document.getElementById('btn-logout').style.display='block';
-    document.getElementById('header-user').textContent = user.displayName || user.email;
-    return;
+  // Promove status antigo para aprovado (sem mais fila)
+  if(userData.status !== 'aprovado'){
+    await setDoc(userRef, { ...userData, status: 'aprovado' }, { merge: true });
   }
 
   // Acesso liberado
@@ -1031,13 +1011,13 @@ window.salvarAposta = async (jogoId) => {
   const jogo = jogosData.find(j=>j.id===jogoId);
   if(!jogo) return;
   const now=Date.now();
-  if(now >= jogo.ts - 5*60*1000){ alert('Palpite bloqueado — o jogo está prestes a começar.'); return; }
+  if(now >= jogo.ts - 5*60*1000){ mostrarToast('Palpite bloqueado — o jogo está prestes a começar.', 'error'); return; }
   const gA = parseInt(document.getElementById('apA').value);
   const gB = parseInt(document.getElementById('apB').value);
-  if(isNaN(gA)||isNaN(gB)){ alert('Informe placar válido.'); return; }
+  if(isNaN(gA)||isNaN(gB)){ mostrarToast('Informe placar válido.', 'error'); return; }
   await setDoc(doc(db,`apostas/${currentUser.uid}/jogos`,jogoId),{ gA, gB, ts:now });
   document.getElementById('apostas-form-wrap').innerHTML='';
-  alert('Palpite salvo!');
+  mostrarToast('Palpite salvo com sucesso!');
 };
 
 // ─── CLASSIFICAÇÃO ───────────────────────────────────────────────────────────
@@ -2563,286 +2543,7 @@ window.salvarRegras = async () => {
   alert('✅ Regras salvas!');
 };
 
-// ─── BUSCA AUTOMÁTICA DE RESULTADOS ──────────────────────────────────────────
-// Usa football-data.org (plano gratuito) — Copa do Mundo 2026 = competição WC
-// Chave de API gratuita — registre em football-data.org para obter a sua
-const API_KEY = '9db068e239c84a2390ce84f408ade73d';
-const API_BASE = 'https://api.football-data.org/v4';
-
-// Mapa de nomes da API → nomes usados no bolão
-// Ajuste conforme os nomes retornados pela API
-const NOMES_API = {
-  'Mexico': 'México',
-  'South Africa': 'África do Sul',
-  'Korea Republic': 'Coreia do Sul',
-  'Czechia': 'República Tcheca',
-  'Czech Republic': 'República Tcheca',
-  'Canada': 'Canadá',
-  'Bosnia and Herzegovina': 'Bósnia e Herzegovina',
-  'USA': 'Estados Unidos',
-  'United States': 'Estados Unidos',
-  'Paraguay': 'Paraguai',
-  'Qatar': 'Catar',
-  'Switzerland': 'Suíça',
-  'Brazil': 'Brasil',
-  'Morocco': 'Marrocos',
-  'Haiti': 'Haiti',
-  'Scotland': 'Escócia',
-  'Australia': 'Austrália',
-  'Turkey': 'Turquia',
-  'Türkiye': 'Turquia',
-  'Germany': 'Alemanha',
-  'Curaçao': 'Curaçao',
-  'Netherlands': 'Holanda',
-  'Japan': 'Japão',
-  "Côte d'Ivoire": 'Costa do Marfim',
-  'Ivory Coast': 'Costa do Marfim',
-  'Ecuador': 'Equador',
-  'Sweden': 'Suécia',
-  'Tunisia': 'Tunísia',
-  'Spain': 'Espanha',
-  'Cape Verde': 'Cabo Verde',
-  'Belgium': 'Bélgica',
-  'Egypt': 'Egito',
-  'Saudi Arabia': 'Arábia Saudita',
-  'Uruguay': 'Uruguai',
-  'Iran': 'Irã',
-  'New Zealand': 'Nova Zelândia',
-  'France': 'França',
-  'Senegal': 'Senegal',
-  'Iraq': 'Iraque',
-  'Norway': 'Noruega',
-  'Argentina': 'Argentina',
-  'Algeria': 'Argélia',
-  'Austria': 'Áustria',
-  'Jordan': 'Jordânia',
-  'Portugal': 'Portugal',
-  'DR Congo': 'RD Congo',
-  'Congo DR': 'RD Congo',
-  'England': 'Inglaterra',
-  'Croatia': 'Croácia',
-  'Ghana': 'Gana',
-  'Panama': 'Panamá',
-  'Uzbekistan': 'Uzbequistão',
-  'Colombia': 'Colômbia',
-};
-
-function normalizarNomeAPI(nome) {
-  return NOMES_API[nome] || nome;
-}
-
-// Staging: resultados buscados aguardando confirmação
-let stagingResultados = [];
-
-window.buscarResultadosAPI = async () => {
-  const btn = document.getElementById('btn-buscar-api');
-  const msgEl = document.getElementById('staging-msg');
-  const stagingArea = document.getElementById('staging-area');
-
-  if (API_KEY === 'SUA_CHAVE_API_AQUI') {
-    msgEl.innerHTML = `<div class="alert alert-danger" style="font-size:13px">
-      ⚠️ Configure sua chave da API antes de usar esta função.<br>
-      Registre-se em <strong>football-data.org</strong> (gratuito) e substitua <code>SUA_CHAVE_API_AQUI</code> no código.
-    </div>`;
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Buscando...';
-  msgEl.innerHTML = '';
-  stagingArea.style.display = 'none';
-  stagingResultados = [];
-
-  try {
-    // Busca partidas da Copa do Mundo 2026
-    const resp = await fetch(`${API_BASE}/competitions/WC/matches?status=FINISHED`, {
-      headers: { 'X-Auth-Token': API_KEY }
-    });
-
-    if (!resp.ok) {
-      throw new Error(`Erro na API: ${resp.status} ${resp.statusText}`);
-    }
-
-    const data = await resp.json();
-    const partidas = data.matches || [];
-
-    // Jogos do bolão ainda não encerrados
-    const jogosAbertos = jogosData.filter(j => !j.encerrado && j.ts <= Date.now());
-
-    if (!jogosAbertos.length) {
-      msgEl.innerHTML = `<div class="alert alert-info" style="font-size:13px">Nenhum jogo encerrado sem resultado registrado.</div>`;
-      btn.disabled = false;
-      btn.textContent = '🔍 Buscar resultados';
-      return;
-    }
-
-    // Para cada jogo aberto, tenta encontrar correspondência na API
-    const encontrados = [];
-    for (const jogo of jogosAbertos) {
-      const nomeA = jogo.timeA;
-      const nomeB = jogo.timeB;
-      const dataJogo = jogo.data; // 'YYYY-MM-DD'
-
-      const partida = partidas.find(p => {
-        const homeAPI = normalizarNomeAPI(p.homeTeam?.name || '');
-        const awayAPI = normalizarNomeAPI(p.awayTeam?.name || '');
-        const dataAPI = p.utcDate?.slice(0, 10);
-        return dataAPI === dataJogo && (
-          (homeAPI === nomeA && awayAPI === nomeB) ||
-          (homeAPI === nomeB && awayAPI === nomeA)
-        );
-      });
-
-      if (partida && partida.score?.fullTime) {
-        const homeAPI = normalizarNomeAPI(partida.homeTeam?.name || '');
-        const ft = partida.score.fullTime;
-        // Ajusta gA/gB conforme a ordem no bolão
-        let gA, gB;
-        if (homeAPI === nomeA) {
-          gA = ft.home ?? ft.homeTeam;
-          gB = ft.away ?? ft.awayTeam;
-        } else {
-          gA = ft.away ?? ft.awayTeam;
-          gB = ft.home ?? ft.homeTeam;
-        }
-        if (gA !== null && gA !== undefined && gB !== null && gB !== undefined) {
-          encontrados.push({ jogo, gA: parseInt(gA), gB: parseInt(gB) });
-        }
-      }
-    }
-
-    if (!encontrados.length) {
-      msgEl.innerHTML = `<div class="alert alert-info" style="font-size:13px">Nenhum resultado novo encontrado na API para os jogos pendentes.</div>`;
-      btn.disabled = false;
-      btn.textContent = '🔍 Buscar resultados';
-      return;
-    }
-
-    // Monta prévia (staging)
-    stagingResultados = encontrados;
-    renderStaging();
-    stagingArea.style.display = 'block';
-
-  } catch (e) {
-    msgEl.innerHTML = `<div class="alert alert-danger" style="font-size:13px">❌ Erro ao buscar resultados: ${e.message}</div>`;
-  }
-
-  btn.disabled = false;
-  btn.textContent = '🔍 Buscar resultados';
-};
-
-function renderStaging() {
-  const el = document.getElementById('staging-list');
-  el.innerHTML = stagingResultados.map((item, idx) => `
-    <div class="game-card" style="margin-bottom:8px">
-      <div class="game-header">
-        <span class="phase-badge">${item.jogo.fase === 'Fase de grupos' ? `Grupo ${item.jogo.grupo}` : item.jogo.fase}</span>
-        <span class="game-date">${formatarDataJogo(item.jogo)}</span>
-      </div>
-      <div class="game-teams" style="margin-bottom:10px">
-        <div class="team-block">
-          <span class="team-flag">${flag(item.jogo.timeA)}</span>
-          <div class="team-name">${item.jogo.timeA}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" min="0" max="99" value="${item.gA}"
-            id="stg-gA-${idx}" style="width:46px;text-align:center;font-size:18px;font-weight:700;padding:6px;border:2px solid #2d6a4f;border-radius:8px"/>
-          <span style="font-size:18px;font-weight:700;color:#888">×</span>
-          <input type="number" min="0" max="99" value="${item.gB}"
-            id="stg-gB-${idx}" style="width:46px;text-align:center;font-size:18px;font-weight:700;padding:6px;border:2px solid #2d6a4f;border-radius:8px"/>
-        </div>
-        <div class="team-block">
-          <span class="team-flag">${flag(item.jogo.timeB)}</span>
-          <div class="team-name">${item.jogo.timeB}</div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-window.cancelarStaging = () => {
-  stagingResultados = [];
-  document.getElementById('staging-area').style.display = 'none';
-  document.getElementById('staging-msg').innerHTML = '';
-};
-
-window.confirmarResultadosStaging = async () => {
-  if (!stagingResultados.length) return;
-
-  const btnConfirm = document.querySelector('#staging-area .btn-primary');
-  btnConfirm.disabled = true;
-  btnConfirm.textContent = '⏳ Salvando...';
-
-  const msgEl = document.getElementById('staging-msg');
-  let salvos = 0;
-  const erros = [];
-
-  for (let idx = 0; idx < stagingResultados.length; idx++) {
-    const { jogo } = stagingResultados[idx];
-    const gA = parseInt(document.getElementById(`stg-gA-${idx}`)?.value);
-    const gB = parseInt(document.getElementById(`stg-gB-${idx}`)?.value);
-
-    if (isNaN(gA) || isNaN(gB)) { erros.push(jogo.timeA + ' x ' + jogo.timeB); continue; }
-
-    try {
-      // Salva resultado no Firestore
-      await updateDoc(doc(db, 'jogos', jogo.id), { gA, gB, encerrado: true });
-
-      // Calcula pontos de cada participante
-      const aprovados = Object.values(usuariosData).filter(u => u.status === 'aprovado');
-      for (const u of aprovados) {
-        const aRef = doc(db, `apostas/${u.uid}/jogos`, jogo.id);
-        const aSnap = await getDoc(aRef);
-        if (!aSnap.exists()) continue;
-        const a = aSnap.data();
-        const pts = calcularPts(a.gA, a.gB, gA, gB, jogo.fase);
-        let resultado = '';
-        if (a.gA === gA && a.gB === gB) resultado = 'exato';
-        else if ((gA > gB && a.gA > a.gB) || (gA < gB && a.gA < a.gB)) {
-          resultado = gA - gB === a.gA - a.gB ? 'vencedor_saldo' : 'vencedor';
-        } else if (gA === gB && a.gA === a.gB) resultado = 'empate';
-        else resultado = 'erro';
-        await updateDoc(aRef, { pts, resultado });
-        await recalcularPtsUsuario(u.uid);
-      }
-
-      // Propaga vencedor/perdedor para mata-mata
-      if (jogo.gerado && jogo.fase !== 'Fase de grupos') {
-        const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
-        const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
-        if (vencedor && jogo.fase === 'Semifinal') {
-          const jogo3 = jogosData.find(j => j.fase === 'Terceiro lugar' && j.placeholder);
-          if (jogo3 && perdedor) {
-            if (!jogo3.timeA || jogo3.timeA.includes('Perdedor')) await updateDoc(doc(db, 'jogos', jogo3.id), { timeA: perdedor });
-            else await updateDoc(doc(db, 'jogos', jogo3.id), { timeB: perdedor });
-          }
-          const jogoFinal = jogosData.find(j => j.fase === 'Final' && j.placeholder);
-          if (jogoFinal) {
-            if (!jogoFinal.timeA || jogoFinal.timeA.includes('Vencedor')) await updateDoc(doc(db, 'jogos', jogoFinal.id), { timeA: vencedor });
-            else await updateDoc(doc(db, 'jogos', jogoFinal.id), { timeB: vencedor });
-          }
-        }
-      }
-
-      salvos++;
-    } catch (e) {
-      erros.push(jogo.timeA + ' x ' + jogo.timeB);
-    }
-  }
-
-  document.getElementById('staging-area').style.display = 'none';
-  stagingResultados = [];
-
-  let msg = `<div class="alert alert-success" style="font-size:13px">✅ ${salvos} resultado(s) publicado(s) e pontos calculados!</div>`;
-  if (erros.length) {
-    msg += `<div class="alert alert-danger" style="font-size:13px;margin-top:6px">⚠️ Erro ao salvar: ${erros.join(', ')}. Registre manualmente.</div>`;
-  }
-  msgEl.innerHTML = msg;
-
-  btnConfirm.disabled = false;
-  btnConfirm.textContent = '✅ Confirmar e publicar';
-};
-
 </script>
+<div class="toast-container" id="toast-container"></div>
 </body>
 </html>
