@@ -304,25 +304,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 .filtro-btn:hover:not(.active){background:#f5f5f5}
 .filtro-badge{display:inline-block;background:#c0392b;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:5px;line-height:1.4}
 .filtro-btn.active .filtro-badge{background:rgba(255,255,255,0.25)}
-
-/* ── ANIMAÇÃO DE PALPITE SALVO ── */
-@keyframes pulseGreen{
-  0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0.6), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
-  40%  { box-shadow: 0 0 0 18px rgba(45,106,79,0); transform: scale(1.012); }
-  100% { box-shadow: 0 0 0 0 rgba(45,106,79,0), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
-}
-.card-saved-anim{ animation: pulseGreen 1s ease-out; }
-.game-card.tem-palpite{ border-left:4px solid #2d6a4f !important; }
-.game-card.tem-palpite::before{
-  content:''; position:absolute; top:8px; right:8px;
-  width:18px; height:18px; border-radius:50%;
-  background:#2d6a4f; color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:700; line-height:1;
-  z-index:2;
-}
-.game-card.tem-palpite::before{ content:'✓'; }
-.game-card{ position:relative; }
 </style>
 </head>
 <body>
@@ -1110,9 +1091,8 @@ function gameCardHTML(j){
     }
   }
 
-  const classePalpite = temAposta && !j.encerrado ? ' tem-palpite' : '';
   return `
-  <div class="game-card${classePalpite}" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
+  <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
     <!-- Cabeçalho -->
     <div style="background:#1a1a2e;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
       <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
@@ -1164,24 +1144,16 @@ window.salvarApostaInline = async (jogoId) => {
     await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
     apostasData[jogoId] = { gA, gB };
 
-    // 1. Confirmação no próprio botão (sobrevive ao re-render porque é setada depois)
+    // Confirmação no próprio botão
     if(btn){
       btn.textContent = '✅ Palpite salvo!';
       btn.style.background = '#1b5e20';
     }
 
-    // 2. Animação de pulse no card inteiro
-    const cardEl = document.getElementById(`card-${jogoId}`);
-    if(cardEl){
-      cardEl.classList.add('card-saved-anim');
-      // Marca como tendo palpite (borda verde + check) imediatamente
-      cardEl.classList.add('tem-palpite');
-    }
-
-    // 3. Toast no topo (5 segundos)
+    // Toast no topo (5 segundos)
     mostrarToast('Palpite salvo com sucesso!');
 
-    // Aguarda 1.2s antes de re-renderizar (deixa o usuário ver a confirmação)
+    // Aguarda 1.2s antes de re-renderizar
     setTimeout(() => {
       renderJogos();
       renderApostasHistorico();
