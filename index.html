@@ -252,6 +252,19 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 </head>
 <body>
 
+<div id="error-display" style="display:none;position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;padding:16px;z-index:9999;font-size:13px;font-family:monospace;white-space:pre-wrap;max-height:50vh;overflow:auto"></div>
+<script>
+window.onerror = function(msg, src, line, col, err) {
+  const el = document.getElementById('error-display');
+  if(el){ el.style.display='block'; el.textContent = 'ERRO linha '+line+': '+msg+'\n'+(err&&err.stack||''); }
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e){
+  const el = document.getElementById('error-display');
+  if(el){ el.style.display='block'; el.textContent += '\nPromise rejeitada: '+(e.reason||e); }
+});
+</script>
+
 <header>
   <h1>⚽ Bolão Copa 2026</h1>
   <div class="header-right">
