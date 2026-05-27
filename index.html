@@ -849,6 +849,9 @@ function updateMetrics(){
 }
 
 // ─── RANKING ─────────────────────────────────────────────────────────────────
+// Cache de apostas por uid para desempate e perfil
+const apostasCache = {};
+
 function renderRanking(){
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
 
@@ -879,9 +882,6 @@ function renderRanking(){
     </div>`;
   }).join('');
 }
-
-// Cache de apostas por uid para desempate
-const apostasCache = {};
 
 // ─── JOGOS ───────────────────────────────────────────────────────────────────
 // Filtro ativo (persiste durante a sessão)
