@@ -791,6 +791,10 @@ function initListeners(){
     updateMetrics();
     renderAdminParticipantes();
     renderPublico();
+    // Admin: (re)carrega o cache de palpites de todos para o indicador de pendentes
+    if(isAdmin){
+      carregarCachePalpitesGlobal().catch(()=>{});
+    }
   });
 
   // Classificados confirmados (admin)
