@@ -780,6 +780,7 @@ function initListeners(){
   // Classificação do usuário atual
   onSnapshot(doc(db,'classificacoes',currentUser.uid), snap => {
     classificadosData = snap.exists() ? snap.data() : {};
+    sincronizarFinal();
     renderClassif();
   });
 
@@ -1723,6 +1724,7 @@ window.toggleClassif = (fase, time) => {
     arr.push(time);
   }
   classificadosData[fase]=arr;
+  sincronizarFinal();
   renderClassif();
 };
 
@@ -1741,6 +1743,17 @@ window.toggleEspecial = (chave, time) => {
   }
   renderClassif();
 };
+
+// Finalistas = semifinalistas nao escolhidos para o 3o lugar (derivado, nao toggle)
+function sincronizarFinal(){
+  const semi = classificadosData['Semifinal'] || [];
+  const terc = classificadosData['Terceiro lugar'] || [];
+  if(semi.length === 4 && terc.length === 2){
+    classificadosData['Final'] = semi.filter(t => !terc.includes(t));
+  } else {
+    classificadosData['Final'] = [];
+  }
+}
 
 window.salvarClassif = async () => {
   await setDoc(doc(db,'classificacoes',currentUser.uid), {...classificadosData, uid:currentUser.uid, nome:currentUser.displayName||'', email:currentUser.email||'', foto:currentUser.photoURL||'' });
@@ -2260,6 +2273,10 @@ async function recalcularPtsUsuario(uid){
   const classifSnap = await getDoc(doc(db,'classificacoes',uid));
   if(classifSnap.exists()){
     const c = classifSnap.data();
+    // Finalistas derivados na pontuacao (mesmo se nao gravados): Semifinal - Terceiro lugar
+    if((c['Semifinal']||[]).length === 4 && (c['Terceiro lugar']||[]).length === 2){
+      c['Final'] = c['Semifinal'].filter(t => !c['Terceiro lugar'].includes(t));
+    }
     FASES_CLASSIF.forEach(fase=>{
       const confirmados = classifsData[fase]?.times||[];
       const palpites = c[fase]||[];
