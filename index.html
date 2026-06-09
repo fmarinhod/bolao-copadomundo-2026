@@ -1607,10 +1607,9 @@ function renderClassif(){
     html+=`</div></div>`;
   });
 
-  el.innerHTML=html+`<button class="btn btn-primary" style="margin-top:16px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
-
-  // Adiciona blocos especiais: 3º lugar e campeão
-  el.innerHTML += renderEspecialBlocos(false);
+  // Monta os blocos especiais (3º lugar e campeão) e só então o botão salvar
+  el.innerHTML = html + renderEspecialBlocos(false)
+    + `<button class="btn btn-primary" style="margin-top:16px;width:100%;padding:13px;font-size:15px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
 }
 
 function renderEspecialBlocos(readonly=false){
@@ -2529,9 +2528,12 @@ function renderAdminClassif(){
       html+=`<div style="font-size:12px;color:#888;margin-top:8px">Selecione os ${LIMITES_CLASSIF[fase]} classificados para ${FASES_LABEL[fase]||fase}. Os jogos da próxima fase serão gerados automaticamente.</div>`;
     }
 
-    html+=`<button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarClassifAdmin('${fase}')">
-      ✅ Confirmar + Gerar jogos
-    </button></div></div>`;
+    html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+      <button class="btn btn-primary btn-sm" onclick="salvarClassifAdmin('${fase}')">
+        ✅ Confirmar + Gerar jogos
+      </button>
+      ${(classifsData[fase]?.times||[]).length ? `<button class="btn btn-danger btn-sm" onclick="reabrirClassif('${fase}')">↩️ Reabrir classificação</button>` : ''}
+    </div></div></div>`;
   });
 
   // Blocos especiais: vencedor do 3º lugar e campeão
@@ -2560,9 +2562,12 @@ function renderAdminClassif(){
       </div>`;
     });
     html+=`</div>
-        <button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarEspecialAdmin('${chave}')">
-          Confirmar ${LABEL_ESPECIAL[chave]}
-        </button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+          <button class="btn btn-primary btn-sm" onclick="salvarEspecialAdmin('${chave}')">
+            Confirmar ${LABEL_ESPECIAL[chave]}
+          </button>
+          ${confirmado ? `<button class="btn btn-danger btn-sm" onclick="reabrirEspecial('${chave}')">↩️ Reabrir</button>` : ''}
+        </div>
       </div></div>`;
   });
 
@@ -2923,6 +2928,29 @@ window.salvarEspecialAdmin = async (chave) => {
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
+};
+
+// Reabre uma fase de classificação: apaga a confirmação e recalcula os pontos
+window.reabrirClassif = async (fase) => {
+  if(!confirm(`Reabrir a classificação de ${FASES_LABEL[fase]||fase}?\n\nIsso remove a confirmação dos times e zera os bônus desta fase. Os palpites dos participantes NÃO são afetados.`)) return;
+  await deleteDoc(doc(db,'classificados_confirmados',fase));
+  // Limpa o cache local da fase
+  delete classifsData[fase];
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  renderAdminClassif();
+  alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
+};
+
+// Reabre um palpite especial (3º lugar ou campeão): apaga a confirmação e recalcula
+window.reabrirEspecial = async (chave) => {
+  if(!confirm(`Reabrir ${LABEL_ESPECIAL[chave]}?\n\nIsso remove a confirmação e zera o bônus. Os palpites dos participantes NÃO são afetados.`)) return;
+  await deleteDoc(doc(db,'classificados_confirmados',chave));
+  delete classifsData[chave];
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  renderAdminClassif();
+  alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
 };
 
 // ─── REGRAS ───────────────────────────────────────────────────────────────────
