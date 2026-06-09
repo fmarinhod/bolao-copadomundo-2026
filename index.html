@@ -2377,7 +2377,21 @@ window.migrarJogosGrupos = async () => {
 
 window.reabrirJogo = async (jogoId) => {
   if(!confirm('Reabrir jogo e remover resultado?')) return;
+  // 1. Remove o resultado do jogo
   await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
+  // 2. Apaga os pontos calculados desse jogo em cada participante
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){
+    const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
+    const aSnap = await getDoc(aRef);
+    if(aSnap.exists() && aSnap.data().pts !== undefined){
+      // Remove pts e resultado, mantém o palpite (gA/gB) do participante
+      const a = aSnap.data();
+      await setDoc(aRef, { gA: a.gA, gB: a.gB });
+    }
+    // 3. Recalcula o total do participante
+    await recalcularPtsUsuario(u.uid);
+  }
 };
 
 window.deletarJogo = async (jogoId) => {
