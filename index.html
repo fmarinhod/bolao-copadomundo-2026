@@ -1088,7 +1088,7 @@ function gameCardHTML(j){
       return !apostasU || !apostasU[u.uid];
     });
     if(semPalpite.length){
-      const nomes = semPalpite.map(u => (u.nome||'').split(' ')[0]).join(', ');
+      const nomes = semPalpite.map(u => u.nome || u.email || 'Participante').join(', ');
       adminPendentes = `<div style="background:#fef2f2;border-left:3px solid #c0392b;border-radius:6px;padding:7px 12px;font-size:12px;color:#7a1f1f;margin-bottom:8px">
         🔧 <strong>${semPalpite.length}/${aprovados.length}</strong> ainda não palpitou: <span style="font-weight:600">${nomes}</span>
       </div>`;
