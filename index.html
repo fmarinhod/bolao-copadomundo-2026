@@ -354,6 +354,14 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
   <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
 </div>
 
+<!-- Tela de inscrições encerradas -->
+<div id="closed-screen" class="pending-screen" style="display:none">
+  <div style="font-size:48px;margin-bottom:16px">🔒</div>
+  <h2>Inscrições encerradas</h2>
+  <p>O período de inscrições para o bolão foi encerrado.<br/>Não é mais possível participar desta edição.</p>
+  <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
+</div>
+
 <!-- App principal -->
 <div id="app" style="display:none">
   <div class="container">
@@ -426,6 +434,13 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
     <!-- Admin -->
     <div id="tab-admin" class="section">
       <div class="alert alert-warn">Somente o administrador pode ver esta aba.</div>
+
+      <!-- Controle de inscrições -->
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">🔐 Inscrições</div>
+        <div id="inscricoes-status" style="font-size:14px;margin-bottom:12px;color:#555">Carregando...</div>
+        <button id="btn-toggle-inscricoes" class="btn btn-primary" onclick="toggleInscricoes()" style="min-width:180px">Carregando...</button>
+      </div>
 
       <!-- Aprovar participantes -->
       <div class="card">
@@ -622,7 +637,21 @@ onAuthStateChanged(auth, async user => {
   const userSnap = await getDoc(userRef);
 
   if(!userSnap.exists()){
-    // Novo usuário: já entra aprovado (sem fila de aprovação)
+    if(!isAdmin){
+      // Verifica se inscrições estão abertas antes de criar novo usuário
+      const configSnap = await getDoc(doc(db, 'config', 'bolao'));
+      const inscricoesAbertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
+      if(!inscricoesAbertas){
+        document.getElementById('login-screen').style.display='none';
+        document.getElementById('app').style.display='none';
+        document.getElementById('pending-screen').style.display='none';
+        document.getElementById('closed-screen').style.display='flex';
+        document.getElementById('btn-logout').style.display='block';
+        document.getElementById('header-user').textContent = user.displayName || user.email;
+        return;
+      }
+    }
+    // Novo usuário: entra direto como aprovado
     await setDoc(userRef, {
       uid: user.uid,
       nome: user.displayName || user.email,
@@ -638,14 +667,10 @@ onAuthStateChanged(auth, async user => {
   const snap = await getDoc(userRef);
   const userData = snap.data();
 
-  // Promove para aprovado se ainda estiver com status antigo (pendente/rejeitado)
-  if(userData.status !== 'aprovado'){
-    await setDoc(userRef, { ...userData, status: 'aprovado' }, { merge: true });
-  }
-
   // Acesso liberado
   document.getElementById('login-screen').style.display='none';
   document.getElementById('pending-screen').style.display='none';
+  document.getElementById('closed-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('btn-logout').style.display='block';
   document.getElementById('header-user').textContent = user.displayName || '';
@@ -794,6 +819,7 @@ function initListeners(){
     renderRanking();
     updateMetrics();
     renderAdminParticipantes();
+    renderAdminInscricoes();
     renderPublico();
     // Admin: (re)carrega o cache de palpites de todos para o indicador de pendentes
     if(isAdmin){
@@ -1975,6 +2001,34 @@ window.togglePublicoDetalhes = (header) => {
 };
 
 // ─── ADMIN: PARTICIPANTES ────────────────────────────────────────────────────
+// ─── ADMIN: INSCRIÇÕES ───────────────────────────────────────────────────────
+async function renderAdminInscricoes(){
+  if(!isAdmin) return;
+  const configSnap = await getDoc(doc(db, 'config', 'bolao'));
+  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
+  const statusEl = document.getElementById('inscricoes-status');
+  const btnEl = document.getElementById('btn-toggle-inscricoes');
+  if(!statusEl || !btnEl) return;
+  if(abertas){
+    statusEl.innerHTML = '<span style="color:#2d6a4f;font-weight:600">✅ Inscrições abertas</span> — novos participantes podem entrar.';
+    btnEl.textContent = '🔒 Fechar inscrições';
+    btnEl.style.background = '#c0392b';
+  } else {
+    statusEl.innerHTML = '<span style="color:#c0392b;font-weight:600">🔒 Inscrições encerradas</span> — novos acessos estão bloqueados.';
+    btnEl.textContent = '🔓 Reabrir inscrições';
+    btnEl.style.background = '#2d6a4f';
+  }
+}
+
+window.toggleInscricoes = async () => {
+  if(!isAdmin) return;
+  const configRef = doc(db, 'config', 'bolao');
+  const configSnap = await getDoc(configRef);
+  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
+  await setDoc(configRef, { inscricoesAbertas: !abertas }, { merge: true });
+  await renderAdminInscricoes();
+};
+
 function renderAdminParticipantes(){
   if(!isAdmin) return;
   const el = document.getElementById('admin-participantes-list');
