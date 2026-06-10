@@ -1426,7 +1426,7 @@ function poolParaFase(fase){
 
 function renderClassif(){
   const now=Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   const bloqueado = now >= abertura - 5*60*1000;
   const el = document.getElementById('classif-content');
 
@@ -1704,7 +1704,7 @@ function obterTodasSelecoes(){
 
 window.toggleClassif = (fase, time) => {
   const now=Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   if(now >= abertura - 5*60*1000) return;
   const arr = classificadosData[fase] || [];
   const idx = arr.indexOf(time);
@@ -1730,7 +1730,7 @@ window.toggleClassif = (fase, time) => {
 
 window.toggleEspecial = (chave, time) => {
   const now=Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   if(now >= abertura - 5*60*1000) return;
   // Toggle: se já selecionado, deseleciona; senão seleciona
   if(classificadosData[chave] === time){
@@ -1919,7 +1919,7 @@ async function carregarCachePalpitesGlobal(){
 
 function renderPublicoClassif(el, aprovados, filtroFase){
   const now = Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   const bloqueado = now >= abertura - 5*60*1000;
   if(!bloqueado){
     el.innerHTML='<div class="empty-state">Palpites de classificação ficam visíveis após o início da Copa (11/06).</div>';
@@ -2992,7 +2992,7 @@ const REGRAS_PADRAO = [
     itens: [
       'Acesse a aba "Palpites" e registre o placar que você prevê para cada jogo.',
       'Os palpites de placar são bloqueados individualmente 5 minutos antes do início de cada jogo.',
-      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 15h).',
+      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 16h).',
       'Após o bloqueio, não é possível alterar ou registrar palpites para aquele jogo ou fase.',
       'Palpites não feitos valem 0 pontos — não há pontuação automática.'
     ]
