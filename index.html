@@ -9,7 +9,9 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:15px}
 header{background:#1a1a2e;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
 header h1{font-size:18px;font-weight:600}
-.header-right{display:flex;align-items:center;gap:12px}
+.header-right{display:flex;align-items:center;gap:10px}
+.btn-header-admin{padding:6px 12px;background:rgba(245,197,24,0.15);color:#f5c518;border:1px solid rgba(245,197,24,0.4);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.btn-header-admin:hover{background:rgba(245,197,24,0.28)}
 .user-info{font-size:13px;opacity:0.8}
 .btn{padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s}
 .btn:hover{opacity:0.85}
@@ -21,9 +23,33 @@ header h1{font-size:18px;font-weight:600}
 .btn-danger{border:1px solid #c0392b;color:#c0392b;background:transparent;padding:5px 10px;font-size:12px}
 .btn-warn{background:#e67e22;color:#fff;padding:5px 10px;font-size:12px;border:none;border-radius:6px;cursor:pointer}
 .container{max-width:820px;margin:0 auto;padding:20px}
-.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:24px;overflow-x:auto}
-.tab{padding:10px 16px;font-size:14px;font-weight:500;border:none;background:transparent;color:#666;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px}
-.tab.active{color:#2d6a4f;border-bottom-color:#2d6a4f}
+.tabs{display:none}
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#1a1a2e;
+  display:flex;align-items:stretch;
+  height:62px;z-index:200;
+  box-shadow:0 -2px 12px rgba(0,0,0,0.25);
+  overflow-x:auto;
+}
+.bnav-item{
+  flex:1;min-width:56px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:transparent;
+  color:rgba(255,255,255,0.45);
+  font-size:9px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;
+  cursor:pointer;transition:color 0.15s;position:relative;padding:4px 2px 0;
+  white-space:nowrap;
+}
+.bnav-item .bnav-icon{font-size:19px;line-height:1}
+.bnav-item.active{color:#f5c518}
+.bnav-item.active::after{
+  content:'';position:absolute;bottom:0;left:15%;right:15%;
+  height:3px;background:#f5c518;border-radius:2px 2px 0 0
+}
+.bnav-item.admin-only{display:none}
+body{padding-bottom:72px}
 .section{display:none}.section.active{display:block}
 .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
@@ -248,6 +274,55 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 .status-rejeitado{background:#fdecea;color:#c0392b}
 
 @media(max-width:500px){.form-row{grid-template-columns:1fr}header h1{font-size:15px}.historico-stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ── MODAL PERFIL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:300;display:flex;align-items:flex-end;justify-content:center}
+.modal-sheet{background:#fff;width:100%;max-width:600px;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.22s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:12px auto 0}
+.modal-header{display:flex;align-items:center;gap:12px;padding:16px 20px 12px;border-bottom:1px solid #f0f0f0}
+.modal-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.modal-avatar-placeholder{width:48px;height:48px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0}
+.modal-body{overflow-y:auto;padding:16px 20px 24px;flex:1}
+.modal-close{margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;color:#888;padding:4px}
+.perfil-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.perfil-stat{background:#f7f8fa;border-radius:10px;padding:12px 8px;text-align:center}
+.perfil-stat-val{font-size:20px;font-weight:800;color:#2d6a4f}
+.perfil-stat-label{font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;font-weight:600}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:400;pointer-events:none}
+.toast{background:#2d6a4f;color:#fff;padding:12px 22px;border-radius:99px;font-size:14px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-15px);transition:opacity 0.2s,transform 0.2s;margin-bottom:8px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.toast-error{background:#c0392b}
+
+/* ── FILTROS PALPITES ── */
+.jogos-filtros{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.jogos-filtros::-webkit-scrollbar{display:none}
+.filtro-btn{padding:8px 14px;border:1.5px solid #ddd;background:#fff;color:#555;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
+.filtro-btn.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.filtro-btn:hover:not(.active){background:#f5f5f5}
+.filtro-badge{display:inline-block;background:#c0392b;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:5px;line-height:1.4}
+.filtro-btn.active .filtro-badge{background:rgba(255,255,255,0.25)}
+
+/* ── ANIMAÇÃO DE PALPITE SALVO ── */
+@keyframes pulseGreen{
+  0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0.6), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
+  40%  { box-shadow: 0 0 0 18px rgba(45,106,79,0); transform: scale(1.012); }
+  100% { box-shadow: 0 0 0 0 rgba(45,106,79,0), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
+}
+.card-saved-anim{ animation: pulseGreen 1s ease-out; }
+.game-card.tem-palpite{ border-left:4px solid #2d6a4f !important; }
+.game-card.tem-palpite::before{
+  content:''; position:absolute; top:8px; right:8px;
+  width:18px; height:18px; border-radius:50%;
+  background:#2d6a4f; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; line-height:1;
+  z-index:2;
+}
+.game-card.tem-palpite::before{ content:'✓'; }
+.game-card{ position:relative; }
 </style>
 </head>
 <body>
@@ -256,6 +331,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
   <h1>⚽ Bolão Copa 2026</h1>
   <div class="header-right">
     <span class="user-info" id="header-user"></span>
+    <button class="btn-header-admin admin-only" id="btn-header-admin" style="display:none" onclick="switchTab('admin')">🔧 Admin</button>
     <button class="btn btn-secondary btn-sm" id="btn-logout" style="display:none" onclick="logout()">Sair</button>
   </div>
 </header>
@@ -278,14 +354,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
   <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
 </div>
 
-<!-- Tela de inscrições encerradas -->
-<div id="closed-screen" class="pending-screen" style="display:none">
-  <div style="font-size:48px;margin-bottom:16px">🔒</div>
-  <h2>Inscrições encerradas</h2>
-  <p>O período de inscrições para o bolão foi encerrado.<br/>Não é mais possível participar desta edição.</p>
-  <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
-</div>
-
 <!-- App principal -->
 <div id="app" style="display:none">
   <div class="container">
@@ -296,15 +364,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
       <div class="metric"><div class="metric-label">Líder</div><div class="metric-value" style="font-size:13px;padding-top:4px" id="m-lider">—</div></div>
     </div>
 
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('ranking')">Ranking</button>
-      <button class="tab" onclick="switchTab('apostas')">Meus palpites</button>
-      <button class="tab" onclick="switchTab('classif')">Classificação</button>
-      <button class="tab" onclick="switchTab('jogos')">Jogos</button>
-      <button class="tab" onclick="switchTab('publico')">Palpites públicos</button>
-      <button class="tab admin-only" onclick="switchTab('admin')" style="display:none">Admin</button>
-      <button class="tab" onclick="switchTab('regras')">Pontuação</button>
-    </div>
+
 
     <!-- Ranking -->
     <div id="tab-ranking" class="section active">
@@ -317,7 +377,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
         <span class="section-title">Meus palpites</span>
       </div>
       <div id="historico-stats-wrap"></div>
-      <div class="alert alert-info" id="apostas-info">Vá até a aba "Jogos" e clique em "Registrar palpite" no jogo desejado.</div>
+      <div class="alert alert-info" id="apostas-info">Vá até a aba "Palpites" e clique em "Registrar palpite" no jogo desejado.</div>
       <div id="apostas-form-wrap"></div>
       <div style="height:1px;background:#f0f0f0;margin:16px 0"></div>
       <div id="apostas-list"><div class="loading">Carregando...</div></div>
@@ -334,13 +394,14 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 
     <!-- Jogos -->
     <div id="tab-jogos" class="section">
+      <div class="jogos-filtros" id="jogos-filtros"></div>
       <div id="jogos-list"><div class="loading">Carregando...</div></div>
     </div>
 
     <!-- Palpites Públicos -->
     <div id="tab-publico" class="section">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <span class="section-title">Palpites de todos</span>
+        <span class="section-title">Comparar palpites</span>
       </div>
       <div class="alert alert-info" style="font-size:13px">Palpites ficam visíveis após o bloqueio de cada jogo ou fase.</div>
       <div class="publico-filter">
@@ -365,13 +426,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
     <!-- Admin -->
     <div id="tab-admin" class="section">
       <div class="alert alert-warn">Somente o administrador pode ver esta aba.</div>
-
-      <!-- Controle de inscrições -->
-      <div class="card">
-        <div style="font-size:15px;font-weight:700;margin-bottom:14px">🔐 Inscrições</div>
-        <div id="inscricoes-status" style="font-size:14px;margin-bottom:12px;color:#555">Carregando...</div>
-        <button id="btn-toggle-inscricoes" class="btn btn-primary" onclick="toggleInscricoes()" style="min-width:180px">Carregando...</button>
-      </div>
 
       <!-- Aprovar participantes -->
       <div class="card">
@@ -409,6 +463,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Registrar resultados</div>
       <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 72 jogos corretos da fase de grupos.</div>
       <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 72 jogos da fase de grupos</button>
+
       <div id="admin-jogos-list"><div class="loading">Carregando...</div></div>
 
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Confirmar classificados</div>
@@ -417,41 +472,31 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 
     <!-- Regras -->
     <div id="tab-regras" class="section">
-      <div class="card">
-        <div class="section-title" style="margin-bottom:12px">Pontuação por acerto de placar</div>
-        <div class="pts-rule"><span>Placar exato</span><span class="pts-val">10 pts × mult.</span></div>
-        <div class="pts-rule"><span>Vencedor + saldo de gols certo</span><span class="pts-val">7 pts × mult.</span></div>
-        <div class="pts-rule"><span>Vencedor certo (placar errado)</span><span class="pts-val">5 pts × mult.</span></div>
-        <div class="pts-rule"><span>Empate previsto (placar errado)</span><span class="pts-val">3 pts × mult.</span></div>
+
+      <!-- Visualização pública das regras -->
+      <div id="regras-view">
+        <div id="regras-conteudo"><!-- preenchido pelo JS --></div>
+        <div id="regras-edit-btn-wrap" style="display:none;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="abrirEdicaoRegras()">✏️ Editar regras</button>
+        </div>
       </div>
-      <div class="card">
-        <div class="section-title" style="margin-bottom:12px">Multiplicador por fase</div>
-        <div class="pts-rule"><span>Fase de grupos</span><span class="pts-val">× 1</span></div>
-        <div class="pts-rule"><span>16-avos de final</span><span class="pts-val">× 1.5</span></div>
-        <div class="pts-rule"><span>Oitavas de final</span><span class="pts-val">× 2</span></div>
-        <div class="pts-rule"><span>Quartas de final</span><span class="pts-val">× 2.5</span></div>
-        <div class="pts-rule"><span>Semifinal</span><span class="pts-val">× 3</span></div>
-        <div class="pts-rule"><span>Terceiro lugar</span><span class="pts-val">× 2</span></div>
-        <div class="pts-rule"><span>Final</span><span class="pts-val">× 4</span></div>
+
+      <!-- Formulário de edição (admin only, oculto por padrão) -->
+      <div id="regras-editor" style="display:none">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">✏️ Editar Regras do Bolão</div>
+          <div class="alert alert-warn" style="font-size:13px">As alterações ficam visíveis para todos os participantes imediatamente após salvar.</div>
+
+          <div id="regras-secoes-editor"><!-- seções dinâmicas --></div>
+
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="adicionarSecaoRegra()">＋ Nova seção</button>
+            <button class="btn btn-primary" onclick="salvarRegras()">💾 Salvar regras</button>
+            <button class="btn btn-secondary" onclick="fecharEdicaoRegras()">Cancelar</button>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="section-title" style="margin-bottom:12px">Bônus por classificação</div>
-        <div class="pts-rule"><span>Acertou seleção nos 16-avos</span><span class="pts-val">+10 pts</span></div>
-        <div class="pts-rule"><span>Acertou seleção nas oitavas</span><span class="pts-val">+15 pts</span></div>
-        <div class="pts-rule"><span>Acertou seleção nas quartas</span><span class="pts-val">+20 pts</span></div>
-        <div class="pts-rule"><span>Acertou seleção na semifinal</span><span class="pts-val">+30 pts</span></div>
-        <div class="pts-rule"><span>Acertou disputante do 3º lugar</span><span class="pts-val">+30 pts</span></div>
-        <div class="pts-rule"><span>Acertou um finalista</span><span class="pts-val">+50 pts</span></div>
-        <div class="pts-rule"><span>Acertou o vencedor do 3º lugar</span><span class="pts-val">+50 pts</span></div>
-        <div class="pts-rule"><span>Acertou o campeão</span><span class="pts-val">+100 pts</span></div>
-      </div>
-      <div class="card">
-        <div class="section-title" style="margin-bottom:8px">Prazo de palpites</div>
-        <p style="font-size:14px;color:#555;line-height:1.6">
-          <strong>Palpites de jogo:</strong> bloqueados individualmente 5 minutos antes do horário de início de cada jogo.<br/>
-          <strong>Palpites de classificação:</strong> bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 15h), para todas as fases de uma vez.
-        </p>
-      </div>
+
     </div>
   </div>
 </div>
@@ -541,6 +586,7 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
+let todasApostasData = null;  // cache: { jogoId: { uid: {gA,gB,pts,...} } }
 let isAdmin = false;
 let jogosData = [];
 let apostasData = {};
@@ -576,21 +622,7 @@ onAuthStateChanged(auth, async user => {
   const userSnap = await getDoc(userRef);
 
   if(!userSnap.exists()){
-    if(!isAdmin){
-      // Verifica se inscrições estão abertas antes de criar novo usuário
-      const configSnap = await getDoc(doc(db, 'config', 'bolao'));
-      const inscricoesAbertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
-      if(!inscricoesAbertas){
-        document.getElementById('login-screen').style.display='none';
-        document.getElementById('app').style.display='none';
-        document.getElementById('pending-screen').style.display='none';
-        document.getElementById('closed-screen').style.display='flex';
-        document.getElementById('btn-logout').style.display='block';
-        document.getElementById('header-user').textContent = user.displayName || user.email;
-        return;
-      }
-    }
-    // Novo usuário: cria como aprovado (admin sempre aprovado)
+    // Novo usuário: já entra aprovado (sem fila de aprovação)
     await setDoc(userRef, {
       uid: user.uid,
       nome: user.displayName || user.email,
@@ -606,15 +638,9 @@ onAuthStateChanged(auth, async user => {
   const snap = await getDoc(userRef);
   const userData = snap.data();
 
-  if(!isAdmin && userData.status !== 'aprovado'){
-    // Mostra tela de pendente
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='none';
-    document.getElementById('pending-screen').style.display='flex';
-    document.getElementById('pending-email').textContent = user.email;
-    document.getElementById('btn-logout').style.display='block';
-    document.getElementById('header-user').textContent = user.displayName || user.email;
-    return;
+  // Promove para aprovado se ainda estiver com status antigo (pendente/rejeitado)
+  if(userData.status !== 'aprovado'){
+    await setDoc(userRef, { ...userData, status: 'aprovado' }, { merge: true });
   }
 
   // Acesso liberado
@@ -625,13 +651,16 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('header-user').textContent = user.displayName || '';
 
   if(isAdmin){
-    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
+    document.querySelectorAll('.admin-only').forEach(el=>{
+      el.style.display = el.classList.contains('btn-header-admin') ? 'inline-flex' : 'flex';
+    });
   }
 
   initListeners();
 });
 
 function initListeners(){
+  carregarRegras();
   // Jogos
   onSnapshot(collection(db,'jogos'), snap => {
     const firestoreJogos = snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -670,21 +699,21 @@ function initListeners(){
     ];
 
     const MATA_OITAVAS_FIXO = [
-      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 1', data:'2026-07-04', hora:'14:00'},
-      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'18:00'},
-      {timeA:'Venc. Jogo 5', timeB:'Venc. Jogo 6', data:'2026-07-05', hora:'17:00'},
+      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 6', data:'2026-07-04', hora:'18:00'},
+      {timeA:'Venc. Jogo 1', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'14:00'},
+      {timeA:'Venc. Jogo 12', timeB:'Venc. Jogo 11', data:'2026-07-06', hora:'16:00'},
+      {timeA:'Venc. Jogo 10', timeB:'Venc. Jogo 9', data:'2026-07-06', hora:'21:00'},
+      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 5', data:'2026-07-05', hora:'17:00'},
       {timeA:'Venc. Jogo 7', timeB:'Venc. Jogo 8', data:'2026-07-05', hora:'21:00'},
-      {timeA:'Venc. Jogo 9', timeB:'Venc. Jogo 10', data:'2026-07-06', hora:'16:00'},
-      {timeA:'Venc. Jogo 11', timeB:'Venc. Jogo 12', data:'2026-07-06', hora:'21:00'},
-      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
-      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
+      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
+      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
     ];
 
     const MATA_QUARTAS_FIXO = [
-      {timeA:'Venc. Oitavas 2', timeB:'Venc. Oitavas 1', data:'2026-07-09', hora:'17:00'},
-      {timeA:'Venc. Oitavas 6', timeB:'Venc. Oitavas 5', data:'2026-07-10', hora:'16:00'},
-      {timeA:'Venc. Oitavas 4', timeB:'Venc. Oitavas 3', data:'2026-07-11', hora:'18:00'},
-      {timeA:'Venc. Oitavas 8', timeB:'Venc. Oitavas 7', data:'2026-07-11', hora:'22:00'},
+      {timeA:'Venc. Oitavas 1', timeB:'Venc. Oitavas 2', data:'2026-07-09', hora:'17:00'},
+      {timeA:'Venc. Oitavas 3', timeB:'Venc. Oitavas 4', data:'2026-07-10', hora:'16:00'},
+      {timeA:'Venc. Oitavas 5', timeB:'Venc. Oitavas 6', data:'2026-07-11', hora:'18:00'},
+      {timeA:'Venc. Oitavas 7', timeB:'Venc. Oitavas 8', data:'2026-07-11', hora:'22:00'},
     ];
 
     const MATA_SEMIS_FIXO = [
@@ -709,6 +738,9 @@ function initListeners(){
           id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           fase,
           grupo: '',
+          jogoNum: i+1,
+          placeholderA: base.timeA,
+          placeholderB: base.timeB,
           ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           encerrado: false,
           // Se Firestore tem times reais, usa — mantém data/hora do HTML
@@ -733,6 +765,10 @@ function initListeners(){
     updateMetrics();
     renderApostasHistorico();
     renderPublico();
+    // Carrega cache global de palpites para estatísticas e indicador admin
+    if(isAdmin || Object.keys(todasApostasData||{}).length === 0){
+      carregarCachePalpitesGlobal().catch(()=>{});
+    }
   });
 
   // Apostas do usuário atual
@@ -747,6 +783,7 @@ function initListeners(){
   // Classificação do usuário atual
   onSnapshot(doc(db,'classificacoes',currentUser.uid), snap => {
     classificadosData = snap.exists() ? snap.data() : {};
+    sincronizarFinal();
     renderClassif();
   });
 
@@ -757,8 +794,11 @@ function initListeners(){
     renderRanking();
     updateMetrics();
     renderAdminParticipantes();
-    renderAdminInscricoes();
     renderPublico();
+    // Admin: (re)carrega o cache de palpites de todos para o indicador de pendentes
+    if(isAdmin){
+      carregarCachePalpitesGlobal().catch(()=>{});
+    }
   });
 
   // Classificados confirmados (admin)
@@ -779,11 +819,20 @@ function initListeners(){
 
 // ─── TAB SWITCH ───────────────────────────────────────────────────────────────
 window.switchTab = (tab) => {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
   document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const nb = document.getElementById(`bnav-${tab}`);
+  if(nb) nb.classList.add('active');
   if(tab==='publico') renderPublico();
+};
+
+window.fecharPerfil = (e) => {
+  if(e.target === document.getElementById('modal-perfil'))
+    document.getElementById('modal-perfil').style.display = 'none';
+};
+window.fecharPerfilBtn = () => {
+  document.getElementById('modal-perfil').style.display = 'none';
 };
 
 // ─── MÉTRICAS ────────────────────────────────────────────────────────────────
@@ -797,38 +846,112 @@ function updateMetrics(){
 }
 
 // ─── RANKING ─────────────────────────────────────────────────────────────────
+// Cache de apostas por uid para desempate e perfil
+const apostasCache = {};
+
 function renderRanking(){
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado')
-    .sort((a,b)=>(b.pts||0)-(a.pts||0));
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+
+  // Calcular exatos de cada participante para desempate
+  aprovados.forEach(u => {
+    const apostasU = apostasCache[u.uid] || {};
+    u._exatos = Object.values(apostasU).filter(a=>a.resultado==='exato').length;
+  });
+
+  aprovados.sort((a,b) => {
+    const diffPts = (b.pts||0) - (a.pts||0);
+    if(diffPts !== 0) return diffPts;
+    return (b._exatos||0) - (a._exatos||0); // desempate por placares exatos
+  });
+
   const el = document.getElementById('ranking-list');
   if(!aprovados.length){ el.innerHTML='<div class="empty-state">Nenhum participante ainda.</div>'; return; }
   el.innerHTML = aprovados.map((u,i)=>{
     const posClass = i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'pos-n';
     const foto = u.foto ? `<img src="${u.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">` :
-      `<div style="width:36px;height:36px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${u.nome[0]}</div>`;
-    return `<div class="ranking-row">
+      `<div style="width:36px;height:36px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${(u.nome||'?')[0]}</div>`;
+    const exatosBadge = u._exatos > 0 ? `<span style="font-size:10px;background:#e6f4ec;color:#2d6a4f;padding:1px 6px;border-radius:99px;font-weight:700;margin-left:4px">🎯 ${u._exatos}</span>` : '';
+    return `<div class="ranking-row" style="cursor:pointer" onclick="abrirPerfil('${u.uid}')">
       <div class="pos-badge ${posClass}">${i+1}</div>
       ${foto}
-      <div class="ranking-name">${u.nome}<div class="ranking-sub">${u.email||''}</div></div>
+      <div class="ranking-name">${u.nome}${exatosBadge}<div class="ranking-sub">${u.email||''}</div></div>
       <div class="ranking-pts">${u.pts||0} pts</div>
     </div>`;
   }).join('');
 }
 
 // ─── JOGOS ───────────────────────────────────────────────────────────────────
+// Filtro ativo (persiste durante a sessão)
+let filtroJogosAtivo = 'hoje';
+
+function contarSemPalpite(jogos){
+  return jogos.filter(j => !j.encerrado && Date.now() < j.ts - 5*60*1000 && !apostasData[j.id]).length;
+}
+
 function renderJogos(){
   const el = document.getElementById('jogos-list');
-  if(!jogosData.length){ el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>'; return; }
+  const filtrosEl = document.getElementById('jogos-filtros');
+  if(!jogosData.length){
+    if(filtrosEl) filtrosEl.innerHTML = '';
+    el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>';
+    return;
+  }
   const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
 
-  const jogosGrupos = sorted.filter(j=>j.fase==='Fase de grupos');
-  const jogosMata   = sorted.filter(j=>j.fase!=='Fase de grupos');
+  // ── Definir intervalos de filtro (em milissegundos) ──
+  const agora = new Date();
+  const hojeIni = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+  const amanhaIni = hojeIni + 86400000;
+  const depoisAmanhaIni = hojeIni + 2*86400000;
+  // "Esta semana" = próximos 7 dias a partir de hoje
+  const semanaFim = hojeIni + 7*86400000;
+
+  const jogosHoje = sorted.filter(j => j.ts >= hojeIni && j.ts < amanhaIni);
+  const jogosAmanha = sorted.filter(j => j.ts >= amanhaIni && j.ts < depoisAmanhaIni);
+  const jogosSemana = sorted.filter(j => j.ts >= hojeIni && j.ts < semanaFim);
+  const jogosPendentes = sorted.filter(j => !j.encerrado && Date.now() < j.ts - 5*60*1000 && !apostasData[j.id]);
+
+  // ── Renderizar barra de filtros ──
+  const cntHoje = contarSemPalpite(jogosHoje);
+  const cntAmanha = contarSemPalpite(jogosAmanha);
+  const cntSemana = contarSemPalpite(jogosSemana);
+  const cntPend = jogosPendentes.length;
+
+  const badge = (n) => n > 0 ? `<span class="filtro-badge">${n}</span>` : '';
+
+  if(filtrosEl){
+    filtrosEl.innerHTML = `
+      <button class="filtro-btn ${filtroJogosAtivo==='hoje'?'active':''}" onclick="setFiltroJogos('hoje')">Hoje${badge(cntHoje)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='amanha'?'active':''}" onclick="setFiltroJogos('amanha')">Amanhã${badge(cntAmanha)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='semana'?'active':''}" onclick="setFiltroJogos('semana')">Esta semana${badge(cntSemana)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='pendentes'?'active':''}" onclick="setFiltroJogos('pendentes')">Pendentes${badge(cntPend)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='todos'?'active':''}" onclick="setFiltroJogos('todos')">Todos</button>
+    `;
+  }
+
+  // ── Filtrar jogos exibidos ──
+  let jogosFiltrados;
+  if(filtroJogosAtivo==='hoje') jogosFiltrados = jogosHoje;
+  else if(filtroJogosAtivo==='amanha') jogosFiltrados = jogosAmanha;
+  else if(filtroJogosAtivo==='semana') jogosFiltrados = jogosSemana;
+  else if(filtroJogosAtivo==='pendentes') jogosFiltrados = jogosPendentes;
+  else jogosFiltrados = sorted;
+
+  if(!jogosFiltrados.length){
+    let msg = 'Nenhum jogo neste filtro.';
+    if(filtroJogosAtivo==='hoje') msg = '🎉 Nenhum jogo hoje. Volte amanhã!';
+    else if(filtroJogosAtivo==='pendentes') msg = '✅ Você já palpitou em todos os jogos abertos!';
+    el.innerHTML = `<div class="empty-state">${msg}</div>`;
+    return;
+  }
+
+  const jogosGrupos = jogosFiltrados.filter(j=>j.fase==='Fase de grupos');
+  const jogosMata   = jogosFiltrados.filter(j=>j.fase!=='Fase de grupos');
 
   let html='';
 
-  // Fase de grupos: ordem cronologica agrupada por data
   if(jogosGrupos.length){
-    html+='<div class="grupo-titulo">Fase de grupos</div>';
+    if(filtroJogosAtivo==='todos') html+='<div class="grupo-titulo">Fase de grupos</div>';
     let dataAtual='';
     jogosGrupos.forEach(j=>{
       if(j.data !== dataAtual){
@@ -841,7 +964,6 @@ function renderJogos(){
     });
   }
 
-  // Mata-mata: por fase
   const gruposMata = {};
   jogosMata.forEach(j=>{ if(!gruposMata[j.fase]) gruposMata[j.fase]=[]; gruposMata[j.fase].push(j); });
   FASES_MATA_ORDEM.forEach(f=>{
@@ -853,53 +975,220 @@ function renderJogos(){
   el.innerHTML=html;
 }
 
+window.setFiltroJogos = (f) => {
+  filtroJogosAtivo = f;
+  renderJogos();
+};
+
+// Estatística: palpite mais comum entre participantes (após bloqueio)
+function calcularPalpiteMaisComum(jogoId){
+  if(!todasApostasData || !todasApostasData[jogoId]) return null;
+  const palpites = Object.values(todasApostasData[jogoId]);
+  if(palpites.length < 2) return null;
+  const cont = {};
+  palpites.forEach(p => {
+    if(p.gA === undefined || p.gB === undefined) return;
+    const k = `${p.gA}×${p.gB}`;
+    cont[k] = (cont[k]||0) + 1;
+  });
+  let maior = null, qtd = 0;
+  Object.entries(cont).forEach(([k,v]) => { if(v > qtd){ maior=k; qtd=v; }});
+  if(!maior) return null;
+  const pct = Math.round((qtd / palpites.length) * 100);
+  return { placar: maior, pct, qtd, total: palpites.length };
+}
+
 function gameCardHTML(j){
-  const now=Date.now();
+  const now = Date.now();
   const bloqueado = now >= j.ts - 5*60*1000;
   const aposta = apostasData[j.id];
   const temAposta = aposta && aposta.gA !== undefined;
   const dtStr = formatarDataJogo(j);
-  let scorePart='';
+  const jid = j.id;
+
+  // ── Placar central ──
+  let scorePart = '';
   if(j.encerrado){
-    scorePart=`<div class="score-display">${j.gA} × ${j.gB}</div>`;
+    scorePart = `<div class="score-display">${j.gA} × ${j.gB}</div>`;
+  } else if(bloqueado){
+    scorePart = `<div class="score-display" style="font-size:16px;color:#aaa">× </div>`;
   } else {
-    scorePart=`<div class="score-display">× </div>`;
+    // Inputs inline com valores já salvos (se houver)
+    const vA = temAposta ? aposta.gA : '';
+    const vB = temAposta ? aposta.gB : '';
+    scorePart = `
+      <div style="display:flex;align-items:center;gap:6px">
+        <input class="score-input" id="inp-gA-${jid}" type="number" min="0" max="99"
+          value="${vA}" placeholder="0"
+          style="width:52px;text-align:center;font-size:22px;font-weight:800;padding:8px 4px;border:2px solid #2d6a4f;border-radius:8px;color:#2d6a4f"/>
+        <span style="font-size:20px;font-weight:700;color:#aaa">×</span>
+        <input class="score-input" id="inp-gB-${jid}" type="number" min="0" max="99"
+          value="${vB}" placeholder="0"
+          style="width:52px;text-align:center;font-size:22px;font-weight:800;padding:8px 4px;border:2px solid #2d6a4f;border-radius:8px;color:#2d6a4f"/>
+      </div>`;
   }
-  let apostaBadge='';
-  if(temAposta){
-    const pts = aposta.pts !== undefined ? `+${aposta.pts} pts` : 'Aguardando resultado';
-    const cor = aposta.pts > 0 ? 'pts-badge-green':'pts-badge-gray';
-    apostaBadge=`<span class="publico-pts-badge ${cor}">${pts}</span>`;
-  }
-  let btnAposta='';
-  if(!j.encerrado){
-    if(bloqueado){
-      btnAposta=`<span class="fechado-badge">⏱ Bloqueado</span>`;
-    } else {
-      const txt = temAposta ? 'Alterar palpite' : 'Registrar palpite';
-      btnAposta=`<button class="btn btn-primary btn-sm" onclick="abrirAposta('${j.id}')">✏️ ${txt}</button>`;
-      const minutos = Math.ceil((j.ts - 5*60*1000 - now)/60000);
-      if(minutos > 0 && minutos < 60) btnAposta += `<div class="countdown">Fecha em ${minutos} min</div>`;
+
+  // ── Badge de pontuação do participante ──
+  let ptsBadge = '';
+  if(j.encerrado && temAposta){
+    if(aposta.pts !== undefined){
+      const cor = aposta.pts > 0 ? '#e6f4ec' : '#f0f0f0';
+      const txtCor = aposta.pts > 0 ? '#2d6a4f' : '#888';
+      let desc = '';
+      if(aposta.resultado==='exato') desc = '🎯 Placar exato';
+      else if(aposta.resultado==='vencedor_saldo') desc = '⚖️ Vencedor+saldo';
+      else if(aposta.resultado==='vencedor') desc = '✅ Vencedor certo';
+      else if(aposta.resultado==='empate') desc = '🤝 Empate certo';
+      else desc = '❌ Errou';
+      ptsBadge = `<div style="background:${cor};border-radius:8px;padding:8px 14px;text-align:center;font-size:13px;color:${txtCor};font-weight:700">
+        ${desc} · <strong>+${aposta.pts} pts</strong>
+        <span style="font-size:11px;font-weight:400;margin-left:6px;opacity:0.75">Palpite: ${aposta.gA}×${aposta.gB}</span>
+      </div>`;
     }
-  } else {
-    btnAposta=`<span class="encerrado-badge">✅ Encerrado</span>`;
+  } else if(!j.encerrado && temAposta && bloqueado){
+    ptsBadge = `<div style="background:#fff8e1;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a;font-weight:600">
+      ⏳ Pontuação deste palpite: aguardando resultado
+    </div>`;
+  } else if(!j.encerrado && !bloqueado){
+    ptsBadge = `<div style="background:#fffde7;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a">
+      Pontuação deste palpite: aguardando resultado
+    </div>`;
   }
-  return `<div class="game-card">
-    <div class="game-header">
-      <span class="phase-badge">${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:FASES_LABEL[j.fase]||j.fase}</span>
-      <span class="game-date">${dtStr}</span>
+
+  // ── Rodapé: status ou botão salvar ──
+  let rodape = '';
+  if(j.encerrado){
+    rodape = `<div style="text-align:center;padding:6px 0">
+      <span class="encerrado-badge">✅ Encerrado</span>
+    </div>`;
+  } else if(bloqueado){
+    const minutos = Math.ceil((j.ts - now) / 60000);
+    const tempoStr = minutos > 0 ? `Inicia em ${minutos} min` : 'Em andamento';
+    rodape = `<div style="text-align:center;padding:6px 0">
+      <span class="fechado-badge">⏱ Bloqueado · ${tempoStr}</span>
+    </div>`;
+  } else {
+    rodape = `
+      <button onclick="salvarApostaInline('${jid}')"
+        style="width:100%;padding:12px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px">
+        ✅ Salvar Palpite
+      </button>`;
+  }
+
+  // ── Estatística "palpite mais comum" (após bloqueio) ──
+  let statsBox = '';
+  if(bloqueado || j.encerrado){
+    const stat = calcularPalpiteMaisComum(jid);
+    if(stat){
+      statsBox = `<div style="background:#f0f4f8;border-radius:8px;padding:8px 14px;font-size:12px;color:#1a1a2e;font-weight:600;margin-bottom:8px">
+        📊 Palpite mais comum: <strong>${stat.placar}</strong>
+        <span style="font-size:11px;font-weight:500;color:#666"> · ${stat.pct}% (${stat.qtd}/${stat.total})</span>
+      </div>`;
+    }
+  }
+
+  // ── Indicador admin: quem ainda não palpitou (apenas para admin, jogo ainda aberto) ──
+  let adminPendentes = '';
+  if(isAdmin && !j.encerrado && !bloqueado && todasApostasData){
+    const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+    const semPalpite = aprovados.filter(u => {
+      const apostasU = todasApostasData[jid];
+      return !apostasU || !apostasU[u.uid];
+    });
+    if(semPalpite.length){
+      const nomes = semPalpite.map(u => u.nome || u.email || 'Participante').join(', ');
+      adminPendentes = `<div style="background:#fef2f2;border-left:3px solid #c0392b;border-radius:6px;padding:7px 12px;font-size:12px;color:#7a1f1f;margin-bottom:8px">
+        🔧 <strong>${semPalpite.length}/${aprovados.length}</strong> ainda não palpitou: <span style="font-weight:600">${nomes}</span>
+      </div>`;
+    } else if(aprovados.length){
+      adminPendentes = `<div style="background:#e6f4ec;border-left:3px solid #2d6a4f;border-radius:6px;padding:7px 12px;font-size:12px;color:#1b5e20;margin-bottom:8px">
+        🔧 ✅ Todos os ${aprovados.length} participantes já palpitaram
+      </div>`;
+    }
+  }
+
+  const classePalpite = temAposta && !j.encerrado ? ' tem-palpite' : '';
+  return `
+  <div class="game-card${classePalpite}" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
+    <!-- Cabeçalho -->
+    <div style="background:#1a1a2e;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
+        ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''} · ${dtStr}`:(FASES_LABEL[j.fase]||j.fase)+' · '+dtStr}
+      </span>
     </div>
-    <div class="game-teams">
-      <div class="team-block"><span class="team-flag">${flag(j.timeA)}</span><div class="team-name">${j.timeA}</div></div>
-      ${scorePart}
-      <div class="team-block"><span class="team-flag">${flag(j.timeB)}</span><div class="team-name">${j.timeB}</div></div>
+    <!-- Times + inputs -->
+    <div style="padding:18px 16px 12px;background:#fff">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">${j.timeA}</div>
+          <div style="font-size:44px;line-height:1">${flag(j.timeA)}</div>
+        </div>
+        ${scorePart}
+        <div style="flex:1;text-align:center">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">${j.timeB}</div>
+          <div style="font-size:44px;line-height:1">${flag(j.timeB)}</div>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      ${btnAposta}
-      <div style="display:flex;gap:6px;align-items:center">${apostaBadge}${temAposta?`<span style="font-size:12px;color:#888">Palpite: ${aposta.gA}×${aposta.gB}</span>`:''}</div>
-    </div>
+    <!-- Indicador admin -->
+    <div style="padding:0 16px">${adminPendentes}</div>
+    <!-- Estatística pública -->
+    <div style="padding:0 16px">${statsBox}</div>
+    <!-- Badge pontuação -->
+    <div style="padding:0 16px 10px">${ptsBadge}</div>
+    <!-- Botão / status -->
+    <div style="padding:0 16px 14px">${rodape}</div>
   </div>`;
 }
+
+// Salva palpite diretamente do card inline (sem modal)
+window.salvarApostaInline = async (jogoId) => {
+  const inpA = document.getElementById(`inp-gA-${jogoId}`);
+  const inpB = document.getElementById(`inp-gB-${jogoId}`);
+  if(!inpA || !inpB){ alert('Erro ao localizar os campos.'); return; }
+  const gA = parseInt(inpA.value);
+  const gB = parseInt(inpB.value);
+  if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){
+    mostrarToast('Preencha os dois placares antes de salvar.', 'error'); return;
+  }
+  const btn = document.querySelector(`#card-${jogoId} button`);
+  const txtOriginal = btn ? btn.textContent : '';
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = '⏳ Salvando...';
+  }
+  try {
+    await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
+    apostasData[jogoId] = { gA, gB };
+
+    // 1. Confirmação no próprio botão (sobrevive ao re-render porque é setada depois)
+    if(btn){
+      btn.textContent = '✅ Palpite salvo!';
+      btn.style.background = '#1b5e20';
+    }
+
+    // 2. Animação de pulse no card inteiro
+    const cardEl = document.getElementById(`card-${jogoId}`);
+    if(cardEl){
+      cardEl.classList.add('card-saved-anim');
+      // Marca como tendo palpite (borda verde + check) imediatamente
+      cardEl.classList.add('tem-palpite');
+    }
+
+    // 3. Toast no topo (5 segundos)
+    mostrarToast('Palpite salvo com sucesso!');
+
+    // Aguarda 1.2s antes de re-renderizar (deixa o usuário ver a confirmação)
+    setTimeout(() => {
+      renderJogos();
+      renderApostasHistorico();
+    }, 1200);
+
+  } catch(e) {
+    mostrarToast('Erro ao salvar: ' + e.message, 'error');
+    if(btn){ btn.disabled = false; btn.textContent = txtOriginal || '✅ Salvar Palpite'; }
+  }
+};
 
 // ─── APOSTAS / HISTÓRICO ─────────────────────────────────────────────────────
 function renderApostasHistorico(){
@@ -937,38 +1226,98 @@ function renderApostasHistorico(){
   }
   info.style.display='none';
 
-  // Ordena por fase/data
+  // Ordena cronologicamente
   const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
   let html='';
-  // Por fase
-  const fases = ['Fase de grupos','16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
-  fases.forEach(fase=>{
-    const jogsFase = sorted.filter(j=>j.fase===fase);
-    const apostasNaFase = jogsFase.filter(j=>apostasData[j.id]);
-    if(!apostasNaFase.length) return;
-    const faseLbl = fase==='Fase de grupos'?'Fase de grupos':(FASES_LABEL[fase]||fase);
-    html+=`<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px">${faseLbl}</div>`;
-    apostasNaFase.forEach(j=>{
+
+  // Agrupa por data (apenas jogos com palpite)
+  const porData = {};
+  sorted.forEach(j=>{
+    if(!apostasData[j.id]) return;
+    const key = j.data || j.ts;
+    if(!porData[key]) porData[key] = [];
+    porData[key].push(j);
+  });
+
+  // Fase de grupos: por rodada/data
+  const datasGrupos = Object.keys(porData)
+    .filter(d => porData[d][0].fase === 'Fase de grupos')
+    .sort();
+
+  if(datasGrupos.length){
+    html+=`<div style="font-size:13px;font-weight:800;color:#2d6a4f;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px">⚽ Fase de grupos</div>`;
+    datasGrupos.forEach(data=>{
+      const jogsDia = porData[data];
+      const parts = data.split('-');
+      const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date(data+'T12:00:00').getDay()];
+      const ptsDia = jogsDia.reduce((s,j)=>{ const a=apostasData[j.id]; return s+(a?.pts||0); },0);
+      const comResultado = jogsDia.filter(j=>apostasData[j.id]?.pts !== undefined);
+
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+        <div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.6px">${parts[2]}/${parts[1]} · ${diaSemana}</div>
+        ${comResultado.length ? `<div style="font-size:12px;font-weight:700;color:#2d6a4f;background:#e6f4ec;padding:2px 10px;border-radius:99px">+${ptsDia} pts no dia</div>` : ''}
+      </div>`;
+
+      jogsDia.forEach(j=>{
+        const a = apostasData[j.id];
+        let ptsBadge='';
+        if(a.pts!==undefined){
+          const cor = a.pts>0?'pts-badge-green':'pts-badge-gray';
+          let desc='';
+          if(a.resultado==='exato') desc='🎯 Placar exato';
+          else if(a.resultado==='vencedor_saldo') desc='⚖️ Vencedor+saldo';
+          else if(a.resultado==='vencedor') desc='✅ Vencedor certo';
+          else if(a.resultado==='empate') desc='🤝 Empate certo';
+          else desc='❌ Errou';
+          ptsBadge=`<div style="text-align:right"><span class="publico-pts-badge ${cor}">+${a.pts} pts</span><div style="font-size:11px;color:#888;margin-top:2px">${desc}</div></div>`;
+        } else {
+          ptsBadge=`<span class="aposta-pendente">Aguardando</span>`;
+        }
+        const resultado = j.encerrado ? `Resultado: ${j.gA}×${j.gB} · ` : '';
+        html+=`<div class="aposta-card">
+          <div style="font-size:22px">${flag(j.timeA)}</div>
+          <div class="aposta-info">
+            <div class="aposta-jogo">${j.timeA} × ${j.timeB}</div>
+            <div class="aposta-placar">${resultado}Palpite: ${a.gA}×${a.gB}</div>
+          </div>
+          ${ptsBadge}
+        </div>`;
+      });
+    });
+  }
+
+  // Mata-mata: por fase
+  const fasesMata = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  fasesMata.forEach(fase=>{
+    const jogsFase = sorted.filter(j=>j.fase===fase && apostasData[j.id]);
+    if(!jogsFase.length) return;
+    const ptsFase = jogsFase.reduce((s,j)=>s+(apostasData[j.id]?.pts||0),0);
+    const comRes = jogsFase.filter(j=>apostasData[j.id]?.pts!==undefined);
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px">
+      <div style="font-size:13px;font-weight:800;color:#b5341b;text-transform:uppercase;letter-spacing:0.5px">${FASES_LABEL[fase]||fase}</div>
+      ${comRes.length ? `<div style="font-size:12px;font-weight:700;color:#b5341b;background:#fdecea;padding:2px 10px;border-radius:99px">+${ptsFase} pts</div>` : ''}
+    </div>`;
+    jogsFase.forEach(j=>{
       const a = apostasData[j.id];
       let ptsBadge='';
       if(a.pts!==undefined){
         const cor = a.pts>0?'pts-badge-green':'pts-badge-gray';
         let desc='';
-        if(a.resultado==='exato') desc='Placar exato';
-        else if(a.resultado==='vencedor_saldo') desc='Vencedor+saldo';
-        else if(a.resultado==='vencedor') desc='Vencedor certo';
-        else if(a.resultado==='empate') desc='Empate certo';
-        else desc='Errou';
-        ptsBadge=`<div><span class="publico-pts-badge ${cor}">+${a.pts} pts</span><div style="font-size:11px;color:#888;margin-top:2px">${desc}</div></div>`;
+        if(a.resultado==='exato') desc='🎯 Placar exato';
+        else if(a.resultado==='vencedor_saldo') desc='⚖️ Vencedor+saldo';
+        else if(a.resultado==='vencedor') desc='✅ Vencedor certo';
+        else if(a.resultado==='empate') desc='🤝 Empate certo';
+        else desc='❌ Errou';
+        ptsBadge=`<div style="text-align:right"><span class="publico-pts-badge ${cor}">+${a.pts} pts</span><div style="font-size:11px;color:#888;margin-top:2px">${desc}</div></div>`;
       } else {
-        ptsBadge=`<span class="aposta-pendente">Aguardando resultado</span>`;
+        ptsBadge=`<span class="aposta-pendente">Aguardando</span>`;
       }
-      const resultado = j.encerrado ? ` | Resultado: ${j.gA}×${j.gB}` : '';
+      const resultado = j.encerrado ? `Resultado: ${j.gA}×${j.gB} · ` : '';
       html+=`<div class="aposta-card">
         <div style="font-size:22px">${flag(j.timeA)}</div>
         <div class="aposta-info">
           <div class="aposta-jogo">${j.timeA} × ${j.timeB}</div>
-          <div class="aposta-placar">Meu palpite: ${a.gA}×${a.gB}${resultado}</div>
+          <div class="aposta-placar">${resultado}Palpite: ${a.gA}×${a.gB}</div>
         </div>
         ${ptsBadge}
       </div>`;
@@ -1080,7 +1429,7 @@ function poolParaFase(fase){
 
 function renderClassif(){
   const now=Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   const bloqueado = now >= abertura - 5*60*1000;
   const el = document.getElementById('classif-content');
 
@@ -1266,10 +1615,9 @@ function renderClassif(){
     html+=`</div></div>`;
   });
 
-  el.innerHTML=html+`<button class="btn btn-primary" style="margin-top:16px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
-
-  // Adiciona blocos especiais: 3º lugar e campeão
-  el.innerHTML += renderEspecialBlocos(false);
+  // Monta os blocos especiais (3º lugar e campeão) e só então o botão salvar
+  el.innerHTML = html + renderEspecialBlocos(false)
+    + `<button class="btn btn-primary" style="margin-top:16px;width:100%;padding:13px;font-size:15px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
 }
 
 function renderEspecialBlocos(readonly=false){
@@ -1359,7 +1707,7 @@ function obterTodasSelecoes(){
 
 window.toggleClassif = (fase, time) => {
   const now=Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   if(now >= abertura - 5*60*1000) return;
   const arr = classificadosData[fase] || [];
   const idx = arr.indexOf(time);
@@ -1379,12 +1727,13 @@ window.toggleClassif = (fase, time) => {
     arr.push(time);
   }
   classificadosData[fase]=arr;
+  sincronizarFinal();
   renderClassif();
 };
 
 window.toggleEspecial = (chave, time) => {
   const now=Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   if(now >= abertura - 5*60*1000) return;
   // Toggle: se já selecionado, deseleciona; senão seleciona
   if(classificadosData[chave] === time){
@@ -1397,6 +1746,17 @@ window.toggleEspecial = (chave, time) => {
   }
   renderClassif();
 };
+
+// Finalistas = semifinalistas nao escolhidos para o 3o lugar (derivado, nao toggle)
+function sincronizarFinal(){
+  const semi = classificadosData['Semifinal'] || [];
+  const terc = classificadosData['Terceiro lugar'] || [];
+  if(semi.length === 4 && terc.length === 2){
+    classificadosData['Final'] = semi.filter(t => !terc.includes(t));
+  } else {
+    classificadosData['Final'] = [];
+  }
+}
 
 window.salvarClassif = async () => {
   await setDoc(doc(db,'classificacoes',currentUser.uid), {...classificadosData, uid:currentUser.uid, nome:currentUser.displayName||'', email:currentUser.email||'', foto:currentUser.photoURL||'' });
@@ -1417,8 +1777,7 @@ window.renderPublico = () => {
     return;
   }
 
-  // Palpites de placar
-  // Jogos já bloqueados (ts - 5min <= agora)
+  // Palpites de placar agrupados por placar dentro de cada jogo
   const now = Date.now();
   let jogosVisiveis = jogosData.filter(j => now >= j.ts - 5*60*1000);
   if(filtroFase) jogosVisiveis = jogosVisiveis.filter(j=>j.fase===filtroFase);
@@ -1429,46 +1788,109 @@ window.renderPublico = () => {
     return;
   }
 
-  // Busca todas as apostas dos aprovados - precisamos ouvir subcoleções individualmente
-  // Usamos os dados já carregados via apostasData para o usuário atual
-  // Para todos, vamos carregar via getDocs
   el.innerHTML='<div class="loading">Carregando palpites...</div>';
   carregarTodosOsPalpites(aprovados, jogosVisiveis).then(todosPalpites=>{
-    let html='';
-    const sorted = [...aprovados].sort((a,b)=>(b.pts||0)-(a.pts||0));
-    sorted.forEach(u=>{
-      const palpitesUsuario = todosPalpites[u.uid] || {};
-      const temAlgum = jogosVisiveis.some(j=>palpitesUsuario[j.id]);
-      if(!temAlgum) return;
-      const foto = u.foto ?
-        `<img src="${u.foto}" class="publico-avatar">` :
-        `<div class="publico-avatar-placeholder">${u.nome[0]}</div>`;
-      html+=`<div class="publico-participante">
-        <div class="publico-header" onclick="togglePublicoDetalhes(this)">
-          ${foto}
-          <div class="publico-nome">${u.nome}</div>
-          <div class="publico-pts">${u.pts||0} pts</div>
-          <div class="publico-toggle">▼</div>
-        </div>
-        <div class="publico-palpites">`;
-      jogosVisiveis.forEach(j=>{
-        const p = palpitesUsuario[j.id];
-        if(!p) return;
-        let ptsBadge = '';
-        if(p.pts!==undefined){
-          const cor = p.pts>0?'pts-badge-green':'pts-badge-gray';
-          ptsBadge=`<span class="publico-pts-badge ${cor}">+${p.pts}</span>`;
+    // Mapa rápido uid → nome
+    const nomeDe = {};
+    aprovados.forEach(u => { nomeDe[u.uid] = u.nome || u.email || 'Participante'; });
+
+    let html = '';
+
+    jogosVisiveis.forEach(j => {
+      // Coletar palpites deste jogo agrupados por placar
+      const porPlacar = {};  // "gA-gB" → { gA, gB, participantes: [{nome, pts, resultado}] }
+      aprovados.forEach(u => {
+        const p = todosPalpites[u.uid]?.[j.id];
+        if(!p || p.gA === undefined || p.gB === undefined) return;
+        const k = `${p.gA}-${p.gB}`;
+        if(!porPlacar[k]) porPlacar[k] = { gA: p.gA, gB: p.gB, participantes: [] };
+        porPlacar[k].participantes.push({
+          nome: nomeDe[u.uid],
+          pts: p.pts,
+          resultado: p.resultado
+        });
+      });
+
+      const grupos = Object.values(porPlacar);
+      if(!grupos.length) return;
+
+      // Ordenar grupos: mais palpites primeiro; em empate, placar exato no topo
+      const placarReal = j.encerrado ? `${j.gA}-${j.gB}` : null;
+      grupos.sort((a,b) => {
+        if(placarReal){
+          const aExato = (a.gA===j.gA && a.gB===j.gB) ? 1 : 0;
+          const bExato = (b.gA===j.gA && b.gB===j.gB) ? 1 : 0;
+          if(aExato !== bExato) return bExato - aExato;
         }
-        const resultadoReal = j.encerrado ? ` (${j.gA}×${j.gB})` : '';
-        html+=`<div class="publico-jogo-row">
-          <span class="publico-jogo-nome">${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}${resultadoReal}</span>
-          <span class="publico-placar">${p.gA}×${p.gB}</span>
-          ${ptsBadge}
+        return b.participantes.length - a.participantes.length;
+      });
+
+      const totalPalpites = grupos.reduce((s,g) => s + g.participantes.length, 0);
+      const resultadoBadge = j.encerrado
+        ? `<span style="background:#1a1a2e;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;margin-left:8px">Resultado: ${j.gA}×${j.gB}</span>`
+        : `<span style="background:#fff8e1;color:#92610a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;margin-left:8px">Aguardando resultado</span>`;
+
+      html += `
+      <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:18px">
+        <!-- Cabeçalho do jogo -->
+        <div style="background:#1a1a2e;padding:10px 14px;color:#fff">
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;flex-wrap:wrap">
+            <span>${flag(j.timeA)} ${j.timeA}</span>
+            <span style="opacity:0.6">×</span>
+            <span>${j.timeB} ${flag(j.timeB)}</span>
+          </div>
+          <div style="text-align:center;margin-top:4px;font-size:11px;opacity:0.8">
+            ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:(FASES_LABEL[j.fase]||j.fase)} · ${formatarDataJogo(j)}
+            ${resultadoBadge}
+          </div>
+        </div>
+        <!-- Grupos de placar -->
+        <div style="padding:12px 14px;background:#fff">`;
+
+      grupos.forEach(g => {
+        const ehPlacarReal = j.encerrado && g.gA===j.gA && g.gB===j.gB;
+        const corBorda = ehPlacarReal ? '#2d6a4f' : '#e0e0e0';
+        const corBg = ehPlacarReal ? '#e6f4ec' : '#f7f8fa';
+
+        // Coletar pontuação (caso já tenha sido calculada)
+        const ptsGrupo = g.participantes[0]?.pts;
+        const ptsLabel = (j.encerrado && ptsGrupo !== undefined && ptsGrupo > 0)
+          ? `<span style="background:#2d6a4f;color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;margin-left:6px">+${ptsGrupo} pts</span>`
+          : '';
+
+        html += `
+        <div style="background:${corBg};border:1.5px solid ${corBorda};border-radius:10px;padding:10px 14px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e">
+              ${j.timeA} <span style="color:#2d6a4f">${g.gA}</span> × <span style="color:#2d6a4f">${g.gB}</span> ${j.timeB}
+              ${ehPlacarReal ? '<span style="margin-left:6px">🎯</span>' : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              ${ptsLabel}
+              <span style="background:#fff;border:1px solid #ddd;color:#1a1a2e;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px">
+                ${g.participantes.length} ${g.participantes.length===1?'palpite':'palpites'}
+              </span>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+            ${g.participantes.map(p => `
+              <span style="background:#fff;border:1px solid #ddd;color:#333;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px">
+                ${p.nome}
+              </span>
+            `).join('')}
+          </div>
         </div>`;
       });
-      html+=`</div></div>`;
+
+      html += `
+          <div style="text-align:center;font-size:11px;color:#888;margin-top:6px">
+            Total: ${totalPalpites} ${totalPalpites===1?'palpite':'palpites'} · ${grupos.length} ${grupos.length===1?'placar diferente':'placares diferentes'}
+          </div>
+        </div>
+      </div>`;
     });
-    el.innerHTML = html || '<div class="empty-state">Nenhum palpite disponível ainda.</div>';
+
+    el.innerHTML = html || '<div class="empty-state">Nenhum palpite registrado para os jogos visíveis.</div>';
   });
 };
 
@@ -1479,12 +1901,28 @@ async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
     resultado[u.uid]={};
     snap.docs.forEach(d=>{ resultado[u.uid][d.id]=d.data(); });
   }));
+  // Atualiza cache global por jogo (para estatísticas e admin)
+  todasApostasData = {};
+  Object.entries(resultado).forEach(([uid, palps])=>{
+    Object.entries(palps).forEach(([jid, p])=>{
+      if(!todasApostasData[jid]) todasApostasData[jid] = {};
+      todasApostasData[jid][uid] = { ...p, _uid: uid };
+    });
+  });
   return resultado;
+}
+
+// Carrega todas as apostas no login (para popular cache na aba palpites)
+async function carregarCachePalpitesGlobal(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  if(!aprovados.length) return;
+  await carregarTodosOsPalpites(aprovados, jogosData);
+  renderJogos();
 }
 
 function renderPublicoClassif(el, aprovados, filtroFase){
   const now = Date.now();
-  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
   const bloqueado = now >= abertura - 5*60*1000;
   if(!bloqueado){
     el.innerHTML='<div class="empty-state">Palpites de classificação ficam visíveis após o início da Copa (11/06).</div>';
@@ -1534,34 +1972,6 @@ window.togglePublicoDetalhes = (header) => {
   const toggle = header.querySelector('.publico-toggle');
   palpites.classList.toggle('aberto');
   toggle.textContent = palpites.classList.contains('aberto') ? '▲' : '▼';
-};
-
-// ─── ADMIN: INSCRIÇÕES ───────────────────────────────────────────────────────
-async function renderAdminInscricoes(){
-  if(!isAdmin) return;
-  const configSnap = await getDoc(doc(db, 'config', 'bolao'));
-  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
-  const statusEl = document.getElementById('inscricoes-status');
-  const btnEl = document.getElementById('btn-toggle-inscricoes');
-  if(!statusEl || !btnEl) return;
-  if(abertas){
-    statusEl.innerHTML = '<span style="color:#2d6a4f;font-weight:600">✅ Inscrições abertas</span> — novos participantes podem entrar.';
-    btnEl.textContent = '🔒 Fechar inscrições';
-    btnEl.style.background = '#c0392b';
-  } else {
-    statusEl.innerHTML = '<span style="color:#c0392b;font-weight:600">🔒 Inscrições encerradas</span> — novos acessos estão bloqueados.';
-    btnEl.textContent = '🔓 Reabrir inscrições';
-    btnEl.style.background = '#2d6a4f';
-  }
-}
-
-window.toggleInscricoes = async () => {
-  if(!isAdmin) return;
-  const configRef = doc(db, 'config', 'bolao');
-  const configSnap = await getDoc(configRef);
-  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
-  await setDoc(configRef, { inscricoesAbertas: !abertas }, { merge: true });
-  await renderAdminInscricoes();
 };
 
 // ─── ADMIN: PARTICIPANTES ────────────────────────────────────────────────────
@@ -1644,10 +2054,66 @@ function gameCardAdminHTML(j){
   </div>`;
 }
 
+// Filtro do admin (persiste na sessão)
+let filtroAdminAtivo = 'pendentes';
+
 function renderAdminJogos(){
   if(!isAdmin) return;
   const el = document.getElementById('admin-jogos-list');
   const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+
+  // ── Intervalos ──
+  const agora = new Date();
+  const hojeIni = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+  const amanhaIni = hojeIni + 86400000;
+  const depoisAmanhaIni = hojeIni + 2*86400000;
+  const ontemIni = hojeIni - 86400000;
+  const semanaFim = hojeIni + 7*86400000;
+
+  const jogosHoje = sorted.filter(j => j.ts >= hojeIni && j.ts < amanhaIni);
+  const jogosOntem = sorted.filter(j => j.ts >= ontemIni && j.ts < hojeIni);
+  const jogosAmanha = sorted.filter(j => j.ts >= amanhaIni && j.ts < depoisAmanhaIni);
+  const jogosSemana = sorted.filter(j => j.ts >= hojeIni && j.ts < semanaFim);
+  // Pendentes = jogos que já começaram (passaram do horário) e ainda não foram encerrados pelo admin
+  const jogosPendentes = sorted.filter(j => !j.encerrado && Date.now() >= j.ts);
+
+  // Contadores de pendentes (jogos sem resultado, já iniciados)
+  const cntPend = (lista) => lista.filter(j => !j.encerrado && Date.now() >= j.ts).length;
+  const cntHoje = cntPend(jogosHoje);
+  const cntOntem = cntPend(jogosOntem);
+  const cntAmanha = jogosAmanha.length;
+  const cntSemana = cntPend(jogosSemana);
+  const cntPendTotal = jogosPendentes.length;
+
+  const badge = (n) => n > 0 ? `<span class="filtro-badge">${n}</span>` : '';
+
+  const barraFiltros = `
+    <div class="jogos-filtros" id="admin-filtros">
+      <button class="filtro-btn ${filtroAdminAtivo==='pendentes'?'active':''}" onclick="setFiltroAdmin('pendentes')">⏰ Pendentes${badge(cntPendTotal)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='ontem'?'active':''}" onclick="setFiltroAdmin('ontem')">Ontem${badge(cntOntem)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='hoje'?'active':''}" onclick="setFiltroAdmin('hoje')">Hoje${badge(cntHoje)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='amanha'?'active':''}" onclick="setFiltroAdmin('amanha')">Amanhã${badge(cntAmanha)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='semana'?'active':''}" onclick="setFiltroAdmin('semana')">Esta semana${badge(cntSemana)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='todos'?'active':''}" onclick="setFiltroAdmin('todos')">Todos</button>
+    </div>
+  `;
+
+  // ── Filtrar ──
+  let jogosFiltrados;
+  if(filtroAdminAtivo==='pendentes') jogosFiltrados = jogosPendentes;
+  else if(filtroAdminAtivo==='ontem') jogosFiltrados = jogosOntem;
+  else if(filtroAdminAtivo==='hoje') jogosFiltrados = jogosHoje;
+  else if(filtroAdminAtivo==='amanha') jogosFiltrados = jogosAmanha;
+  else if(filtroAdminAtivo==='semana') jogosFiltrados = jogosSemana;
+  else jogosFiltrados = sorted;
+
+  if(!jogosFiltrados.length){
+    let msg = 'Nenhum jogo neste filtro.';
+    if(filtroAdminAtivo==='pendentes') msg = '✅ Nenhum resultado pendente — todos os jogos já encerrados foram lançados.';
+    else if(filtroAdminAtivo==='hoje') msg = 'Nenhum jogo hoje.';
+    el.innerHTML = barraFiltros + `<div class="empty-state">${msg}</div>`;
+    return;
+  }
 
   const FASES_ORDEM = ['Fase de grupos','16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
   const FASE_CONFIG = {
@@ -1660,33 +2126,54 @@ function renderAdminJogos(){
     'Final':          { label:'🥇 Final', cor:'#f57f17', bg:'#fffde7' },
   };
 
-  let html = '';
-  FASES_ORDEM.forEach(fase => {
-    const jogos = sorted.filter(j => j.fase === fase);
-    if(!jogos.length) return;
-    const cfg = FASE_CONFIG[fase] || { label: fase, cor:'#333', bg:'#f5f5f5' };
-    const total = jogos.length;
-    const encerrados = jogos.filter(j=>j.encerrado).length;
+  let html = barraFiltros;
 
-    html += `<div style="margin-bottom:24px">
-      <div onclick="toggleFaseAdmin('${fase}')" style="
-        display:flex;justify-content:space-between;align-items:center;
-        padding:10px 14px;border-radius:10px;cursor:pointer;
-        background:${cfg.bg};border-left:4px solid ${cfg.cor};margin-bottom:8px">
-        <span style="font-size:14px;font-weight:700;color:${cfg.cor}">${cfg.label}</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;color:${cfg.cor};opacity:0.8">${encerrados}/${total} encerrados</span>
-          <span id="seta-fase-${fase.replace(/\s/g,'_')}" style="font-size:12px;color:${cfg.cor}">▼</span>
+  // Quando filtro = pendentes/ontem/hoje/amanhã/semana → agrupar por data
+  // Quando filtro = todos → manter agrupamento por fase
+  if(filtroAdminAtivo === 'todos'){
+    FASES_ORDEM.forEach(fase => {
+      const jogos = jogosFiltrados.filter(j => j.fase === fase);
+      if(!jogos.length) return;
+      const cfg = FASE_CONFIG[fase] || { label: fase, cor:'#333', bg:'#f5f5f5' };
+      const total = jogos.length;
+      const encerrados = jogos.filter(j=>j.encerrado).length;
+      html += `<div style="margin-bottom:24px">
+        <div onclick="toggleFaseAdmin('${fase}')" style="
+          display:flex;justify-content:space-between;align-items:center;
+          padding:10px 14px;border-radius:10px;cursor:pointer;
+          background:${cfg.bg};border-left:4px solid ${cfg.cor};margin-bottom:8px">
+          <span style="font-size:14px;font-weight:700;color:${cfg.cor}">${cfg.label}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:${cfg.cor};opacity:0.8">${encerrados}/${total} encerrados</span>
+            <span id="seta-fase-${fase.replace(/\s/g,'_')}" style="font-size:12px;color:${cfg.cor}">▼</span>
+          </div>
         </div>
-      </div>
-      <div id="fase-admin-${fase.replace(/\s/g,'_')}">
-        ${jogos.map(j => gameCardAdminHTML(j)).join('')}
-      </div>
-    </div>`;
-  });
+        <div id="fase-admin-${fase.replace(/\s/g,'_')}">
+          ${jogos.map(j => gameCardAdminHTML(j)).join('')}
+        </div>
+      </div>`;
+    });
+  } else {
+    // Agrupar por data
+    let dataAtual = '';
+    jogosFiltrados.forEach(j => {
+      if(j.data !== dataAtual){
+        dataAtual = j.data;
+        const parts = j.data.split('-');
+        const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(j.data+'T12:00:00').getDay()];
+        html += `<div style="font-size:13px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.6px;margin:18px 0 8px;padding:0 0 6px;border-bottom:2px solid #1a1a2e">${parts[2]}/${parts[1]} · ${diaSemana}</div>`;
+      }
+      html += gameCardAdminHTML(j);
+    });
+  }
 
-  el.innerHTML = html || '<div class="empty-state">Nenhum jogo cadastrado.</div>';
+  el.innerHTML = html;
 }
+
+window.setFiltroAdmin = (f) => {
+  filtroAdminAtivo = f;
+  renderAdminJogos();
+};
 
 window.toggleFaseAdmin = (fase) => {
   const id = fase.replace(/\s/g,'_');
@@ -1750,20 +2237,19 @@ window.salvarResultado = async (jogoId) => {
     await updateDoc(aRef,{ pts, resultado });
     await recalcularPtsUsuario(u.uid);
   }
-  // Propaga vencedor/perdedor para jogos placeholder da próxima fase (mata-mata)
-  if(jogo && jogo.gerado && jogo.fase !== 'Fase de grupos'){
+  // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
+  if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
     const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
     const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
-    if(vencedor && jogo.fase === 'Semifinal'){
-      const jogo3 = jogosData.find(j=>j.fase==='Terceiro lugar'&&j.placeholder);
-      if(jogo3 && perdedor){
-        if(!jogo3.timeA || jogo3.timeA.includes('Perdedor')) await updateDoc(doc(db,'jogos',jogo3.id),{timeA:perdedor});
-        else await updateDoc(doc(db,'jogos',jogo3.id),{timeB:perdedor});
-      }
-      const jogoFinal = jogosData.find(j=>j.fase==='Final'&&j.placeholder);
-      if(jogoFinal){
-        if(!jogoFinal.timeA || jogoFinal.timeA.includes('Vencedor')) await updateDoc(doc(db,'jogos',jogoFinal.id),{timeA:vencedor});
-        else await updateDoc(doc(db,'jogos',jogoFinal.id),{timeB:vencedor});
+    let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
+    if(dests){
+      if(!Array.isArray(dests)) dests = [dests];
+      for(const d of dests){
+        const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
+        if(!time) continue;
+        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+        if(!alvo) continue;
+        await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
       }
     }
   }
@@ -1789,6 +2275,10 @@ async function recalcularPtsUsuario(uid){
   const classifSnap = await getDoc(doc(db,'classificacoes',uid));
   if(classifSnap.exists()){
     const c = classifSnap.data();
+    // Finalistas derivados na pontuacao (mesmo se nao gravados): Semifinal - Terceiro lugar
+    if((c['Semifinal']||[]).length === 4 && (c['Terceiro lugar']||[]).length === 2){
+      c['Final'] = c['Semifinal'].filter(t => !c['Terceiro lugar'].includes(t));
+    }
     FASES_CLASSIF.forEach(fase=>{
       const confirmados = classifsData[fase]?.times||[];
       const palpites = c[fase]||[];
@@ -1907,9 +2397,66 @@ window.migrarJogosGrupos = async () => {
   alert(`✅ Concluído!\n\n${apagados} jogos antigos removidos.\n${cadastrados} jogos corretos cadastrados.`);
 };
 
+// Bracket do mata-mata (numeracao interna do codigo). Para cada jogo-origem,
+// para onde o vencedor (e, na semi, o perdedor) vai na fase seguinte.
+const BRACKET_PROPAGA = {
+  '16avos': {
+    3:{fase:'Oitavas',jogo:1,slot:'timeA'},  6:{fase:'Oitavas',jogo:1,slot:'timeB'},
+    1:{fase:'Oitavas',jogo:2,slot:'timeA'},  4:{fase:'Oitavas',jogo:2,slot:'timeB'},
+    12:{fase:'Oitavas',jogo:3,slot:'timeA'}, 11:{fase:'Oitavas',jogo:3,slot:'timeB'},
+    10:{fase:'Oitavas',jogo:4,slot:'timeA'}, 9:{fase:'Oitavas',jogo:4,slot:'timeB'},
+    2:{fase:'Oitavas',jogo:5,slot:'timeA'},  5:{fase:'Oitavas',jogo:5,slot:'timeB'},
+    7:{fase:'Oitavas',jogo:6,slot:'timeA'},  8:{fase:'Oitavas',jogo:6,slot:'timeB'},
+    15:{fase:'Oitavas',jogo:7,slot:'timeA'}, 14:{fase:'Oitavas',jogo:7,slot:'timeB'},
+    13:{fase:'Oitavas',jogo:8,slot:'timeA'}, 16:{fase:'Oitavas',jogo:8,slot:'timeB'},
+  },
+  'Oitavas': {
+    1:{fase:'Quartas',jogo:1,slot:'timeA'}, 2:{fase:'Quartas',jogo:1,slot:'timeB'},
+    3:{fase:'Quartas',jogo:2,slot:'timeA'}, 4:{fase:'Quartas',jogo:2,slot:'timeB'},
+    5:{fase:'Quartas',jogo:3,slot:'timeA'}, 6:{fase:'Quartas',jogo:3,slot:'timeB'},
+    7:{fase:'Quartas',jogo:4,slot:'timeA'}, 8:{fase:'Quartas',jogo:4,slot:'timeB'},
+  },
+  'Quartas': {
+    1:{fase:'Semifinal',jogo:1,slot:'timeA'}, 2:{fase:'Semifinal',jogo:1,slot:'timeB'},
+    3:{fase:'Semifinal',jogo:2,slot:'timeA'}, 4:{fase:'Semifinal',jogo:2,slot:'timeB'},
+  },
+  'Semifinal': {
+    1:[{fase:'Final',jogo:1,slot:'timeA',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeA',tipo:'perdedor'}],
+    2:[{fase:'Final',jogo:1,slot:'timeB',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeB',tipo:'perdedor'}],
+  },
+};
+
 window.reabrirJogo = async (jogoId) => {
   if(!confirm('Reabrir jogo e remover resultado?')) return;
+  // 1. Remove o resultado do jogo
   await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
+  // 2. Apaga os pontos calculados desse jogo em cada participante
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){
+    const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
+    const aSnap = await getDoc(aRef);
+    if(aSnap.exists() && aSnap.data().pts !== undefined){
+      // Remove pts e resultado, mantém o palpite (gA/gB) do participante
+      const a = aSnap.data();
+      await setDoc(aRef, { gA: a.gA, gB: a.gB });
+    }
+    // 3. Recalcula o total do participante
+    await recalcularPtsUsuario(u.uid);
+  }
+  // 4. Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
+  const jReab = jogosData.find(j=>j.id===jogoId);
+  if(jReab && jReab.jogoNum && BRACKET_PROPAGA[jReab.fase]){
+    let dests = BRACKET_PROPAGA[jReab.fase][jReab.jogoNum];
+    if(dests){
+      if(!Array.isArray(dests)) dests = [dests];
+      for(const d of dests){
+        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+        if(!alvo) continue;
+        const rotulo = d.slot==='timeA' ? alvo.placeholderA : alvo.placeholderB;
+        await setDoc(doc(db,'jogos',alvo.id), { [d.slot]: rotulo }, {merge:true});
+      }
+    }
+  }
 };
 
 window.deletarJogo = async (jogoId) => {
@@ -2047,9 +2594,12 @@ function renderAdminClassif(){
       html+=`<div style="font-size:12px;color:#888;margin-top:8px">Selecione os ${LIMITES_CLASSIF[fase]} classificados para ${FASES_LABEL[fase]||fase}. Os jogos da próxima fase serão gerados automaticamente.</div>`;
     }
 
-    html+=`<button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarClassifAdmin('${fase}')">
-      ✅ Confirmar + Gerar jogos
-    </button></div></div>`;
+    html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+      <button class="btn btn-primary btn-sm" onclick="salvarClassifAdmin('${fase}')">
+        ✅ Confirmar + Gerar jogos
+      </button>
+      ${(classifsData[fase]?.times||[]).length ? `<button class="btn btn-danger btn-sm" onclick="reabrirClassif('${fase}')">↩️ Reabrir classificação</button>` : ''}
+    </div></div></div>`;
   });
 
   // Blocos especiais: vencedor do 3º lugar e campeão
@@ -2078,9 +2628,12 @@ function renderAdminClassif(){
       </div>`;
     });
     html+=`</div>
-        <button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarEspecialAdmin('${chave}')">
-          Confirmar ${LABEL_ESPECIAL[chave]}
-        </button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+          <button class="btn btn-primary btn-sm" onclick="salvarEspecialAdmin('${chave}')">
+            Confirmar ${LABEL_ESPECIAL[chave]}
+          </button>
+          ${confirmado ? `<button class="btn btn-danger btn-sm" onclick="reabrirEspecial('${chave}')">↩️ Reabrir</button>` : ''}
+        </div>
       </div></div>`;
   });
 
@@ -2294,13 +2847,11 @@ window.salvarClassifAdmin = async (fase) => {
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
 
-  // Gera jogos do mata-mata automaticamente
+  // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
+  // se montam sozinhos quando os placares da fase anterior sao lancados.
   if(fase==='16avos') await gerarJogos16avos(primeiros, segundos, terceiros, pts3os);
-  else if(fase==='Oitavas') await gerarJogosFase(times,'Oitavas');
-  else if(fase==='Quartas') await gerarJogosFase(times,'Quartas');
-  else if(fase==='Semifinal') await gerarJogosFase(times,'Semifinal',null,null,true);
 
-  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Jogos da próxima fase gerados.`);
+  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Bônus recalculado.`);
 };
 
 // Gera os 16 jogos dos 16-avos — chaveamento oficial Copa 2026
@@ -2443,6 +2994,226 @@ window.salvarEspecialAdmin = async (chave) => {
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
 };
 
+// Reabre uma fase de classificação: apaga a confirmação e recalcula os pontos
+window.reabrirClassif = async (fase) => {
+  if(!confirm(`Reabrir a classificação de ${FASES_LABEL[fase]||fase}?\n\nIsso remove a confirmação dos times e zera os bônus desta fase. Os palpites dos participantes NÃO são afetados.`)) return;
+  await deleteDoc(doc(db,'classificados_confirmados',fase));
+  // Limpa o cache local da fase
+  delete classifsData[fase];
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  renderAdminClassif();
+  alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
+};
+
+// Reabre um palpite especial (3º lugar ou campeão): apaga a confirmação e recalcula
+window.reabrirEspecial = async (chave) => {
+  if(!confirm(`Reabrir ${LABEL_ESPECIAL[chave]}?\n\nIsso remove a confirmação e zera o bônus. Os palpites dos participantes NÃO são afetados.`)) return;
+  await deleteDoc(doc(db,'classificados_confirmados',chave));
+  delete classifsData[chave];
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  renderAdminClassif();
+  alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
+};
+
+// ─── REGRAS ───────────────────────────────────────────────────────────────────
+
+// Regras padrão — usadas na primeira carga se não houver nada no Firestore
+const REGRAS_PADRAO = [
+  {
+    titulo: '📋 Participação',
+    itens: [
+      'O bolão é aberto a todos os participantes aprovados pelo administrador.',
+      'Cada participante deve fazer seus palpites individualmente, sem combinação com outros.',
+      'A taxa de participação é definida pelo administrador e deve ser paga antes do início da Copa.',
+      'Qualquer irregularidade pode resultar na desclassificação do participante.'
+    ]
+  },
+  {
+    titulo: '✏️ Como fazer palpites',
+    itens: [
+      'Acesse a aba "Palpites" e registre o placar que você prevê para cada jogo.',
+      'Os palpites de placar são bloqueados individualmente 5 minutos antes do início de cada jogo.',
+      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 16h).',
+      'Após o bloqueio, não é possível alterar ou registrar palpites para aquele jogo ou fase.',
+      'Palpites não feitos valem 0 pontos — não há pontuação automática.'
+    ]
+  },
+  {
+    titulo: '🏆 Pontuação por placar',
+    itens: [
+      'Placar exato: 10 pontos × multiplicador da fase.',
+      'Vencedor certo + saldo de gols correto: 7 pontos × multiplicador.',
+      'Vencedor certo (placar errado): 5 pontos × multiplicador.',
+      'Empate previsto corretamente (placar errado): 3 pontos × multiplicador.',
+      'Resultado completamente errado: 0 pontos.'
+    ]
+  },
+  {
+    titulo: '✖️ Multiplicador por fase',
+    itens: [
+      'Fase de grupos: × 1',
+      '16-avos de final: × 1,5',
+      'Oitavas de final: × 2',
+      'Quartas de final: × 2,5',
+      'Semifinal: × 3',
+      'Terceiro lugar: × 2',
+      'Final: × 4'
+    ]
+  },
+  {
+    titulo: '🌟 Bônus por classificação',
+    itens: [
+      'Acertou seleção classificada aos 16-avos: +10 pts por seleção.',
+      'Acertou seleção classificada às oitavas: +15 pts por seleção.',
+      'Acertou seleção classificada às quartas: +20 pts por seleção.',
+      'Acertou seleção classificada à semifinal: +30 pts por seleção.',
+      'Acertou disputante do 3º lugar: +30 pts.',
+      'Acertou um finalista: +50 pts por finalista.',
+      'Acertou o vencedor do 3º lugar: +50 pts.',
+      'Acertou o campeão: +100 pts.'
+    ]
+  },
+  {
+    titulo: '🏅 Premiação',
+    itens: [
+      '1º lugar: 50% do valor total arrecadado.',
+      '2º lugar: 30% do valor total arrecadado.',
+      '3º lugar: 20% do valor total arrecadado.',
+      'Em caso de empate na pontuação final, o critério de desempate é o maior número de placares exatos.'
+    ]
+  }
+];
+
+let regrasData = null; // cache local
+
+// Carrega regras do Firestore (ou usa padrão)
+async function carregarRegras() {
+  const snap = await getDoc(doc(db, 'config', 'regras'));
+  if (snap.exists() && snap.data().secoes) {
+    regrasData = snap.data().secoes;
+  } else {
+    regrasData = REGRAS_PADRAO;
+  }
+  renderRegras();
+}
+
+function renderRegras() {
+  const el = document.getElementById('regras-conteudo');
+  if (!el || !regrasData) return;
+
+  el.innerHTML = regrasData.map(sec => `
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:12px">${sec.titulo}</div>
+      <ul style="padding-left:18px;display:flex;flex-direction:column;gap:8px">
+        ${sec.itens.map(item => `<li style="font-size:14px;color:#444;line-height:1.5">${item}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+
+  // Botão de edição visível só para admin
+  const btnWrap = document.getElementById('regras-edit-btn-wrap');
+  if (btnWrap) btnWrap.style.display = isAdmin ? 'block' : 'none';
+}
+
+window.abrirEdicaoRegras = () => {
+  document.getElementById('regras-view').style.display = 'none';
+  document.getElementById('regras-editor').style.display = 'block';
+  renderEditorRegras();
+};
+
+window.fecharEdicaoRegras = () => {
+  document.getElementById('regras-editor').style.display = 'none';
+  document.getElementById('regras-view').style.display = 'block';
+};
+
+function renderEditorRegras() {
+  const el = document.getElementById('regras-secoes-editor');
+  el.innerHTML = (regrasData || []).map((sec, si) => `
+    <div class="card" style="margin-bottom:12px;border:1px solid #ddd" id="sec-editor-${si}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:#555;text-transform:uppercase">Seção ${si+1}</span>
+        <button class="btn btn-danger btn-sm" onclick="removerSecaoRegra(${si})">🗑 Remover seção</button>
+      </div>
+      <div class="form-group">
+        <label>Título da seção</label>
+        <input type="text" id="sec-titulo-${si}" value="${escHtml(sec.titulo)}" placeholder="Ex: 🏆 Pontuação"/>
+      </div>
+      <div class="form-group">
+        <label>Itens (um por linha)</label>
+        <textarea id="sec-itens-${si}" rows="6" style="resize:vertical;font-size:13px;line-height:1.6">${sec.itens.map(escHtml).join('\n')}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+window.adicionarSecaoRegra = () => {
+  if (!regrasData) regrasData = [];
+  regrasData.push({ titulo: '📌 Nova seção', itens: ['Novo item'] });
+  renderEditorRegras();
+};
+
+window.removerSecaoRegra = (idx) => {
+  if (!confirm('Remover esta seção?')) return;
+  regrasData.splice(idx, 1);
+  renderEditorRegras();
+};
+
+window.salvarRegras = async () => {
+  const total = document.querySelectorAll('[id^="sec-titulo-"]').length;
+  const secoes = [];
+  for (let i = 0; i < total; i++) {
+    const tituloEl = document.getElementById(`sec-titulo-${i}`);
+    const itensEl  = document.getElementById(`sec-itens-${i}`);
+    if (!tituloEl || !itensEl) continue;
+    const titulo = tituloEl.value.trim();
+    const itens  = itensEl.value.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!titulo) continue;
+    secoes.push({ titulo, itens });
+  }
+  if (!secoes.length) { alert('Adicione ao menos uma seção.'); return; }
+  await setDoc(doc(db, 'config', 'regras'), { secoes, atualizadoEm: Date.now() });
+  regrasData = secoes;
+  renderRegras();
+  fecharEdicaoRegras();
+  alert('✅ Regras salvas!');
+};
+
 </script>
-</body>
+
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bnav-item active" id="bnav-ranking" onclick="switchTab('ranking')">
+    <span class="bnav-icon">🏆</span><span>Ranking</span>
+  </button>
+  <button class="bnav-item" id="bnav-apostas" onclick="switchTab('apostas')">
+    <span class="bnav-icon">✏️</span><span>Meus Palpites</span>
+  </button>
+  <button class="bnav-item" id="bnav-jogos" onclick="switchTab('jogos')">
+    <span class="bnav-icon">⚽</span><span>Palpites</span>
+  </button>
+  <button class="bnav-item" id="bnav-classif" onclick="switchTab('classif')">
+    <span class="bnav-icon">🗂️</span><span>Seleções</span>
+  </button>
+  <button class="bnav-item" id="bnav-publico" onclick="switchTab('publico')">
+    <span class="bnav-icon">📊</span><span>Comparar</span>
+  </button>
+  <button class="bnav-item" id="bnav-regras" onclick="switchTab('regras')">
+    <span class="bnav-icon">📖</span><span>Regras</span>
+  </button>
+
+</nav>
+
+<div id="modal-perfil" class="modal-overlay" style="display:none" onclick="fecharPerfil(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header" id="modal-perfil-header"></div>
+    <div class="modal-body" id="modal-perfil-body"><div class="loading">Carregando...</div></div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div></body>
 </html>
