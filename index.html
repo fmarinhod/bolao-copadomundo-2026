@@ -699,21 +699,21 @@ function initListeners(){
     ];
 
     const MATA_OITAVAS_FIXO = [
-      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 1', data:'2026-07-04', hora:'14:00'},
-      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'18:00'},
-      {timeA:'Venc. Jogo 5', timeB:'Venc. Jogo 6', data:'2026-07-05', hora:'17:00'},
+      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 6', data:'2026-07-04', hora:'18:00'},
+      {timeA:'Venc. Jogo 1', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'14:00'},
+      {timeA:'Venc. Jogo 12', timeB:'Venc. Jogo 11', data:'2026-07-06', hora:'16:00'},
+      {timeA:'Venc. Jogo 10', timeB:'Venc. Jogo 9', data:'2026-07-06', hora:'21:00'},
+      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 5', data:'2026-07-05', hora:'17:00'},
       {timeA:'Venc. Jogo 7', timeB:'Venc. Jogo 8', data:'2026-07-05', hora:'21:00'},
-      {timeA:'Venc. Jogo 9', timeB:'Venc. Jogo 10', data:'2026-07-06', hora:'16:00'},
-      {timeA:'Venc. Jogo 11', timeB:'Venc. Jogo 12', data:'2026-07-06', hora:'21:00'},
-      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
-      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
+      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
+      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
     ];
 
     const MATA_QUARTAS_FIXO = [
-      {timeA:'Venc. Oitavas 2', timeB:'Venc. Oitavas 1', data:'2026-07-09', hora:'17:00'},
-      {timeA:'Venc. Oitavas 6', timeB:'Venc. Oitavas 5', data:'2026-07-10', hora:'16:00'},
-      {timeA:'Venc. Oitavas 4', timeB:'Venc. Oitavas 3', data:'2026-07-11', hora:'18:00'},
-      {timeA:'Venc. Oitavas 8', timeB:'Venc. Oitavas 7', data:'2026-07-11', hora:'22:00'},
+      {timeA:'Venc. Oitavas 1', timeB:'Venc. Oitavas 2', data:'2026-07-09', hora:'17:00'},
+      {timeA:'Venc. Oitavas 3', timeB:'Venc. Oitavas 4', data:'2026-07-10', hora:'16:00'},
+      {timeA:'Venc. Oitavas 5', timeB:'Venc. Oitavas 6', data:'2026-07-11', hora:'18:00'},
+      {timeA:'Venc. Oitavas 7', timeB:'Venc. Oitavas 8', data:'2026-07-11', hora:'22:00'},
     ];
 
     const MATA_SEMIS_FIXO = [
@@ -738,6 +738,9 @@ function initListeners(){
           id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           fase,
           grupo: '',
+          jogoNum: i+1,
+          placeholderA: base.timeA,
+          placeholderB: base.timeB,
           ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           encerrado: false,
           // Se Firestore tem times reais, usa — mantém data/hora do HTML
@@ -2234,20 +2237,19 @@ window.salvarResultado = async (jogoId) => {
     await updateDoc(aRef,{ pts, resultado });
     await recalcularPtsUsuario(u.uid);
   }
-  // Propaga vencedor/perdedor para jogos placeholder da próxima fase (mata-mata)
-  if(jogo && jogo.gerado && jogo.fase !== 'Fase de grupos'){
+  // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
+  if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
     const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
     const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
-    if(vencedor && jogo.fase === 'Semifinal'){
-      const jogo3 = jogosData.find(j=>j.fase==='Terceiro lugar'&&j.placeholder);
-      if(jogo3 && perdedor){
-        if(!jogo3.timeA || jogo3.timeA.includes('Perdedor')) await updateDoc(doc(db,'jogos',jogo3.id),{timeA:perdedor});
-        else await updateDoc(doc(db,'jogos',jogo3.id),{timeB:perdedor});
-      }
-      const jogoFinal = jogosData.find(j=>j.fase==='Final'&&j.placeholder);
-      if(jogoFinal){
-        if(!jogoFinal.timeA || jogoFinal.timeA.includes('Vencedor')) await updateDoc(doc(db,'jogos',jogoFinal.id),{timeA:vencedor});
-        else await updateDoc(doc(db,'jogos',jogoFinal.id),{timeB:vencedor});
+    let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
+    if(dests){
+      if(!Array.isArray(dests)) dests = [dests];
+      for(const d of dests){
+        const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
+        if(!time) continue;
+        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+        if(!alvo) continue;
+        await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
       }
     }
   }
@@ -2395,6 +2397,35 @@ window.migrarJogosGrupos = async () => {
   alert(`✅ Concluído!\n\n${apagados} jogos antigos removidos.\n${cadastrados} jogos corretos cadastrados.`);
 };
 
+// Bracket do mata-mata (numeracao interna do codigo). Para cada jogo-origem,
+// para onde o vencedor (e, na semi, o perdedor) vai na fase seguinte.
+const BRACKET_PROPAGA = {
+  '16avos': {
+    3:{fase:'Oitavas',jogo:1,slot:'timeA'},  6:{fase:'Oitavas',jogo:1,slot:'timeB'},
+    1:{fase:'Oitavas',jogo:2,slot:'timeA'},  4:{fase:'Oitavas',jogo:2,slot:'timeB'},
+    12:{fase:'Oitavas',jogo:3,slot:'timeA'}, 11:{fase:'Oitavas',jogo:3,slot:'timeB'},
+    10:{fase:'Oitavas',jogo:4,slot:'timeA'}, 9:{fase:'Oitavas',jogo:4,slot:'timeB'},
+    2:{fase:'Oitavas',jogo:5,slot:'timeA'},  5:{fase:'Oitavas',jogo:5,slot:'timeB'},
+    7:{fase:'Oitavas',jogo:6,slot:'timeA'},  8:{fase:'Oitavas',jogo:6,slot:'timeB'},
+    15:{fase:'Oitavas',jogo:7,slot:'timeA'}, 14:{fase:'Oitavas',jogo:7,slot:'timeB'},
+    13:{fase:'Oitavas',jogo:8,slot:'timeA'}, 16:{fase:'Oitavas',jogo:8,slot:'timeB'},
+  },
+  'Oitavas': {
+    1:{fase:'Quartas',jogo:1,slot:'timeA'}, 2:{fase:'Quartas',jogo:1,slot:'timeB'},
+    3:{fase:'Quartas',jogo:2,slot:'timeA'}, 4:{fase:'Quartas',jogo:2,slot:'timeB'},
+    5:{fase:'Quartas',jogo:3,slot:'timeA'}, 6:{fase:'Quartas',jogo:3,slot:'timeB'},
+    7:{fase:'Quartas',jogo:4,slot:'timeA'}, 8:{fase:'Quartas',jogo:4,slot:'timeB'},
+  },
+  'Quartas': {
+    1:{fase:'Semifinal',jogo:1,slot:'timeA'}, 2:{fase:'Semifinal',jogo:1,slot:'timeB'},
+    3:{fase:'Semifinal',jogo:2,slot:'timeA'}, 4:{fase:'Semifinal',jogo:2,slot:'timeB'},
+  },
+  'Semifinal': {
+    1:[{fase:'Final',jogo:1,slot:'timeA',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeA',tipo:'perdedor'}],
+    2:[{fase:'Final',jogo:1,slot:'timeB',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeB',tipo:'perdedor'}],
+  },
+};
+
 window.reabrirJogo = async (jogoId) => {
   if(!confirm('Reabrir jogo e remover resultado?')) return;
   // 1. Remove o resultado do jogo
@@ -2411,6 +2442,20 @@ window.reabrirJogo = async (jogoId) => {
     }
     // 3. Recalcula o total do participante
     await recalcularPtsUsuario(u.uid);
+  }
+  // 4. Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
+  const jReab = jogosData.find(j=>j.id===jogoId);
+  if(jReab && jReab.jogoNum && BRACKET_PROPAGA[jReab.fase]){
+    let dests = BRACKET_PROPAGA[jReab.fase][jReab.jogoNum];
+    if(dests){
+      if(!Array.isArray(dests)) dests = [dests];
+      for(const d of dests){
+        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+        if(!alvo) continue;
+        const rotulo = d.slot==='timeA' ? alvo.placeholderA : alvo.placeholderB;
+        await setDoc(doc(db,'jogos',alvo.id), { [d.slot]: rotulo }, {merge:true});
+      }
+    }
   }
 };
 
@@ -2802,13 +2847,11 @@ window.salvarClassifAdmin = async (fase) => {
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
 
-  // Gera jogos do mata-mata automaticamente
+  // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
+  // se montam sozinhos quando os placares da fase anterior sao lancados.
   if(fase==='16avos') await gerarJogos16avos(primeiros, segundos, terceiros, pts3os);
-  else if(fase==='Oitavas') await gerarJogosFase(times,'Oitavas');
-  else if(fase==='Quartas') await gerarJogosFase(times,'Quartas');
-  else if(fase==='Semifinal') await gerarJogosFase(times,'Semifinal',null,null,true);
 
-  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Jogos da próxima fase gerados.`);
+  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Bônus recalculado.`);
 };
 
 // Gera os 16 jogos dos 16-avos — chaveamento oficial Copa 2026
