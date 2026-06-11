@@ -442,6 +442,14 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
         <button id="btn-toggle-inscricoes" class="btn btn-primary" onclick="toggleInscricoes()" style="min-width:180px">Carregando...</button>
       </div>
 
+      <!-- Exportar ranking -->
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">📤 Exportar ranking (WhatsApp)</div>
+        <div style="font-size:13px;color:#666;margin-bottom:12px">Gera o ranking em texto pronto para colar no grupo.</div>
+        <button class="btn btn-primary" onclick="exportarRanking()" style="min-width:180px">📋 Copiar ranking</button>
+        <textarea id="ranking-export-area" readonly style="display:none;width:100%;margin-top:12px;min-height:200px;font-family:monospace;font-size:13px;white-space:pre"></textarea>
+      </div>
+
       <!-- Aprovar participantes -->
       <div class="card">
         <div style="font-size:15px;font-weight:700;margin-bottom:14px">👥 Aprovação de participantes</div>
@@ -520,7 +528,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDoc, getDocs, query, where }
+import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDoc, getDocs, query, where, writeBatch }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -874,6 +882,70 @@ function updateMetrics(){
 // ─── RANKING ─────────────────────────────────────────────────────────────────
 // Cache de apostas por uid para desempate e perfil
 const apostasCache = {};
+
+window.exportarRanking = async () => {
+  // Busca usuários direto do Firestore para garantir dados atualizados
+  let aprovados;
+  try {
+    const usSnap = await getDocs(collection(db,'usuarios'));
+    aprovados = usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
+  } catch(e){
+    aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  }
+
+  // Desempate por placares exatos (mesma lógica do ranking visível)
+  aprovados.forEach(u => {
+    const apostasU = apostasCache[u.uid] || {};
+    u._exatos = Object.values(apostasU).filter(a=>a.resultado==='exato').length;
+  });
+  aprovados.sort((a,b) => {
+    const diffPts = (b.pts||0) - (a.pts||0);
+    if(diffPts !== 0) return diffPts;
+    return (b._exatos||0) - (a._exatos||0);
+  });
+
+  // Monta texto. Posição empata por pontos (mesmos pts = mesma posição).
+  const agora = new Date();
+  const dd = String(agora.getDate()).padStart(2,'0');
+  const mm = String(agora.getMonth()+1).padStart(2,'0');
+  const hh = String(agora.getHours()).padStart(2,'0');
+  const min = String(agora.getMinutes()).padStart(2,'0');
+
+  let texto = `🏆 RANKING — Bolão Copa 2026\nAtualizado em ${dd}/${mm} às ${hh}:${min}\n\n`;
+
+  aprovados.forEach((u, i) => {
+    const pts = u.pts || 0;
+    const pos = i + 1;
+    const medalha = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`;
+    const sep = pos <= 3 ? ' ' : '  ';
+    texto += `${medalha}${sep}${u.nome} — ${pts} pts\n`;
+  });
+
+  texto += `\nTotal: ${aprovados.length} participantes`;
+
+  // Tenta copiar para a área de transferência
+  const area = document.getElementById('ranking-export-area');
+  area.value = texto;
+  let copiou = false;
+  try {
+    await navigator.clipboard.writeText(texto);
+    copiou = true;
+  } catch(e){
+    // Fallback: mostra a textarea para cópia manual
+    area.style.display = 'block';
+    area.focus();
+    area.select();
+    try { document.execCommand('copy'); copiou = true; } catch(e2){}
+  }
+
+  if(copiou){
+    mostrarToast('✅ Ranking copiado! Cole no WhatsApp.');
+    area.style.display = 'none';
+  } else {
+    area.style.display = 'block';
+    mostrarToast('Selecione o texto abaixo e copie manualmente.', 'error');
+  }
+};
 
 function renderRanking(){
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
@@ -2269,45 +2341,84 @@ window.addJogo = async () => {
 };
 
 window.salvarResultado = async (jogoId) => {
+  const btn = event?.target;
   const gA = parseInt(document.getElementById(`adm-gA-${jogoId}`).value);
   const gB = parseInt(document.getElementById(`adm-gB-${jogoId}`).value);
   if(isNaN(gA)||isNaN(gB)){ alert('Informe o placar.'); return; }
   const jogo = jogosData.find(j=>j.id===jogoId);
-  await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  for(const u of aprovados){
-    const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
-    const aSnap = await getDoc(aRef);
-    if(!aSnap.exists()) continue;
-    const a = aSnap.data();
-    const pts = calcularPts(a.gA,a.gB,gA,gB,jogo.fase);
-    let resultado='';
-    if(a.gA===gA&&a.gB===gB) resultado='exato';
-    else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
-      if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
-      else resultado='vencedor';
-    } else if(gA===gB&&a.gA===a.gB) resultado='empate';
-    else resultado='erro';
-    await updateDoc(aRef,{ pts, resultado });
-    await recalcularPtsUsuario(u.uid);
-  }
-  // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
-  if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
-    const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
-    const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
-    let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
-    if(dests){
-      if(!Array.isArray(dests)) dests = [dests];
-      for(const d of dests){
-        const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
-        if(!time) continue;
-        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
-        if(!alvo) continue;
-        await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
+  const fase = jogo ? jogo.fase : 'Fase de grupos';
+
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
+
+  try {
+    // 1. Grava o resultado do jogo
+    await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
+
+    // 2. Busca usuários DIRETO do Firestore (não depende do cache em memória)
+    const usSnap = await getDocs(collection(db,'usuarios'));
+    const aprovados = usSnap.docs
+      .map(d=>({ uid:d.id, ...d.data() }))
+      .filter(u=>u.status==='aprovado');
+
+    // 3. Lê todas as apostas deste jogo EM PARALELO
+    const apostasJogo = await Promise.all(aprovados.map(async u=>{
+      try {
+        const aSnap = await getDoc(doc(db,`apostas/${u.uid}/jogos`,jogoId));
+        return { uid:u.uid, existe:aSnap.exists(), dados:aSnap.exists()?aSnap.data():null };
+      } catch(e){
+        console.error('Erro ao ler aposta de', u.uid, e);
+        return { uid:u.uid, existe:false, dados:null };
+      }
+    }));
+
+    // 4. Grava os pts de cada aposta EM LOTE (uma operação só)
+    const batch = writeBatch(db);
+    let comPalpite = 0;
+    for(const ap of apostasJogo){
+      if(!ap.existe) continue;
+      const a = ap.dados;
+      const pts = calcularPts(a.gA,a.gB,gA,gB,fase);
+      let resultado='';
+      if(a.gA===gA&&a.gB===gB) resultado='exato';
+      else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
+        if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
+        else resultado='vencedor';
+      } else if(gA===gB&&a.gA===a.gB) resultado='empate';
+      else resultado='erro';
+      batch.update(doc(db,`apostas/${ap.uid}/jogos`,jogoId), { pts, resultado });
+      comPalpite++;
+    }
+    await batch.commit();
+
+    // 5. Recalcula o total de TODOS os participantes EM PARALELO
+    await Promise.all(aprovados.map(u=>
+      recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro ao recalcular', u.uid, e))
+    ));
+
+    // 6. Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
+    if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
+      const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
+      const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
+      let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
+      if(dests){
+        if(!Array.isArray(dests)) dests = [dests];
+        for(const d of dests){
+          const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
+          if(!time) continue;
+          const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+          if(!alvo) continue;
+          await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
+        }
       }
     }
+
+    if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
+    alert(`✅ Resultado salvo! ${comPalpite} palpite(s) pontuado(s) e ranking atualizado.`);
+  } catch(e){
+    console.error('Erro ao salvar resultado:', e);
+    if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
+    alert('❌ Erro ao salvar: ' + e.message);
   }
-  alert('✅ Resultado salvo e pontos calculados!');
 };
 
 function calcularPts(pA,pB,rA,rB,fase){
@@ -2482,22 +2593,47 @@ const BRACKET_PROPAGA = {
 
 window.reabrirJogo = async (jogoId) => {
   if(!confirm('Reabrir jogo e remover resultado?')) return;
-  // 1. Remove o resultado do jogo
-  await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
-  // 2. Apaga os pontos calculados desse jogo em cada participante
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  for(const u of aprovados){
-    const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
-    const aSnap = await getDoc(aRef);
-    if(aSnap.exists() && aSnap.data().pts !== undefined){
-      // Remove pts e resultado, mantém o palpite (gA/gB) do participante
-      const a = aSnap.data();
-      await setDoc(aRef, { gA: a.gA, gB: a.gB });
+  const btn = event?.target;
+  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
+  try {
+    // 1. Remove o resultado do jogo
+    await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
+
+    // 2. Busca usuários DIRETO do Firestore
+    const usSnap = await getDocs(collection(db,'usuarios'));
+    const aprovados = usSnap.docs
+      .map(d=>({ uid:d.id, ...d.data() }))
+      .filter(u=>u.status==='aprovado');
+
+    // 3. Lê apostas deste jogo EM PARALELO
+    const apostasJogo = await Promise.all(aprovados.map(async u=>{
+      try {
+        const aSnap = await getDoc(doc(db,`apostas/${u.uid}/jogos`,jogoId));
+        return { uid:u.uid, existe:aSnap.exists(), dados:aSnap.exists()?aSnap.data():null };
+      } catch(e){ return { uid:u.uid, existe:false, dados:null }; }
+    }));
+
+    // 4. Remove pts/resultado em LOTE, mantendo o palpite (gA/gB)
+    const batch = writeBatch(db);
+    for(const ap of apostasJogo){
+      if(ap.existe && ap.dados.pts !== undefined){
+        batch.set(doc(db,`apostas/${ap.uid}/jogos`,jogoId), { gA: ap.dados.gA, gB: ap.dados.gB });
+      }
     }
-    // 3. Recalcula o total do participante
-    await recalcularPtsUsuario(u.uid);
+    await batch.commit();
+
+    // 5. Recalcula total de TODOS EM PARALELO
+    await Promise.all(aprovados.map(u=>
+      recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro ao recalcular', u.uid, e))
+    ));
+  } catch(e){
+    console.error('Erro ao reabrir jogo:', e);
+    if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
+    alert('❌ Erro ao reabrir: ' + e.message);
+    return;
   }
-  // 4. Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
+  if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
+  // 6. Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
   const jReab = jogosData.find(j=>j.id===jogoId);
   if(jReab && jReab.jogoNum && BRACKET_PROPAGA[jReab.fase]){
     let dests = BRACKET_PROPAGA[jReab.fase][jReab.jogoNum];
@@ -2898,8 +3034,9 @@ window.salvarClassifAdmin = async (fase) => {
   await setDoc(doc(db,'classificados_confirmados',fase),{
     times, primeiros, segundos, terceiros, pts3os, slots3os, fase
   });
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  const _usSnap = await getDocs(collection(db,'usuarios'));
+  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
+  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
 
   // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
   // se montam sozinhos quando os placares da fase anterior sao lancados.
@@ -3043,8 +3180,9 @@ window.salvarEspecialAdmin = async (chave) => {
   const time = classifsData[chave]?.time||null;
   if(!time){ alert('Selecione um time primeiro.'); return; }
   await setDoc(doc(db,'classificados_confirmados',chave),{ time, chave });
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  const _usSnap = await getDocs(collection(db,'usuarios'));
+  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
+  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
 };
 
@@ -3054,8 +3192,9 @@ window.reabrirClassif = async (fase) => {
   await deleteDoc(doc(db,'classificados_confirmados',fase));
   // Limpa o cache local da fase
   delete classifsData[fase];
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  const _usSnap = await getDocs(collection(db,'usuarios'));
+  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
+  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
   renderAdminClassif();
   alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
 };
@@ -3065,8 +3204,9 @@ window.reabrirEspecial = async (chave) => {
   if(!confirm(`Reabrir ${LABEL_ESPECIAL[chave]}?\n\nIsso remove a confirmação e zera o bônus. Os palpites dos participantes NÃO são afetados.`)) return;
   await deleteDoc(doc(db,'classificados_confirmados',chave));
   delete classifsData[chave];
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
+  const _usSnap = await getDocs(collection(db,'usuarios'));
+  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
+  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
   renderAdminClassif();
   alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
 };
