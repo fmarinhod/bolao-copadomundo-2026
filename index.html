@@ -2466,6 +2466,24 @@ window.salvarResultado = async (jogoId) => {
     // 5. Recalcula o total de TODOS os participantes EM LOTES de 5
     await recalcularEmLotes(aprovados.map(u=>u.uid));
 
+    // 5b. Força a atualização da tela: relê os usuários do Firestore, atualiza
+    // o cache em memória e redesenha ranking + métricas. Não depende do onSnapshot
+    // (que pode disparar com dados parciais durante a rajada de updates).
+    try {
+      const freshSnap = await getDocs(collection(db,'usuarios'));
+      freshSnap.docs.forEach(d => { usuariosData[d.id] = d.data(); });
+      // Recarrega o cache de palpites para os exatos do desempate ficarem certos
+      await carregarTodosOsPalpites(
+        Object.values(usuariosData).filter(u=>u.status==='aprovado'),
+        jogosData
+      ).then(res => {
+        Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
+        Object.entries(res).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
+      }).catch(()=>{});
+      renderRanking();
+      updateMetrics();
+    } catch(e){ console.error('Erro ao atualizar tela pós-save:', e); }
+
     // 6. Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
     if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
       const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
@@ -2722,6 +2740,21 @@ window.reabrirJogo = async (jogoId) => {
 
     // 5. Recalcula total de TODOS EM LOTES de 5
     await recalcularEmLotes(aprovados.map(u=>u.uid));
+
+    // 5b. Força atualização da tela (não depende do onSnapshot)
+    try {
+      const freshSnap = await getDocs(collection(db,'usuarios'));
+      freshSnap.docs.forEach(d => { usuariosData[d.id] = d.data(); });
+      await carregarTodosOsPalpites(
+        Object.values(usuariosData).filter(u=>u.status==='aprovado'),
+        jogosData
+      ).then(res => {
+        Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
+        Object.entries(res).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
+      }).catch(()=>{});
+      renderRanking();
+      updateMetrics();
+    } catch(e){ console.error('Erro ao atualizar tela pós-reabrir:', e); }
   } catch(e){
     console.error('Erro ao reabrir jogo:', e);
     if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
