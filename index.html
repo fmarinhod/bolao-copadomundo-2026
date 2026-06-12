@@ -811,22 +811,25 @@ function initListeners(){
     ];
 
     jogosData = [...grupos, ...mataMata];
+    aplicarPontuacaoDerivada();
+    renderRanking();
     renderJogos();
     renderAdminJogos();
     renderAdminClassif();
     updateMetrics();
     renderApostasHistorico();
     renderPublico();
-    // Carrega cache global de palpites para estatísticas e indicador admin
-    if(isAdmin || Object.keys(todasApostasData||{}).length === 0){
-      carregarCachePalpitesGlobal().catch(()=>{});
-    }
+    // Recarrega palpites de todos (debounce) — garante que a pontuação
+    // derivada use dados frescos em todos os clientes quando um placar muda
+    clearTimeout(window.__tPalpites);
+    window.__tPalpites = setTimeout(()=>carregarCachePalpitesGlobal().catch(()=>{}), 600);
   });
 
   // Apostas do usuário atual
   onSnapshot(collection(db,`apostas/${currentUser.uid}/jogos`), snap => {
     apostasData = {};
     snap.docs.forEach(d=>{ apostasData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
     renderApostasHistorico();
     renderJogos();
     renderPublico();
@@ -843,6 +846,7 @@ function initListeners(){
   onSnapshot(collection(db,'usuarios'), snap => {
     usuariosData = {};
     snap.docs.forEach(d=>{ usuariosData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
     renderRanking();
     updateMetrics();
     renderAdminParticipantes();
@@ -858,15 +862,21 @@ function initListeners(){
   onSnapshot(collection(db,'classificados_confirmados'), snap => {
     classifsData = {};
     snap.docs.forEach(d=>{ classifsData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
     renderClassif();
     renderApostasHistorico();
+    renderRanking();
+    updateMetrics();
   });
 
   // Todas as apostas (para aba pública e histórico de classificação)
   onSnapshot(collection(db,'classificacoes'), snap => {
     allApostasData = {};
     snap.docs.forEach(d=>{ allApostasData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
     renderPublico();
+    renderRanking();
+    updateMetrics();
   });
 }
 
@@ -903,19 +913,13 @@ function updateMetrics(){
 const apostasCache = {};
 
 window.exportarRanking = async () => {
-  // Busca usuários direto do Firestore para garantir dados atualizados
-  let aprovados;
-  try {
-    const usSnap = await getDocs(collection(db,'usuarios'));
-    aprovados = usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  } catch(e){
-    aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-  }
+  // Usa o cache em memória: é onde está a pontuação DERIVADA correta
+  aplicarPontuacaoDerivada();
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
 
   // Desempate por placares exatos (mesma lógica do ranking visível)
   aprovados.forEach(u => {
-    const apostasU = apostasCache[u.uid] || {};
-    u._exatos = Object.values(apostasU).filter(a=>a.resultado==='exato').length;
+    u._exatos = u._exatosDerivados || 0;
   });
   aprovados.sort((a,b) => {
     const diffPts = (b.pts||0) - (a.pts||0);
@@ -971,8 +975,7 @@ function renderRanking(){
 
   // Calcular exatos de cada participante para desempate
   aprovados.forEach(u => {
-    const apostasU = apostasCache[u.uid] || {};
-    u._exatos = Object.values(apostasU).filter(a=>a.resultado==='exato').length;
+    u._exatos = u._exatosDerivados || 0;
   });
 
   aprovados.sort((a,b) => {
@@ -2082,6 +2085,9 @@ async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
       todasApostasData[jid][uid] = { ...p, _uid: uid };
     });
   });
+  // Atualiza também o cache por uid (desempate/perfil)
+  Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
+  Object.entries(resultado).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
   return resultado;
 }
 
@@ -2090,7 +2096,12 @@ async function carregarCachePalpitesGlobal(){
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   if(!aprovados.length) return;
   await carregarTodosOsPalpites(aprovados, jogosData);
+  aplicarPontuacaoDerivada();
   renderJogos();
+  renderRanking();
+  updateMetrics();
+  renderApostasHistorico();
+  renderPublico();
 }
 
 function renderPublicoClassif(el, aprovados, filtroFase){
@@ -2421,70 +2432,22 @@ window.salvarResultado = async (jogoId) => {
   const gB = parseInt(document.getElementById(`adm-gB-${jogoId}`).value);
   if(isNaN(gA)||isNaN(gB)){ alert('Informe o placar.'); return; }
   const jogo = jogosData.find(j=>j.id===jogoId);
-  const fase = jogo ? jogo.fase : 'Fase de grupos';
 
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
 
   try {
-    // 1. Grava o resultado do jogo
+    // ÚNICA escrita necessária: o placar no doc do jogo. A pontuação de TODOS
+    // os participantes é derivada em memória, em todos os clientes, pelo
+    // onSnapshot de jogos + aplicarPontuacaoDerivada(). Nada de fan-out.
     await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
 
-    // 2. Busca usuários DIRETO do Firestore (não depende do cache em memória)
-    const usSnap = await getDocs(collection(db,'usuarios'));
-    const aprovados = usSnap.docs
-      .map(d=>({ uid:d.id, ...d.data() }))
-      .filter(u=>u.status==='aprovado');
+    // Atualiza a tela local imediatamente (o onSnapshot confirma em seguida)
+    if(jogo){ jogo.gA = gA; jogo.gB = gB; jogo.encerrado = true; }
+    aplicarPontuacaoDerivada();
+    renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
+    renderApostasHistorico(); renderPublico();
 
-    // 3+4. Para cada participante (em LOTES de 5): lê a aposta deste jogo,
-    // calcula os pts e grava. Lotes pequenos evitam a saturação que causa
-    // processamento parcial silencioso.
-    let comPalpite = 0;
-    for(let i=0; i<aprovados.length; i+=5){
-      const lote = aprovados.slice(i, i+5);
-      await Promise.all(lote.map(async u=>{
-        try {
-          const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
-          const aSnap = await getDoc(aRef);
-          if(!aSnap.exists()) return;
-          const a = aSnap.data();
-          const pts = calcularPts(a.gA,a.gB,gA,gB,fase);
-          let resultado='';
-          if(a.gA===gA&&a.gB===gB) resultado='exato';
-          else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
-            if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
-            else resultado='vencedor';
-          } else if(gA===gB&&a.gA===a.gB) resultado='empate';
-          else resultado='erro';
-          await updateDoc(aRef, { pts, resultado });
-          comPalpite++;
-        } catch(e){
-          console.error('Erro ao pontuar aposta de', u.uid, e);
-        }
-      }));
-    }
-
-    // 5. Recalcula o total de TODOS os participantes EM LOTES de 5
-    await recalcularEmLotes(aprovados.map(u=>u.uid));
-
-    // 5b. Força a atualização da tela: relê os usuários do Firestore, atualiza
-    // o cache em memória e redesenha ranking + métricas. Não depende do onSnapshot
-    // (que pode disparar com dados parciais durante a rajada de updates).
-    try {
-      const freshSnap = await getDocs(collection(db,'usuarios'));
-      freshSnap.docs.forEach(d => { usuariosData[d.id] = d.data(); });
-      // Recarrega o cache de palpites para os exatos do desempate ficarem certos
-      await carregarTodosOsPalpites(
-        Object.values(usuariosData).filter(u=>u.status==='aprovado'),
-        jogosData
-      ).then(res => {
-        Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
-        Object.entries(res).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
-      }).catch(()=>{});
-      renderRanking();
-      updateMetrics();
-    } catch(e){ console.error('Erro ao atualizar tela pós-save:', e); }
-
-    // 6. Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
+    // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
     if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
       const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
       const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
@@ -2502,7 +2465,7 @@ window.salvarResultado = async (jogoId) => {
     }
 
     if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
-    alert(`✅ Resultado salvo! ${comPalpite} palpite(s) pontuado(s) e ranking atualizado.`);
+    alert('✅ Resultado salvo! O ranking de todos os participantes foi atualizado.');
   } catch(e){
     console.error('Erro ao salvar resultado:', e);
     if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
@@ -2521,56 +2484,75 @@ function calcularPts(pA,pB,rA,rB,fase){
   return Math.round(5*m);
 }
 
-// Recalcula os totais de uma lista de UIDs em LOTES sequenciais de 5.
-// Lotes pequenos evitam a saturação de conexões do Firestore que causa
-// processamento parcial silencioso (causa raiz dos bugs de pontuação).
-async function recalcularEmLotes(uids, tamLote=5){
-  let ok=0, falhas=[];
-  for(let i=0; i<uids.length; i+=tamLote){
-    const lote = uids.slice(i, i+tamLote);
-    await Promise.all(lote.map(uid =>
-      recalcularPtsUsuario(uid).then(()=>{ ok++; }).catch(e=>{
-        console.error('Falha ao recalcular', uid, e);
-        falhas.push(uid);
-      })
-    ));
-  }
-  // Segunda passada nas falhas (uma vez), agora individual
-  if(falhas.length){
-    console.warn('Reprocessando', falhas.length, 'falha(s)...');
-    for(const uid of falhas){
-      try { await recalcularPtsUsuario(uid); ok++; }
-      catch(e){ console.error('Falha persistente em', uid, e); }
-    }
-  }
-  return ok;
-}
+// ─── PONTUAÇÃO DERIVADA ──────────────────────────────────────────────────────
+// Calcula os pts de cada aposta e o total de cada participante EM MEMÓRIA, a
+// partir dos placares (jogosData) + palpites + bônus de classificação.
+// Nada de pontuação é gravado no Firestore: salvar/reabrir um jogo é 1 única
+// escrita e todos os clientes derivam a pontuação sozinhos via onSnapshot.
+function aplicarPontuacaoDerivada(){
+  const encerrados = {};
+  (jogosData||[]).forEach(j=>{
+    if(j.encerrado && j.gA!=null && j.gB!=null)
+      encerrados[j.id] = { gA:j.gA, gB:j.gB, fase:j.fase||'Fase de grupos' };
+  });
 
-async function recalcularPtsUsuario(uid){
-  let total=0;
-  const jogosSnap = await getDocs(collection(db,`apostas/${uid}/jogos`));
-  jogosSnap.docs.forEach(d=>{ total+=(d.data().pts||0); });
-  // Bônus de classificação por fase
-  const classifSnap = await getDoc(doc(db,'classificacoes',uid));
-  if(classifSnap.exists()){
-    const c = classifSnap.data();
-    // Finalistas derivados na pontuacao (mesmo se nao gravados): Semifinal - Terceiro lugar
-    if((c['Semifinal']||[]).length === 4 && (c['Terceiro lugar']||[]).length === 2){
-      c['Final'] = c['Semifinal'].filter(t => !c['Terceiro lugar'].includes(t));
+  const totais = {}; // uid -> pontos de jogos
+  const exatos = {}; // uid -> nº de placares exatos
+
+  function pontuar(a, jid){
+    // Limpa valores antigos (gravados no banco ou de jogo reaberto)
+    delete a.pts; delete a.resultado;
+    const jogo = encerrados[jid];
+    if(!jogo || a.gA==null || a.gB==null) return;
+    const pts = calcularPts(a.gA, a.gB, jogo.gA, jogo.gB, jogo.fase);
+    let resultado;
+    if(a.gA===jogo.gA && a.gB===jogo.gB) resultado='exato';
+    else if(pts===0) resultado='erro';
+    else if(jogo.gA===jogo.gB) resultado='empate';
+    else if(jogo.gA-jogo.gB===a.gA-a.gB) resultado='vencedor_saldo';
+    else resultado='vencedor';
+    a.pts = pts; a.resultado = resultado;
+  }
+
+  // Apostas de todos (cache global por jogo) — base do total
+  Object.entries(todasApostasData||{}).forEach(([jid, porUid])=>{
+    Object.entries(porUid).forEach(([uid, a])=>{
+      pontuar(a, jid);
+      if(a.pts!==undefined){
+        totais[uid] = (totais[uid]||0) + a.pts;
+        if(a.resultado==='exato') exatos[uid] = (exatos[uid]||0)+1;
+      }
+    });
+  });
+  // Cache por uid (desempate/perfil) e apostas do usuário logado
+  Object.entries(apostasCache||{}).forEach(([uid, palps])=>{
+    Object.entries(palps||{}).forEach(([jid, a])=>pontuar(a, jid));
+  });
+  Object.entries(apostasData||{}).forEach(([jid, a])=>pontuar(a, jid));
+
+  // Bônus de classificação por fase + especiais (palpites de todos)
+  Object.entries(allApostasData||{}).forEach(([uid, cOrig])=>{
+    const c = {...cOrig};
+    if((c['Semifinal']||[]).length===4 && (c['Terceiro lugar']||[]).length===2){
+      c['Final'] = c['Semifinal'].filter(t=>!c['Terceiro lugar'].includes(t));
     }
+    let bonus = 0;
     FASES_CLASSIF.forEach(fase=>{
       const confirmados = classifsData[fase]?.times||[];
-      const palpites = c[fase]||[];
-      palpites.forEach(time=>{ if(confirmados.includes(time)) total+=BONUS_CLASSIF[fase]; });
+      (c[fase]||[]).forEach(time=>{ if(confirmados.includes(time)) bonus += BONUS_CLASSIF[fase]; });
     });
-    // Bônus especiais: 3º lugar e campeão
     ['TerceiroLugar','Campeao'].forEach(chave=>{
       const confirmado = classifsData[chave]?.time||null;
-      const palpite = c[chave]||null;
-      if(confirmado && palpite === confirmado) total+=BONUS_ESPECIAL[chave];
+      if(confirmado && c[chave]===confirmado) bonus += BONUS_ESPECIAL[chave];
     });
-  }
-  await updateDoc(doc(db,'usuarios',uid),{ pts:total });
+    if(bonus) totais[uid] = (totais[uid]||0) + bonus;
+  });
+
+  // Sobrepõe o pts antigo do banco NO CACHE em memória
+  Object.entries(usuariosData||{}).forEach(([uid, u])=>{
+    u.pts = totais[uid]||0;
+    u._exatosDerivados = exatos[uid]||0;
+  });
 }
 
 // Jogos oficiais da fase de grupos — Copa 2026
@@ -2710,51 +2692,16 @@ window.reabrirJogo = async (jogoId) => {
   const btn = event?.target;
   if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
   try {
-    // 1. Remove o resultado do jogo
+    // ÚNICA escrita: limpa o placar do jogo. A pontuação derivada se ajusta
+    // sozinha em todos os clientes (nenhum pts gravado precisa ser limpo).
     await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
 
-    // 2. Busca usuários DIRETO do Firestore
-    const usSnap = await getDocs(collection(db,'usuarios'));
-    const aprovados = usSnap.docs
-      .map(d=>({ uid:d.id, ...d.data() }))
-      .filter(u=>u.status==='aprovado');
-
-    // 3+4. Para cada participante (em LOTES de 5): lê a aposta deste jogo e
-    // remove pts/resultado, mantendo o palpite (gA/gB). Lotes pequenos evitam
-    // a saturação que causa processamento parcial silencioso.
-    for(let i=0; i<aprovados.length; i+=5){
-      const lote = aprovados.slice(i, i+5);
-      await Promise.all(lote.map(async u=>{
-        try {
-          const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
-          const aSnap = await getDoc(aRef);
-          if(aSnap.exists() && aSnap.data().pts !== undefined){
-            const a = aSnap.data();
-            await setDoc(aRef, { gA: a.gA, gB: a.gB });
-          }
-        } catch(e){
-          console.error('Erro ao limpar aposta de', u.uid, e);
-        }
-      }));
-    }
-
-    // 5. Recalcula total de TODOS EM LOTES de 5
-    await recalcularEmLotes(aprovados.map(u=>u.uid));
-
-    // 5b. Força atualização da tela (não depende do onSnapshot)
-    try {
-      const freshSnap = await getDocs(collection(db,'usuarios'));
-      freshSnap.docs.forEach(d => { usuariosData[d.id] = d.data(); });
-      await carregarTodosOsPalpites(
-        Object.values(usuariosData).filter(u=>u.status==='aprovado'),
-        jogosData
-      ).then(res => {
-        Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
-        Object.entries(res).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
-      }).catch(()=>{});
-      renderRanking();
-      updateMetrics();
-    } catch(e){ console.error('Erro ao atualizar tela pós-reabrir:', e); }
+    // Atualiza a tela local imediatamente
+    const jogo = jogosData.find(j=>j.id===jogoId);
+    if(jogo){ jogo.gA = null; jogo.gB = null; jogo.encerrado = false; }
+    aplicarPontuacaoDerivada();
+    renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
+    renderApostasHistorico(); renderPublico();
   } catch(e){
     console.error('Erro ao reabrir jogo:', e);
     if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
@@ -2762,7 +2709,7 @@ window.reabrirJogo = async (jogoId) => {
     return;
   }
   if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
-  // 6. Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
+  // Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
   const jReab = jogosData.find(j=>j.id===jogoId);
   if(jReab && jReab.jogoNum && BRACKET_PROPAGA[jReab.fase]){
     let dests = BRACKET_PROPAGA[jReab.fase][jReab.jogoNum];
@@ -3163,9 +3110,9 @@ window.salvarClassifAdmin = async (fase) => {
   await setDoc(doc(db,'classificados_confirmados',fase),{
     times, primeiros, segundos, terceiros, pts3os, slots3os, fase
   });
-  const _usSnap = await getDocs(collection(db,'usuarios'));
-  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await recalcularEmLotes(aprovados.map(u=>u.uid));
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
 
   // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
   // se montam sozinhos quando os placares da fase anterior sao lancados.
@@ -3309,9 +3256,9 @@ window.salvarEspecialAdmin = async (chave) => {
   const time = classifsData[chave]?.time||null;
   if(!time){ alert('Selecione um time primeiro.'); return; }
   await setDoc(doc(db,'classificados_confirmados',chave),{ time, chave });
-  const _usSnap = await getDocs(collection(db,'usuarios'));
-  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await recalcularEmLotes(aprovados.map(u=>u.uid));
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
 };
 
@@ -3321,9 +3268,9 @@ window.reabrirClassif = async (fase) => {
   await deleteDoc(doc(db,'classificados_confirmados',fase));
   // Limpa o cache local da fase
   delete classifsData[fase];
-  const _usSnap = await getDocs(collection(db,'usuarios'));
-  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await recalcularEmLotes(aprovados.map(u=>u.uid));
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
   renderAdminClassif();
   alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
 };
@@ -3333,9 +3280,9 @@ window.reabrirEspecial = async (chave) => {
   if(!confirm(`Reabrir ${LABEL_ESPECIAL[chave]}?\n\nIsso remove a confirmação e zera o bônus. Os palpites dos participantes NÃO são afetados.`)) return;
   await deleteDoc(doc(db,'classificados_confirmados',chave));
   delete classifsData[chave];
-  const _usSnap = await getDocs(collection(db,'usuarios'));
-  const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await recalcularEmLotes(aprovados.map(u=>u.uid));
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
   renderAdminClassif();
   alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
 };
