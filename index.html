@@ -602,6 +602,25 @@ const FLAGS = {
 
 function flag(team){ return FLAGS[team] || '🏳️'; }
 
+// Exibe uma notificação temporária no topo (toast). Definição única e global.
+function mostrarToast(msg, tipo){
+  try {
+    const cont = document.getElementById('toast-container');
+    if(!cont){ return; }
+    const t = document.createElement('div');
+    t.className = 'toast' + (tipo==='error' ? ' toast-error' : '');
+    t.textContent = msg;
+    cont.appendChild(t);
+    // força reflow para a transição de entrada
+    void t.offsetWidth;
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => { if(t.parentNode) t.parentNode.removeChild(t); }, 250);
+    }, 3000);
+  } catch(e){ /* nunca deixa o toast quebrar o fluxo principal */ }
+}
+
 // App state
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -1862,6 +1881,51 @@ window.salvarClassif = async () => {
 };
 
 // ─── PALPITES PÚBLICOS ───────────────────────────────────────────────────────
+// Registro dos dados de comparação por jogo, preenchido ao renderizar a aba Comparar
+const _exportComparacao = {};
+
+window.exportarComparacaoJogo = async (jogoId) => {
+  const d = _exportComparacao[jogoId];
+  if(!d){ mostrarToast('Abra a aba Comparar primeiro.', 'error'); return; }
+
+  const fase = d.fase==='Fase de grupos' ? `Grupo ${d.grupo||''}`.trim() : (FASES_LABEL[d.fase]||d.fase);
+
+  let texto = `⚽ ${d.timeA} × ${d.timeB}\n${fase} · ${d.dataFmt}\n`;
+  if(d.encerrado && d.gA!=null && d.gB!=null){
+    texto += `🏁 Resultado: ${d.gA}×${d.gB}\n`;
+  } else {
+    texto += `🔒 Palpites encerrados — bola vai rolar!\n`;
+  }
+  texto += `\n📊 Como o grupo apostou:\n\n`;
+
+  d.grupos.forEach(g => {
+    const ehReal = d.encerrado && g.gA===d.gA && g.gB===d.gB;
+    const alvo = ehReal ? ' 🎯' : '';
+    const n = g.nomes.length;
+    texto += `▫️ ${d.timeA} ${g.gA}×${g.gB} ${d.timeB} — ${n} ${n===1?'palpite':'palpites'}${alvo}\n`;
+    texto += `   ${g.nomes.join(', ')}\n\n`;
+  });
+
+  const total = d.grupos.reduce((s,g)=>s+g.nomes.length,0);
+  texto += `Total: ${total} ${total===1?'palpite':'palpites'} · ${d.grupos.length} ${d.grupos.length===1?'placar':'placares diferentes'}`;
+
+  try {
+    await navigator.clipboard.writeText(texto);
+    mostrarToast('✅ Palpites copiados! Cole no WhatsApp.');
+  } catch(e){
+    // Fallback: textarea temporária para cópia manual
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position='fixed'; ta.style.left='0'; ta.style.top='0'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    let ok=false;
+    try { ok = document.execCommand('copy'); } catch(e2){}
+    document.body.removeChild(ta);
+    mostrarToast(ok ? '✅ Palpites copiados! Cole no WhatsApp.' : 'Não foi possível copiar automaticamente.', ok?'success':'error');
+  }
+};
+
 window.renderPublico = () => {
   const el = document.getElementById('publico-list');
   const filtroFase = document.getElementById('publico-filtro-fase')?.value || '';
@@ -1928,6 +1992,14 @@ window.renderPublico = () => {
         ? `<span style="background:#1a1a2e;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;margin-left:8px">Resultado: ${j.gA}×${j.gB}</span>`
         : `<span style="background:#fff8e1;color:#92610a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;margin-left:8px">Aguardando resultado</span>`;
 
+      // Guarda os dados deste jogo para o botão de exportar
+      _exportComparacao[j.id] = {
+        timeA: j.timeA, timeB: j.timeB, fase: j.fase, grupo: j.grupo,
+        encerrado: j.encerrado, gA: j.gA, gB: j.gB,
+        dataFmt: formatarDataJogo(j),
+        grupos: grupos.map(g => ({ gA: g.gA, gB: g.gB, nomes: g.participantes.map(p=>p.nome) }))
+      };
+
       html += `
       <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:18px">
         <!-- Cabeçalho do jogo -->
@@ -1940,6 +2012,9 @@ window.renderPublico = () => {
           <div style="text-align:center;margin-top:4px;font-size:11px;opacity:0.8">
             ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:(FASES_LABEL[j.fase]||j.fase)} · ${formatarDataJogo(j)}
             ${resultadoBadge}
+          </div>
+          <div style="text-align:center;margin-top:8px">
+            <button onclick="exportarComparacaoJogo('${j.id}')" style="background:#2d6a4f;color:#fff;border:none;font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px;cursor:pointer">📋 Exportar palpites</button>
           </div>
         </div>
         <!-- Grupos de placar -->
