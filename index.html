@@ -528,7 +528,7 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDoc, getDocs, query, where, writeBatch }
+import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDoc, getDocs, query, where }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -2360,40 +2360,36 @@ window.salvarResultado = async (jogoId) => {
       .map(d=>({ uid:d.id, ...d.data() }))
       .filter(u=>u.status==='aprovado');
 
-    // 3. Lê todas as apostas deste jogo EM PARALELO
-    const apostasJogo = await Promise.all(aprovados.map(async u=>{
-      try {
-        const aSnap = await getDoc(doc(db,`apostas/${u.uid}/jogos`,jogoId));
-        return { uid:u.uid, existe:aSnap.exists(), dados:aSnap.exists()?aSnap.data():null };
-      } catch(e){
-        console.error('Erro ao ler aposta de', u.uid, e);
-        return { uid:u.uid, existe:false, dados:null };
-      }
-    }));
-
-    // 4. Grava os pts de cada aposta EM LOTE (uma operação só)
-    const batch = writeBatch(db);
+    // 3+4. Para cada participante (em LOTES de 5): lê a aposta deste jogo,
+    // calcula os pts e grava. Lotes pequenos evitam a saturação que causa
+    // processamento parcial silencioso.
     let comPalpite = 0;
-    for(const ap of apostasJogo){
-      if(!ap.existe) continue;
-      const a = ap.dados;
-      const pts = calcularPts(a.gA,a.gB,gA,gB,fase);
-      let resultado='';
-      if(a.gA===gA&&a.gB===gB) resultado='exato';
-      else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
-        if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
-        else resultado='vencedor';
-      } else if(gA===gB&&a.gA===a.gB) resultado='empate';
-      else resultado='erro';
-      batch.update(doc(db,`apostas/${ap.uid}/jogos`,jogoId), { pts, resultado });
-      comPalpite++;
+    for(let i=0; i<aprovados.length; i+=5){
+      const lote = aprovados.slice(i, i+5);
+      await Promise.all(lote.map(async u=>{
+        try {
+          const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
+          const aSnap = await getDoc(aRef);
+          if(!aSnap.exists()) return;
+          const a = aSnap.data();
+          const pts = calcularPts(a.gA,a.gB,gA,gB,fase);
+          let resultado='';
+          if(a.gA===gA&&a.gB===gB) resultado='exato';
+          else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
+            if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
+            else resultado='vencedor';
+          } else if(gA===gB&&a.gA===a.gB) resultado='empate';
+          else resultado='erro';
+          await updateDoc(aRef, { pts, resultado });
+          comPalpite++;
+        } catch(e){
+          console.error('Erro ao pontuar aposta de', u.uid, e);
+        }
+      }));
     }
-    await batch.commit();
 
-    // 5. Recalcula o total de TODOS os participantes EM PARALELO
-    await Promise.all(aprovados.map(u=>
-      recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro ao recalcular', u.uid, e))
-    ));
+    // 5. Recalcula o total de TODOS os participantes EM LOTES de 5
+    await recalcularEmLotes(aprovados.map(u=>u.uid));
 
     // 6. Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
     if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
@@ -2430,6 +2426,31 @@ function calcularPts(pA,pB,rA,rB,fase){
   if(vencedorReal==='E') return Math.round(3*m);
   if(rA-rB===pA-pB) return Math.round(7*m);
   return Math.round(5*m);
+}
+
+// Recalcula os totais de uma lista de UIDs em LOTES sequenciais de 5.
+// Lotes pequenos evitam a saturação de conexões do Firestore que causa
+// processamento parcial silencioso (causa raiz dos bugs de pontuação).
+async function recalcularEmLotes(uids, tamLote=5){
+  let ok=0, falhas=[];
+  for(let i=0; i<uids.length; i+=tamLote){
+    const lote = uids.slice(i, i+tamLote);
+    await Promise.all(lote.map(uid =>
+      recalcularPtsUsuario(uid).then(()=>{ ok++; }).catch(e=>{
+        console.error('Falha ao recalcular', uid, e);
+        falhas.push(uid);
+      })
+    ));
+  }
+  // Segunda passada nas falhas (uma vez), agora individual
+  if(falhas.length){
+    console.warn('Reprocessando', falhas.length, 'falha(s)...');
+    for(const uid of falhas){
+      try { await recalcularPtsUsuario(uid); ok++; }
+      catch(e){ console.error('Falha persistente em', uid, e); }
+    }
+  }
+  return ok;
 }
 
 async function recalcularPtsUsuario(uid){
@@ -2605,27 +2626,27 @@ window.reabrirJogo = async (jogoId) => {
       .map(d=>({ uid:d.id, ...d.data() }))
       .filter(u=>u.status==='aprovado');
 
-    // 3. Lê apostas deste jogo EM PARALELO
-    const apostasJogo = await Promise.all(aprovados.map(async u=>{
-      try {
-        const aSnap = await getDoc(doc(db,`apostas/${u.uid}/jogos`,jogoId));
-        return { uid:u.uid, existe:aSnap.exists(), dados:aSnap.exists()?aSnap.data():null };
-      } catch(e){ return { uid:u.uid, existe:false, dados:null }; }
-    }));
-
-    // 4. Remove pts/resultado em LOTE, mantendo o palpite (gA/gB)
-    const batch = writeBatch(db);
-    for(const ap of apostasJogo){
-      if(ap.existe && ap.dados.pts !== undefined){
-        batch.set(doc(db,`apostas/${ap.uid}/jogos`,jogoId), { gA: ap.dados.gA, gB: ap.dados.gB });
-      }
+    // 3+4. Para cada participante (em LOTES de 5): lê a aposta deste jogo e
+    // remove pts/resultado, mantendo o palpite (gA/gB). Lotes pequenos evitam
+    // a saturação que causa processamento parcial silencioso.
+    for(let i=0; i<aprovados.length; i+=5){
+      const lote = aprovados.slice(i, i+5);
+      await Promise.all(lote.map(async u=>{
+        try {
+          const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
+          const aSnap = await getDoc(aRef);
+          if(aSnap.exists() && aSnap.data().pts !== undefined){
+            const a = aSnap.data();
+            await setDoc(aRef, { gA: a.gA, gB: a.gB });
+          }
+        } catch(e){
+          console.error('Erro ao limpar aposta de', u.uid, e);
+        }
+      }));
     }
-    await batch.commit();
 
-    // 5. Recalcula total de TODOS EM PARALELO
-    await Promise.all(aprovados.map(u=>
-      recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro ao recalcular', u.uid, e))
-    ));
+    // 5. Recalcula total de TODOS EM LOTES de 5
+    await recalcularEmLotes(aprovados.map(u=>u.uid));
   } catch(e){
     console.error('Erro ao reabrir jogo:', e);
     if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
@@ -3036,7 +3057,7 @@ window.salvarClassifAdmin = async (fase) => {
   });
   const _usSnap = await getDocs(collection(db,'usuarios'));
   const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
+  await recalcularEmLotes(aprovados.map(u=>u.uid));
 
   // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
   // se montam sozinhos quando os placares da fase anterior sao lancados.
@@ -3182,7 +3203,7 @@ window.salvarEspecialAdmin = async (chave) => {
   await setDoc(doc(db,'classificados_confirmados',chave),{ time, chave });
   const _usSnap = await getDocs(collection(db,'usuarios'));
   const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
+  await recalcularEmLotes(aprovados.map(u=>u.uid));
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
 };
 
@@ -3194,7 +3215,7 @@ window.reabrirClassif = async (fase) => {
   delete classifsData[fase];
   const _usSnap = await getDocs(collection(db,'usuarios'));
   const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
+  await recalcularEmLotes(aprovados.map(u=>u.uid));
   renderAdminClassif();
   alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
 };
@@ -3206,7 +3227,7 @@ window.reabrirEspecial = async (chave) => {
   delete classifsData[chave];
   const _usSnap = await getDocs(collection(db,'usuarios'));
   const aprovados = _usSnap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.status==='aprovado');
-  await Promise.all(aprovados.map(u=>recalcularPtsUsuario(u.uid).catch(e=>console.error('Erro recalc',u.uid,e))));
+  await recalcularEmLotes(aprovados.map(u=>u.uid));
   renderAdminClassif();
   alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
 };
