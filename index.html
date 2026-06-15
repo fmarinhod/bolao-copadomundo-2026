@@ -2119,7 +2119,8 @@ function renderPublicoClassif(el, aprovados, filtroFase){
   let html='';
   sorted.forEach(u=>{
     const classifU = allApostasData[u.uid] || {};
-    const temAlgum = fasesVisiveis.some(f=>(classifU[f]||[]).length>0);
+    const temEspecial = !filtroFase && (classifU['Campeao']||classifU['TerceiroLugar']);
+    const temAlgum = fasesVisiveis.some(f=>(classifU[f]||[]).length>0) || temEspecial;
     if(!temAlgum) return;
     const foto = u.foto ?
       `<img src="${u.foto}" class="publico-avatar">` :
@@ -2146,6 +2147,22 @@ function renderPublicoClassif(el, aprovados, filtroFase){
       });
       html+=`</div>`;
     });
+    // Palpites especiais (Campeão e Vencedor do 3º lugar) — só sem filtro de fase,
+    // pois não pertencem a nenhuma fase do seletor
+    if(!filtroFase){
+      ['Campeao','TerceiroLugar'].forEach(chave=>{
+        const palpite = classifU[chave]||null;
+        if(!palpite) return;
+        const confirmado = classifsData[chave]?.time||null;
+        const conf = confirmado && palpite===confirmado;
+        const errado = confirmado && palpite!==confirmado;
+        const cls = conf?'pts-badge-green':errado?'pts-badge-gray':'';
+        html+=`<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 6px;text-transform:uppercase">${LABEL_ESPECIAL[chave]}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+            <span class="publico-pts-badge ${cls}">${flag(palpite)} ${palpite}${conf?' ✓':''}</span>
+          </div>`;
+      });
+    }
     html+=`</div></div>`;
   });
   el.innerHTML = html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>';
