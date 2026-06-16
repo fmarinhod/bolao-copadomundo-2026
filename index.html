@@ -1959,9 +1959,32 @@ window.renderPublico = () => {
     const nomeDe = {};
     aprovados.forEach(u => { nomeDe[u.uid] = u.nome || u.email || 'Participante'; });
 
+    // Agrupa jogos por DIA (derivado do ts), dias mais recentes no topo.
+    // Dentro do dia, ordem cronológica. Cada jogo é recolhível; o dia mais
+    // recente abre expandido, os demais recolhidos.
+    const porDia = {}; // 'YYYY-MM-DD' -> [jogos]
+    jogosVisiveis.forEach(j=>{
+      const dt = new Date(typeof j.ts==='number'?j.ts:parseInt(j.ts));
+      const chave = isNaN(dt) ? '0000-00-00'
+        : `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+      if(!porDia[chave]) porDia[chave]=[];
+      porDia[chave].push(j);
+    });
+    const diasOrdenados = Object.keys(porDia).sort().reverse(); // recente primeiro
+    const diaMaisRecente = diasOrdenados[0];
+
     let html = '';
 
-    jogosVisiveis.forEach(j => {
+    diasOrdenados.forEach(dia => {
+      const jogsDia = porDia[dia].sort((a,b)=>a.ts-b.ts); // cronológico dentro do dia
+      const expandidoDia = (dia === diaMaisRecente);
+      const dtDia = new Date(jogsDia[0].ts);
+      const labelDia = isNaN(dtDia) ? 'Data a confirmar'
+        : dtDia.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+
+      html += `<div style="font-size:13px;font-weight:800;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #e0e0e0">📅 ${labelDia} <span style="font-weight:600;color:#888;text-transform:none">· ${jogsDia.length} ${jogsDia.length===1?'jogo':'jogos'}</span></div>`;
+
+    jogsDia.forEach(j => {
       // Coletar palpites deste jogo agrupados por placar
       const porPlacar = {};  // "gA-gB" → { gA, gB, participantes: [{nome, pts, resultado}] }
       aprovados.forEach(u => {
@@ -2004,9 +2027,9 @@ window.renderPublico = () => {
       };
 
       html += `
-      <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:18px">
-        <!-- Cabeçalho do jogo -->
-        <div style="background:#1a1a2e;padding:10px 14px;color:#fff">
+      <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <!-- Cabeçalho do jogo (clicável: recolhe/expande) -->
+        <div onclick="toggleJogoComparar(this)" style="background:#1a1a2e;padding:10px 14px;color:#fff;cursor:pointer;position:relative">
           <div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;flex-wrap:wrap">
             <span>${flag(j.timeA)} ${j.timeA}</span>
             <span style="opacity:0.6">×</span>
@@ -2016,9 +2039,12 @@ window.renderPublico = () => {
             ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:(FASES_LABEL[j.fase]||j.fase)} · ${formatarDataJogo(j)}
             ${resultadoBadge}
           </div>
-          <div style="text-align:center;margin-top:8px">
-            <button onclick="exportarComparacaoJogo('${j.id}')" style="background:#2d6a4f;color:#fff;border:none;font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px;cursor:pointer">📋 Exportar palpites</button>
-          </div>
+          <span class="toggle-jogo-icon" style="position:absolute;right:14px;top:12px;font-size:13px;opacity:0.8">${expandidoDia?'▲':'▼'}</span>
+        </div>
+        <!-- Corpo recolhível -->
+        <div class="jogo-comparar-corpo" style="display:${expandidoDia?'block':'none'}">
+        <div style="text-align:center;padding:8px 0 0;background:#fff">
+          <button onclick="exportarComparacaoJogo('${j.id}')" style="background:#2d6a4f;color:#fff;border:none;font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px;cursor:pointer">📋 Exportar palpites</button>
         </div>
         <!-- Grupos de placar -->
         <div style="padding:12px 14px;background:#fff">`;
@@ -2063,8 +2089,10 @@ window.renderPublico = () => {
             Total: ${totalPalpites} ${totalPalpites===1?'palpite':'palpites'} · ${grupos.length} ${grupos.length===1?'placar diferente':'placares diferentes'}
           </div>
         </div>
+        </div>
       </div>`;
-    });
+    }); // fim jogsDia.forEach
+    }); // fim diasOrdenados.forEach
 
     el.innerHTML = html || '<div class="empty-state">Nenhum palpite registrado para os jogos visíveis.</div>';
   });
@@ -2167,6 +2195,14 @@ function renderPublicoClassif(el, aprovados, filtroFase){
   });
   el.innerHTML = html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>';
 }
+
+window.toggleJogoComparar = (header) => {
+  const corpo = header.nextElementSibling;
+  const icon = header.querySelector('.toggle-jogo-icon');
+  const aberto = corpo.style.display !== 'none';
+  corpo.style.display = aberto ? 'none' : 'block';
+  if(icon) icon.textContent = aberto ? '▼' : '▲';
+};
 
 window.togglePublicoDetalhes = (header) => {
   const palpites = header.nextElementSibling;
