@@ -629,6 +629,7 @@ const provider = new GoogleAuthProvider();
 
 let currentUser = null;
 let todasApostasData = null;  // cache: { jogoId: { uid: {gA,gB,pts,...} } }
+let palpitesGlobaisCarregados = false;  // true após carregar palpites de todos 1x na sessão
 let isAdmin = false;
 let jogosData = [];
 let apostasData = {};
@@ -819,10 +820,15 @@ function initListeners(){
     updateMetrics();
     renderApostasHistorico();
     renderPublico();
-    // Recarrega palpites de todos (debounce) — garante que a pontuação
-    // derivada use dados frescos em todos os clientes quando um placar muda
-    clearTimeout(window.__tPalpites);
-    window.__tPalpites = setTimeout(()=>carregarCachePalpitesGlobal().catch(()=>{}), 600);
+    // Carrega os palpites de todos UMA vez por sessão (base do ranking derivado).
+    // NÃO recarrega quando um placar muda: os palpites não mudaram, então basta
+    // re-derivar a pontuação do cache em memória (já feito acima). Isso elimina
+    // o maior consumo de leituras — antes, cada placar salvo relia ~2.000 docs
+    // em todos os clientes conectados.
+    if(!palpitesGlobaisCarregados){
+      clearTimeout(window.__tPalpites);
+      window.__tPalpites = setTimeout(()=>carregarCachePalpitesGlobal().catch(()=>{}), 600);
+    }
   });
 
   // Apostas do usuário atual
@@ -852,8 +858,9 @@ function initListeners(){
     renderAdminParticipantes();
     renderAdminInscricoes();
     renderPublico();
-    // Admin: (re)carrega o cache de palpites de todos para o indicador de pendentes
-    if(isAdmin){
+    // Admin: carrega o cache de palpites UMA vez (indicador de pendentes).
+    // Não recarrega a cada mudança de usuário — evita releituras desnecessárias.
+    if(isAdmin && !palpitesGlobaisCarregados){
       carregarCachePalpitesGlobal().catch(()=>{});
     }
   });
@@ -2099,6 +2106,12 @@ window.renderPublico = () => {
 };
 
 async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
+  // Economia de cota: se já carregamos os palpites de todos nesta sessão,
+  // reusa o cache em memória em vez de reler ~2.000 documentos do Firestore.
+  // É seguro porque a aba Comparar só mostra jogos já bloqueados, cujos
+  // palpites não mudam mais (trava de prazo). Edição do admin atualiza o cache.
+  if(palpitesGlobaisCarregados) return apostasCache;
+
   const resultado = {};
   await Promise.all(aprovados.map(async u=>{
     const snap = await getDocs(collection(db,`apostas/${u.uid}/jogos`));
@@ -2116,6 +2129,7 @@ async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
   // Atualiza também o cache por uid (desempate/perfil)
   Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
   Object.entries(resultado).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
+  palpitesGlobaisCarregados = true;
   return resultado;
 }
 
@@ -2288,6 +2302,10 @@ window.aprovarUser = async (uid, status) => {
 // ─── ADMIN: JOGOS ─────────────────────────────────────────────────────────────
 function gameCardAdminHTML(j){
   const isMata = j.fase !== 'Fase de grupos';
+  // Botão de editar palpites de terceiros só após o bloqueio (5 min antes do
+  // início). Antes disso, o próprio participante edita o palpite; admin não
+  // deve interferir em palpite ainda aberto (evita sobrescrever edição alheia).
+  const palpitesBloqueados = Date.now() >= j.ts - 5*60*1000;
   return `<div class="game-card">
     <div class="game-header">
       <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
@@ -2301,13 +2319,13 @@ function gameCardAdminHTML(j){
       <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
       ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
       ${isMata?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')" style="background:#7c5cbf;border-color:#7c5cbf;color:#fff">✏️ Editar</button>`:''}
-      <button class="btn btn-secondary btn-sm" onclick="toggleEditarPalpites('${j.id}')" style="background:#0b6e4f;border-color:#0b6e4f;color:#fff">✏️ Palpites</button>
+      ${palpitesBloqueados?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarPalpites('${j.id}')" style="background:#0b6e4f;border-color:#0b6e4f;color:#fff">✏️ Palpites</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
     </div>
-    <div id="edit-palpites-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#eafaf2;border-radius:8px;border:1px solid #9fd8bf">
-      <div style="font-size:12px;font-weight:600;color:#0b6e4f;margin-bottom:8px">✏️ Editar palpites dos participantes</div>
+    ${palpitesBloqueados?`<div id="edit-palpites-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#eafaf2;border-radius:8px;border:1px solid #9fd8bf">
+      <div style="font-size:12px;font-weight:600;color:#0b6e4f;margin-bottom:8px">✏️ Editar palpites dos participantes (correção)</div>
       <div id="lista-palpites-${j.id}"><div class="loading">Clique para carregar...</div></div>
-    </div>
+    </div>`:''}
     ${isMata?`<div id="edit-confronto-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#f5f0ff;border-radius:8px;border:1px solid #c9b8f0">
       <div style="font-size:12px;font-weight:600;color:#5a3d9a;margin-bottom:8px">✏️ Corrigir confronto</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
