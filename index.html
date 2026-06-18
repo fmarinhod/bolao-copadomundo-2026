@@ -304,25 +304,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
 .filtro-btn:hover:not(.active){background:#f5f5f5}
 .filtro-badge{display:inline-block;background:#c0392b;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:5px;line-height:1.4}
 .filtro-btn.active .filtro-badge{background:rgba(255,255,255,0.25)}
-
-/* ── ANIMAÇÃO DE PALPITE SALVO ── */
-@keyframes pulseGreen{
-  0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0.6), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
-  40%  { box-shadow: 0 0 0 18px rgba(45,106,79,0); transform: scale(1.012); }
-  100% { box-shadow: 0 0 0 0 rgba(45,106,79,0), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
-}
-.card-saved-anim{ animation: pulseGreen 1s ease-out; }
-.game-card.tem-palpite{ border-left:4px solid #2d6a4f !important; }
-.game-card.tem-palpite::before{
-  content:''; position:absolute; top:8px; right:8px;
-  width:18px; height:18px; border-radius:50%;
-  background:#2d6a4f; color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:700; line-height:1;
-  z-index:2;
-}
-.game-card.tem-palpite::before{ content:'✓'; }
-.game-card{ position:relative; }
 </style>
 </head>
 <body>
@@ -351,14 +332,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
   <div style="font-size:48px;margin-bottom:16px">⏳</div>
   <h2>Aguardando aprovação</h2>
   <p>Seu cadastro está sendo analisado pelo administrador.<br/>Você receberá acesso assim que for aprovado.<br/><br/><span style="font-size:13px;color:#aaa">Conta: <span id="pending-email"></span></span></p>
-  <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
-</div>
-
-<!-- Tela de inscrições encerradas -->
-<div id="closed-screen" class="pending-screen" style="display:none">
-  <div style="font-size:48px;margin-bottom:16px">🔒</div>
-  <h2>Inscrições encerradas</h2>
-  <p>O período de inscrições para o bolão foi encerrado.<br/>Não é mais possível participar desta edição.</p>
   <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
 </div>
 
@@ -435,21 +408,6 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
     <div id="tab-admin" class="section">
       <div class="alert alert-warn">Somente o administrador pode ver esta aba.</div>
 
-      <!-- Controle de inscrições -->
-      <div class="card">
-        <div style="font-size:15px;font-weight:700;margin-bottom:14px">🔐 Inscrições</div>
-        <div id="inscricoes-status" style="font-size:14px;margin-bottom:12px;color:#555">Carregando...</div>
-        <button id="btn-toggle-inscricoes" class="btn btn-primary" onclick="toggleInscricoes()" style="min-width:180px">Carregando...</button>
-      </div>
-
-      <!-- Exportar ranking -->
-      <div class="card">
-        <div style="font-size:15px;font-weight:700;margin-bottom:14px">📤 Exportar ranking (WhatsApp)</div>
-        <div style="font-size:13px;color:#666;margin-bottom:12px">Gera o ranking em texto pronto para colar no grupo.</div>
-        <button class="btn btn-primary" onclick="exportarRanking()" style="min-width:180px">📋 Copiar ranking</button>
-        <textarea id="ranking-export-area" readonly style="display:none;width:100%;margin-top:12px;min-height:200px;font-family:monospace;font-size:13px;white-space:pre"></textarea>
-      </div>
-
       <!-- Aprovar participantes -->
       <div class="card">
         <div style="font-size:15px;font-weight:700;margin-bottom:14px">👥 Aprovação de participantes</div>
@@ -486,6 +444,25 @@ input:focus,select:focus{outline:none;border-color:#2d6a4f}
       <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Registrar resultados</div>
       <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 72 jogos corretos da fase de grupos.</div>
       <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 72 jogos da fase de grupos</button>
+
+      <!-- Busca automática de resultados -->
+      <div class="card" style="margin-bottom:16px;border:2px solid #2d6a4f">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:15px;font-weight:700">🤖 Busca automática de resultados</div>
+          <button class="btn btn-primary" onclick="buscarResultadosAPI()" id="btn-buscar-api">🔍 Buscar resultados</button>
+        </div>
+        <p style="font-size:13px;color:#666;line-height:1.5">Busca placares dos jogos já encerrados via API. Os resultados ficam em <strong>prévia</strong> para você revisar antes de confirmar — nenhum ponto é calculado até a confirmação.</p>
+        <div id="staging-area" style="display:none;margin-top:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:#1a1a2e">📋 Prévia dos resultados encontrados</div>
+          <div class="alert alert-info" style="font-size:13px">Revise os placares abaixo. Você pode corrigir qualquer valor antes de confirmar.</div>
+          <div id="staging-list"></div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="confirmarResultadosStaging()">✅ Confirmar e publicar</button>
+            <button class="btn btn-secondary" onclick="cancelarStaging()">Cancelar</button>
+          </div>
+        </div>
+        <div id="staging-msg" style="margin-top:10px"></div>
+      </div>
 
       <div id="admin-jogos-list"><div class="loading">Carregando...</div></div>
 
@@ -602,25 +579,6 @@ const FLAGS = {
 
 function flag(team){ return FLAGS[team] || '🏳️'; }
 
-// Exibe uma notificação temporária no topo (toast). Definição única e global.
-function mostrarToast(msg, tipo){
-  try {
-    const cont = document.getElementById('toast-container');
-    if(!cont){ return; }
-    const t = document.createElement('div');
-    t.className = 'toast' + (tipo==='error' ? ' toast-error' : '');
-    t.textContent = msg;
-    cont.appendChild(t);
-    // força reflow para a transição de entrada
-    void t.offsetWidth;
-    t.classList.add('show');
-    setTimeout(() => {
-      t.classList.remove('show');
-      setTimeout(() => { if(t.parentNode) t.parentNode.removeChild(t); }, 250);
-    }, 3000);
-  } catch(e){ /* nunca deixa o toast quebrar o fluxo principal */ }
-}
-
 // App state
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -629,7 +587,6 @@ const provider = new GoogleAuthProvider();
 
 let currentUser = null;
 let todasApostasData = null;  // cache: { jogoId: { uid: {gA,gB,pts,...} } }
-let palpitesGlobaisCarregados = false;  // true após carregar palpites de todos 1x na sessão
 let isAdmin = false;
 let jogosData = [];
 let apostasData = {};
@@ -637,6 +594,7 @@ let usuariosData = {};
 let classificadosData = {};
 let classifsData = {}; // palpites de classificação de todos
 let allApostasData = {}; // apostas de todos para aba pública
+let palpitesGlobaisCarregados = false; // flag: carrega palpites de todos só 1x por sessão
 
 // Auth
 window.loginGoogle = async () => {
@@ -665,27 +623,13 @@ onAuthStateChanged(auth, async user => {
   const userSnap = await getDoc(userRef);
 
   if(!userSnap.exists()){
-    if(!isAdmin){
-      // Verifica se inscrições estão abertas antes de criar novo usuário
-      const configSnap = await getDoc(doc(db, 'config', 'bolao'));
-      const inscricoesAbertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
-      if(!inscricoesAbertas){
-        document.getElementById('login-screen').style.display='none';
-        document.getElementById('app').style.display='none';
-        document.getElementById('pending-screen').style.display='none';
-        document.getElementById('closed-screen').style.display='flex';
-        document.getElementById('btn-logout').style.display='block';
-        document.getElementById('header-user').textContent = user.displayName || user.email;
-        return;
-      }
-    }
-    // Novo usuário: entra direto como aprovado
+    // Novo usuário: cria como pendente (admin é aprovado automaticamente)
     await setDoc(userRef, {
       uid: user.uid,
       nome: user.displayName || user.email,
       email: user.email,
       foto: user.photoURL || '',
-      status: 'aprovado',
+      status: isAdmin ? 'aprovado' : 'pendente',
       pts: 0,
       criadoEm: Date.now()
     });
@@ -695,10 +639,20 @@ onAuthStateChanged(auth, async user => {
   const snap = await getDoc(userRef);
   const userData = snap.data();
 
+  if(!isAdmin && userData.status !== 'aprovado'){
+    // Mostra tela de pendente
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='none';
+    document.getElementById('pending-screen').style.display='flex';
+    document.getElementById('pending-email').textContent = user.email;
+    document.getElementById('btn-logout').style.display='block';
+    document.getElementById('header-user').textContent = user.displayName || user.email;
+    return;
+  }
+
   // Acesso liberado
   document.getElementById('login-screen').style.display='none';
   document.getElementById('pending-screen').style.display='none';
-  document.getElementById('closed-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('btn-logout').style.display='block';
   document.getElementById('header-user').textContent = user.displayName || '';
@@ -752,21 +706,21 @@ function initListeners(){
     ];
 
     const MATA_OITAVAS_FIXO = [
-      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 6', data:'2026-07-04', hora:'18:00'},
-      {timeA:'Venc. Jogo 1', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'14:00'},
-      {timeA:'Venc. Jogo 12', timeB:'Venc. Jogo 11', data:'2026-07-06', hora:'16:00'},
-      {timeA:'Venc. Jogo 10', timeB:'Venc. Jogo 9', data:'2026-07-06', hora:'21:00'},
-      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 5', data:'2026-07-05', hora:'17:00'},
+      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 1', data:'2026-07-04', hora:'14:00'},
+      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'18:00'},
+      {timeA:'Venc. Jogo 5', timeB:'Venc. Jogo 6', data:'2026-07-05', hora:'17:00'},
       {timeA:'Venc. Jogo 7', timeB:'Venc. Jogo 8', data:'2026-07-05', hora:'21:00'},
-      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
-      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
+      {timeA:'Venc. Jogo 9', timeB:'Venc. Jogo 10', data:'2026-07-06', hora:'16:00'},
+      {timeA:'Venc. Jogo 11', timeB:'Venc. Jogo 12', data:'2026-07-06', hora:'21:00'},
+      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
+      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
     ];
 
     const MATA_QUARTAS_FIXO = [
-      {timeA:'Venc. Oitavas 1', timeB:'Venc. Oitavas 2', data:'2026-07-09', hora:'17:00'},
-      {timeA:'Venc. Oitavas 3', timeB:'Venc. Oitavas 4', data:'2026-07-10', hora:'16:00'},
-      {timeA:'Venc. Oitavas 5', timeB:'Venc. Oitavas 6', data:'2026-07-11', hora:'18:00'},
-      {timeA:'Venc. Oitavas 7', timeB:'Venc. Oitavas 8', data:'2026-07-11', hora:'22:00'},
+      {timeA:'Venc. Oitavas 2', timeB:'Venc. Oitavas 1', data:'2026-07-09', hora:'17:00'},
+      {timeA:'Venc. Oitavas 6', timeB:'Venc. Oitavas 5', data:'2026-07-10', hora:'16:00'},
+      {timeA:'Venc. Oitavas 4', timeB:'Venc. Oitavas 3', data:'2026-07-11', hora:'18:00'},
+      {timeA:'Venc. Oitavas 8', timeB:'Venc. Oitavas 7', data:'2026-07-11', hora:'22:00'},
     ];
 
     const MATA_SEMIS_FIXO = [
@@ -791,9 +745,6 @@ function initListeners(){
           id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           fase,
           grupo: '',
-          jogoNum: i+1,
-          placeholderA: base.timeA,
-          placeholderB: base.timeB,
           ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           encerrado: false,
           // Se Firestore tem times reais, usa — mantém data/hora do HTML
@@ -812,22 +763,16 @@ function initListeners(){
     ];
 
     jogosData = [...grupos, ...mataMata];
-    aplicarPontuacaoDerivada();
-    renderRanking();
     renderJogos();
     renderAdminJogos();
     renderAdminClassif();
     updateMetrics();
     renderApostasHistorico();
     renderPublico();
-    // Carrega os palpites de todos UMA vez por sessão (base do ranking derivado).
-    // NÃO recarrega quando um placar muda: os palpites não mudaram, então basta
-    // re-derivar a pontuação do cache em memória (já feito acima). Isso elimina
-    // o maior consumo de leituras — antes, cada placar salvo relia ~2.000 docs
-    // em todos os clientes conectados.
+    // Carrega cache global de palpites para estatísticas e indicador admin
+    // A função tem flag interna — não relê se já carregou nesta sessão
     if(!palpitesGlobaisCarregados){
-      clearTimeout(window.__tPalpites);
-      window.__tPalpites = setTimeout(()=>carregarCachePalpitesGlobal().catch(()=>{}), 600);
+      carregarCachePalpitesGlobal().catch(()=>{});
     }
   });
 
@@ -835,7 +780,6 @@ function initListeners(){
   onSnapshot(collection(db,`apostas/${currentUser.uid}/jogos`), snap => {
     apostasData = {};
     snap.docs.forEach(d=>{ apostasData[d.id]=d.data(); });
-    aplicarPontuacaoDerivada();
     renderApostasHistorico();
     renderJogos();
     renderPublico();
@@ -844,7 +788,6 @@ function initListeners(){
   // Classificação do usuário atual
   onSnapshot(doc(db,'classificacoes',currentUser.uid), snap => {
     classificadosData = snap.exists() ? snap.data() : {};
-    sincronizarFinal();
     renderClassif();
   });
 
@@ -852,38 +795,25 @@ function initListeners(){
   onSnapshot(collection(db,'usuarios'), snap => {
     usuariosData = {};
     snap.docs.forEach(d=>{ usuariosData[d.id]=d.data(); });
-    aplicarPontuacaoDerivada();
     renderRanking();
     updateMetrics();
     renderAdminParticipantes();
-    renderAdminInscricoes();
     renderPublico();
-    // Admin: carrega o cache de palpites UMA vez (indicador de pendentes).
-    // Não recarrega a cada mudança de usuário — evita releituras desnecessárias.
-    if(isAdmin && !palpitesGlobaisCarregados){
-      carregarCachePalpitesGlobal().catch(()=>{});
-    }
   });
 
   // Classificados confirmados (admin)
   onSnapshot(collection(db,'classificados_confirmados'), snap => {
     classifsData = {};
     snap.docs.forEach(d=>{ classifsData[d.id]=d.data(); });
-    aplicarPontuacaoDerivada();
     renderClassif();
     renderApostasHistorico();
-    renderRanking();
-    updateMetrics();
   });
 
   // Todas as apostas (para aba pública e histórico de classificação)
   onSnapshot(collection(db,'classificacoes'), snap => {
     allApostasData = {};
     snap.docs.forEach(d=>{ allApostasData[d.id]=d.data(); });
-    aplicarPontuacaoDerivada();
     renderPublico();
-    renderRanking();
-    updateMetrics();
   });
 }
 
@@ -897,14 +827,6 @@ window.switchTab = (tab) => {
   if(tab==='publico') renderPublico();
 };
 
-window.fecharPerfil = (e) => {
-  if(e.target === document.getElementById('modal-perfil'))
-    document.getElementById('modal-perfil').style.display = 'none';
-};
-window.fecharPerfilBtn = () => {
-  document.getElementById('modal-perfil').style.display = 'none';
-};
-
 // ─── MÉTRICAS ────────────────────────────────────────────────────────────────
 function updateMetrics(){
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
@@ -916,73 +838,13 @@ function updateMetrics(){
 }
 
 // ─── RANKING ─────────────────────────────────────────────────────────────────
-// Cache de apostas por uid para desempate e perfil
-const apostasCache = {};
-
-window.exportarRanking = async () => {
-  // Usa o cache em memória: é onde está a pontuação DERIVADA correta
-  aplicarPontuacaoDerivada();
-  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
-
-  // Desempate por placares exatos (mesma lógica do ranking visível)
-  aprovados.forEach(u => {
-    u._exatos = u._exatosDerivados || 0;
-  });
-  aprovados.sort((a,b) => {
-    const diffPts = (b.pts||0) - (a.pts||0);
-    if(diffPts !== 0) return diffPts;
-    return (b._exatos||0) - (a._exatos||0);
-  });
-
-  // Monta texto. Posição empata por pontos (mesmos pts = mesma posição).
-  const agora = new Date();
-  const dd = String(agora.getDate()).padStart(2,'0');
-  const mm = String(agora.getMonth()+1).padStart(2,'0');
-  const hh = String(agora.getHours()).padStart(2,'0');
-  const min = String(agora.getMinutes()).padStart(2,'0');
-
-  let texto = `🏆 RANKING — Bolão Copa 2026\nAtualizado em ${dd}/${mm} às ${hh}:${min}\n\n`;
-
-  aprovados.forEach((u, i) => {
-    const pts = u.pts || 0;
-    const pos = i + 1;
-    const medalha = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`;
-    const sep = pos <= 3 ? ' ' : '  ';
-    texto += `${medalha}${sep}${u.nome} — ${pts} pts\n`;
-  });
-
-  texto += `\nTotal: ${aprovados.length} participantes`;
-
-  // Tenta copiar para a área de transferência
-  const area = document.getElementById('ranking-export-area');
-  area.value = texto;
-  let copiou = false;
-  try {
-    await navigator.clipboard.writeText(texto);
-    copiou = true;
-  } catch(e){
-    // Fallback: mostra a textarea para cópia manual
-    area.style.display = 'block';
-    area.focus();
-    area.select();
-    try { document.execCommand('copy'); copiou = true; } catch(e2){}
-  }
-
-  if(copiou){
-    mostrarToast('✅ Ranking copiado! Cole no WhatsApp.');
-    area.style.display = 'none';
-  } else {
-    area.style.display = 'block';
-    mostrarToast('Selecione o texto abaixo e copie manualmente.', 'error');
-  }
-};
-
 function renderRanking(){
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
 
   // Calcular exatos de cada participante para desempate
   aprovados.forEach(u => {
-    u._exatos = u._exatosDerivados || 0;
+    const apostasU = apostasCache[u.uid] || {};
+    u._exatos = Object.values(apostasU).filter(a=>a.resultado==='exato').length;
   });
 
   aprovados.sort((a,b) => {
@@ -1006,6 +868,9 @@ function renderRanking(){
     </div>`;
   }).join('');
 }
+
+// Cache de apostas por uid para desempate
+const apostasCache = {};
 
 // ─── JOGOS ───────────────────────────────────────────────────────────────────
 // Filtro ativo (persiste durante a sessão)
@@ -1223,7 +1088,7 @@ function gameCardHTML(j){
       return !apostasU || !apostasU[u.uid];
     });
     if(semPalpite.length){
-      const nomes = semPalpite.map(u => u.nome || u.email || 'Participante').join(', ');
+      const nomes = semPalpite.map(u => (u.nome||'').split(' ')[0]).join(', ');
       adminPendentes = `<div style="background:#fef2f2;border-left:3px solid #c0392b;border-radius:6px;padding:7px 12px;font-size:12px;color:#7a1f1f;margin-bottom:8px">
         🔧 <strong>${semPalpite.length}/${aprovados.length}</strong> ainda não palpitou: <span style="font-weight:600">${nomes}</span>
       </div>`;
@@ -1234,9 +1099,8 @@ function gameCardHTML(j){
     }
   }
 
-  const classePalpite = temAposta && !j.encerrado ? ' tem-palpite' : '';
   return `
-  <div class="game-card${classePalpite}" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
+  <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
     <!-- Cabeçalho -->
     <div style="background:#1a1a2e;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
       <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
@@ -1276,44 +1140,19 @@ window.salvarApostaInline = async (jogoId) => {
   const gA = parseInt(inpA.value);
   const gB = parseInt(inpB.value);
   if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){
-    mostrarToast('Preencha os dois placares antes de salvar.', 'error'); return;
+    alert('Preencha os dois placares antes de salvar.'); return;
   }
   const btn = document.querySelector(`#card-${jogoId} button`);
-  const txtOriginal = btn ? btn.textContent : '';
-  if(btn){
-    btn.disabled = true;
-    btn.textContent = '⏳ Salvando...';
-  }
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
   try {
     await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
     apostasData[jogoId] = { gA, gB };
-
-    // 1. Confirmação no próprio botão (sobrevive ao re-render porque é setada depois)
-    if(btn){
-      btn.textContent = '✅ Palpite salvo!';
-      btn.style.background = '#1b5e20';
-    }
-
-    // 2. Animação de pulse no card inteiro
-    const cardEl = document.getElementById(`card-${jogoId}`);
-    if(cardEl){
-      cardEl.classList.add('card-saved-anim');
-      // Marca como tendo palpite (borda verde + check) imediatamente
-      cardEl.classList.add('tem-palpite');
-    }
-
-    // 3. Toast no topo (5 segundos)
-    mostrarToast('Palpite salvo com sucesso!');
-
-    // Aguarda 1.2s antes de re-renderizar (deixa o usuário ver a confirmação)
-    setTimeout(() => {
-      renderJogos();
-      renderApostasHistorico();
-    }, 1200);
-
+    mostrarToast('Palpite salvo!');
+    renderJogos();
+    renderApostasHistorico();
   } catch(e) {
     mostrarToast('Erro ao salvar: ' + e.message, 'error');
-    if(btn){ btn.disabled = false; btn.textContent = txtOriginal || '✅ Salvar Palpite'; }
+    if(btn){ btn.disabled = false; btn.textContent = '✅ Salvar Palpite'; }
   }
 };
 
@@ -1556,7 +1395,7 @@ function poolParaFase(fase){
 
 function renderClassif(){
   const now=Date.now();
-  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
   const bloqueado = now >= abertura - 5*60*1000;
   const el = document.getElementById('classif-content');
 
@@ -1742,9 +1581,10 @@ function renderClassif(){
     html+=`</div></div>`;
   });
 
-  // Monta os blocos especiais (3º lugar e campeão) e só então o botão salvar
-  el.innerHTML = html + renderEspecialBlocos(false)
-    + `<button class="btn btn-primary" style="margin-top:16px;width:100%;padding:13px;font-size:15px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
+  el.innerHTML=html+`<button class="btn btn-primary" style="margin-top:16px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
+
+  // Adiciona blocos especiais: 3º lugar e campeão
+  el.innerHTML += renderEspecialBlocos(false);
 }
 
 function renderEspecialBlocos(readonly=false){
@@ -1834,7 +1674,7 @@ function obterTodasSelecoes(){
 
 window.toggleClassif = (fase, time) => {
   const now=Date.now();
-  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
   if(now >= abertura - 5*60*1000) return;
   const arr = classificadosData[fase] || [];
   const idx = arr.indexOf(time);
@@ -1854,13 +1694,12 @@ window.toggleClassif = (fase, time) => {
     arr.push(time);
   }
   classificadosData[fase]=arr;
-  sincronizarFinal();
   renderClassif();
 };
 
 window.toggleEspecial = (chave, time) => {
   const now=Date.now();
-  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
   if(now >= abertura - 5*60*1000) return;
   // Toggle: se já selecionado, deseleciona; senão seleciona
   if(classificadosData[chave] === time){
@@ -1874,68 +1713,12 @@ window.toggleEspecial = (chave, time) => {
   renderClassif();
 };
 
-// Finalistas = semifinalistas nao escolhidos para o 3o lugar (derivado, nao toggle)
-function sincronizarFinal(){
-  const semi = classificadosData['Semifinal'] || [];
-  const terc = classificadosData['Terceiro lugar'] || [];
-  if(semi.length === 4 && terc.length === 2){
-    classificadosData['Final'] = semi.filter(t => !terc.includes(t));
-  } else {
-    classificadosData['Final'] = [];
-  }
-}
-
 window.salvarClassif = async () => {
   await setDoc(doc(db,'classificacoes',currentUser.uid), {...classificadosData, uid:currentUser.uid, nome:currentUser.displayName||'', email:currentUser.email||'', foto:currentUser.photoURL||'' });
   alert('Classificação salva!');
 };
 
 // ─── PALPITES PÚBLICOS ───────────────────────────────────────────────────────
-// Registro dos dados de comparação por jogo, preenchido ao renderizar a aba Comparar
-const _exportComparacao = {};
-
-window.exportarComparacaoJogo = async (jogoId) => {
-  const d = _exportComparacao[jogoId];
-  if(!d){ mostrarToast('Abra a aba Comparar primeiro.', 'error'); return; }
-
-  const fase = d.fase==='Fase de grupos' ? `Grupo ${d.grupo||''}`.trim() : (FASES_LABEL[d.fase]||d.fase);
-
-  let texto = `⚽ ${d.timeA} × ${d.timeB}\n${fase} · ${d.dataFmt}\n`;
-  if(d.encerrado && d.gA!=null && d.gB!=null){
-    texto += `🏁 Resultado: ${d.gA}×${d.gB}\n`;
-  } else {
-    texto += `🔒 Palpites encerrados — bola vai rolar!\n`;
-  }
-  texto += `\n📊 Como o grupo apostou:\n\n`;
-
-  d.grupos.forEach(g => {
-    const ehReal = d.encerrado && g.gA===d.gA && g.gB===d.gB;
-    const alvo = ehReal ? ' 🎯' : '';
-    const n = g.nomes.length;
-    texto += `▫️ ${d.timeA} ${g.gA}×${g.gB} ${d.timeB} — ${n} ${n===1?'palpite':'palpites'}${alvo}\n`;
-    texto += `   ${g.nomes.join(', ')}\n\n`;
-  });
-
-  const total = d.grupos.reduce((s,g)=>s+g.nomes.length,0);
-  texto += `Total: ${total} ${total===1?'palpite':'palpites'} · ${d.grupos.length} ${d.grupos.length===1?'placar':'placares diferentes'}`;
-
-  try {
-    await navigator.clipboard.writeText(texto);
-    mostrarToast('✅ Palpites copiados! Cole no WhatsApp.');
-  } catch(e){
-    // Fallback: textarea temporária para cópia manual
-    const ta = document.createElement('textarea');
-    ta.value = texto;
-    ta.style.position='fixed'; ta.style.left='0'; ta.style.top='0'; ta.style.opacity='0';
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    let ok=false;
-    try { ok = document.execCommand('copy'); } catch(e2){}
-    document.body.removeChild(ta);
-    mostrarToast(ok ? '✅ Palpites copiados! Cole no WhatsApp.' : 'Não foi possível copiar automaticamente.', ok?'success':'error');
-  }
-};
-
 window.renderPublico = () => {
   const el = document.getElementById('publico-list');
   const filtroFase = document.getElementById('publico-filtro-fase')?.value || '';
@@ -1966,32 +1749,9 @@ window.renderPublico = () => {
     const nomeDe = {};
     aprovados.forEach(u => { nomeDe[u.uid] = u.nome || u.email || 'Participante'; });
 
-    // Agrupa jogos por DIA (derivado do ts), dias mais recentes no topo.
-    // Dentro do dia, ordem cronológica. Cada jogo é recolhível; o dia mais
-    // recente abre expandido, os demais recolhidos.
-    const porDia = {}; // 'YYYY-MM-DD' -> [jogos]
-    jogosVisiveis.forEach(j=>{
-      const dt = new Date(typeof j.ts==='number'?j.ts:parseInt(j.ts));
-      const chave = isNaN(dt) ? '0000-00-00'
-        : `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-      if(!porDia[chave]) porDia[chave]=[];
-      porDia[chave].push(j);
-    });
-    const diasOrdenados = Object.keys(porDia).sort().reverse(); // recente primeiro
-    const diaMaisRecente = diasOrdenados[0];
-
     let html = '';
 
-    diasOrdenados.forEach(dia => {
-      const jogsDia = porDia[dia].sort((a,b)=>a.ts-b.ts); // cronológico dentro do dia
-      const expandidoDia = (dia === diaMaisRecente);
-      const dtDia = new Date(jogsDia[0].ts);
-      const labelDia = isNaN(dtDia) ? 'Data a confirmar'
-        : dtDia.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
-
-      html += `<div style="font-size:13px;font-weight:800;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #e0e0e0">📅 ${labelDia} <span style="font-weight:600;color:#888;text-transform:none">· ${jogsDia.length} ${jogsDia.length===1?'jogo':'jogos'}</span></div>`;
-
-    jogsDia.forEach(j => {
+    jogosVisiveis.forEach(j => {
       // Coletar palpites deste jogo agrupados por placar
       const porPlacar = {};  // "gA-gB" → { gA, gB, participantes: [{nome, pts, resultado}] }
       aprovados.forEach(u => {
@@ -2025,18 +1785,10 @@ window.renderPublico = () => {
         ? `<span style="background:#1a1a2e;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;margin-left:8px">Resultado: ${j.gA}×${j.gB}</span>`
         : `<span style="background:#fff8e1;color:#92610a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;margin-left:8px">Aguardando resultado</span>`;
 
-      // Guarda os dados deste jogo para o botão de exportar
-      _exportComparacao[j.id] = {
-        timeA: j.timeA, timeB: j.timeB, fase: j.fase, grupo: j.grupo,
-        encerrado: j.encerrado, gA: j.gA, gB: j.gB,
-        dataFmt: formatarDataJogo(j),
-        grupos: grupos.map(g => ({ gA: g.gA, gB: g.gB, nomes: g.participantes.map(p=>p.nome) }))
-      };
-
       html += `
-      <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <!-- Cabeçalho do jogo (clicável: recolhe/expande) -->
-        <div onclick="toggleJogoComparar(this)" style="background:#1a1a2e;padding:10px 14px;color:#fff;cursor:pointer;position:relative">
+      <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:18px">
+        <!-- Cabeçalho do jogo -->
+        <div style="background:#1a1a2e;padding:10px 14px;color:#fff">
           <div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;flex-wrap:wrap">
             <span>${flag(j.timeA)} ${j.timeA}</span>
             <span style="opacity:0.6">×</span>
@@ -2046,12 +1798,6 @@ window.renderPublico = () => {
             ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:(FASES_LABEL[j.fase]||j.fase)} · ${formatarDataJogo(j)}
             ${resultadoBadge}
           </div>
-          <span class="toggle-jogo-icon" style="position:absolute;right:14px;top:12px;font-size:13px;opacity:0.8">${expandidoDia?'▲':'▼'}</span>
-        </div>
-        <!-- Corpo recolhível -->
-        <div class="jogo-comparar-corpo" style="display:${expandidoDia?'block':'none'}">
-        <div style="text-align:center;padding:8px 0 0;background:#fff">
-          <button onclick="exportarComparacaoJogo('${j.id}')" style="background:#2d6a4f;color:#fff;border:none;font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px;cursor:pointer">📋 Exportar palpites</button>
         </div>
         <!-- Grupos de placar -->
         <div style="padding:12px 14px;background:#fff">`;
@@ -2096,22 +1842,14 @@ window.renderPublico = () => {
             Total: ${totalPalpites} ${totalPalpites===1?'palpite':'palpites'} · ${grupos.length} ${grupos.length===1?'placar diferente':'placares diferentes'}
           </div>
         </div>
-        </div>
       </div>`;
-    }); // fim jogsDia.forEach
-    }); // fim diasOrdenados.forEach
+    });
 
     el.innerHTML = html || '<div class="empty-state">Nenhum palpite registrado para os jogos visíveis.</div>';
   });
 };
 
 async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
-  // Economia de cota: se já carregamos os palpites de todos nesta sessão,
-  // reusa o cache em memória em vez de reler ~2.000 documentos do Firestore.
-  // É seguro porque a aba Comparar só mostra jogos já bloqueados, cujos
-  // palpites não mudam mais (trava de prazo). Edição do admin atualiza o cache.
-  if(palpitesGlobaisCarregados) return apostasCache;
-
   const resultado = {};
   await Promise.all(aprovados.map(async u=>{
     const snap = await getDocs(collection(db,`apostas/${u.uid}/jogos`));
@@ -2126,29 +1864,23 @@ async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
       todasApostasData[jid][uid] = { ...p, _uid: uid };
     });
   });
-  // Atualiza também o cache por uid (desempate/perfil)
-  Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
-  Object.entries(resultado).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
-  palpitesGlobaisCarregados = true;
   return resultado;
 }
 
 // Carrega todas as apostas no login (para popular cache na aba palpites)
+// Roda apenas 1x por sessão — flag evita reler ~2.000 docs a cada evento de snapshot
 async function carregarCachePalpitesGlobal(){
+  if(palpitesGlobaisCarregados) return;
   const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
   if(!aprovados.length) return;
   await carregarTodosOsPalpites(aprovados, jogosData);
-  aplicarPontuacaoDerivada();
+  palpitesGlobaisCarregados = true;
   renderJogos();
-  renderRanking();
-  updateMetrics();
-  renderApostasHistorico();
-  renderPublico();
 }
 
 function renderPublicoClassif(el, aprovados, filtroFase){
   const now = Date.now();
-  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  const abertura = new Date('2026-06-11T15:00:00-03:00').getTime();
   const bloqueado = now >= abertura - 5*60*1000;
   if(!bloqueado){
     el.innerHTML='<div class="empty-state">Palpites de classificação ficam visíveis após o início da Copa (11/06).</div>';
@@ -2161,8 +1893,7 @@ function renderPublicoClassif(el, aprovados, filtroFase){
   let html='';
   sorted.forEach(u=>{
     const classifU = allApostasData[u.uid] || {};
-    const temEspecial = !filtroFase && (classifU['Campeao']||classifU['TerceiroLugar']);
-    const temAlgum = fasesVisiveis.some(f=>(classifU[f]||[]).length>0) || temEspecial;
+    const temAlgum = fasesVisiveis.some(f=>(classifU[f]||[]).length>0);
     if(!temAlgum) return;
     const foto = u.foto ?
       `<img src="${u.foto}" class="publico-avatar">` :
@@ -2189,34 +1920,10 @@ function renderPublicoClassif(el, aprovados, filtroFase){
       });
       html+=`</div>`;
     });
-    // Palpites especiais (Campeão e Vencedor do 3º lugar) — só sem filtro de fase,
-    // pois não pertencem a nenhuma fase do seletor
-    if(!filtroFase){
-      ['Campeao','TerceiroLugar'].forEach(chave=>{
-        const palpite = classifU[chave]||null;
-        if(!palpite) return;
-        const confirmado = classifsData[chave]?.time||null;
-        const conf = confirmado && palpite===confirmado;
-        const errado = confirmado && palpite!==confirmado;
-        const cls = conf?'pts-badge-green':errado?'pts-badge-gray':'';
-        html+=`<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 6px;text-transform:uppercase">${LABEL_ESPECIAL[chave]}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-            <span class="publico-pts-badge ${cls}">${flag(palpite)} ${palpite}${conf?' ✓':''}</span>
-          </div>`;
-      });
-    }
     html+=`</div></div>`;
   });
   el.innerHTML = html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>';
 }
-
-window.toggleJogoComparar = (header) => {
-  const corpo = header.nextElementSibling;
-  const icon = header.querySelector('.toggle-jogo-icon');
-  const aberto = corpo.style.display !== 'none';
-  corpo.style.display = aberto ? 'none' : 'block';
-  if(icon) icon.textContent = aberto ? '▼' : '▲';
-};
 
 window.togglePublicoDetalhes = (header) => {
   const palpites = header.nextElementSibling;
@@ -2226,34 +1933,6 @@ window.togglePublicoDetalhes = (header) => {
 };
 
 // ─── ADMIN: PARTICIPANTES ────────────────────────────────────────────────────
-// ─── ADMIN: INSCRIÇÕES ───────────────────────────────────────────────────────
-async function renderAdminInscricoes(){
-  if(!isAdmin) return;
-  const configSnap = await getDoc(doc(db, 'config', 'bolao'));
-  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
-  const statusEl = document.getElementById('inscricoes-status');
-  const btnEl = document.getElementById('btn-toggle-inscricoes');
-  if(!statusEl || !btnEl) return;
-  if(abertas){
-    statusEl.innerHTML = '<span style="color:#2d6a4f;font-weight:600">✅ Inscrições abertas</span> — novos participantes podem entrar.';
-    btnEl.textContent = '🔒 Fechar inscrições';
-    btnEl.style.background = '#c0392b';
-  } else {
-    statusEl.innerHTML = '<span style="color:#c0392b;font-weight:600">🔒 Inscrições encerradas</span> — novos acessos estão bloqueados.';
-    btnEl.textContent = '🔓 Reabrir inscrições';
-    btnEl.style.background = '#2d6a4f';
-  }
-}
-
-window.toggleInscricoes = async () => {
-  if(!isAdmin) return;
-  const configRef = doc(db, 'config', 'bolao');
-  const configSnap = await getDoc(configRef);
-  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
-  await setDoc(configRef, { inscricoesAbertas: !abertas }, { merge: true });
-  await renderAdminInscricoes();
-};
-
 function renderAdminParticipantes(){
   if(!isAdmin) return;
   const el = document.getElementById('admin-participantes-list');
@@ -2302,10 +1981,6 @@ window.aprovarUser = async (uid, status) => {
 // ─── ADMIN: JOGOS ─────────────────────────────────────────────────────────────
 function gameCardAdminHTML(j){
   const isMata = j.fase !== 'Fase de grupos';
-  // Botão de editar palpites de terceiros só após o bloqueio (5 min antes do
-  // início). Antes disso, o próprio participante edita o palpite; admin não
-  // deve interferir em palpite ainda aberto (evita sobrescrever edição alheia).
-  const palpitesBloqueados = Date.now() >= j.ts - 5*60*1000;
   return `<div class="game-card">
     <div class="game-header">
       <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
@@ -2319,13 +1994,8 @@ function gameCardAdminHTML(j){
       <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
       ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
       ${isMata?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')" style="background:#7c5cbf;border-color:#7c5cbf;color:#fff">✏️ Editar</button>`:''}
-      ${palpitesBloqueados?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarPalpites('${j.id}')" style="background:#0b6e4f;border-color:#0b6e4f;color:#fff">✏️ Palpites</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
     </div>
-    ${palpitesBloqueados?`<div id="edit-palpites-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#eafaf2;border-radius:8px;border:1px solid #9fd8bf">
-      <div style="font-size:12px;font-weight:600;color:#0b6e4f;margin-bottom:8px">✏️ Editar palpites dos participantes (correção)</div>
-      <div id="lista-palpites-${j.id}"><div class="loading">Clique para carregar...</div></div>
-    </div>`:''}
     ${isMata?`<div id="edit-confronto-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#f5f0ff;border-radius:8px;border:1px solid #c9b8f0">
       <div style="font-size:12px;font-weight:600;color:#5a3d9a;margin-bottom:8px">✏️ Corrigir confronto</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -2487,78 +2157,6 @@ window.salvarConfrontoMata = async (jogoId) => {
   alert('✅ Confronto atualizado!');
 };
 
-// ─── ADMIN: EDITAR PALPITES DE TERCEIROS ─────────────────────────────────────
-window.toggleEditarPalpites = async (jogoId) => {
-  const painel = document.getElementById(`edit-palpites-${jogoId}`);
-  if(!painel) return;
-  const abrindo = painel.style.display === 'none';
-  painel.style.display = abrindo ? 'block' : 'none';
-  if(abrindo) await carregarPalpitesEdicao(jogoId);
-};
-
-async function carregarPalpitesEdicao(jogoId){
-  const cont = document.getElementById(`lista-palpites-${jogoId}`);
-  if(!cont) return;
-  cont.innerHTML = '<div class="loading">Carregando palpites...</div>';
-  const aprovados = Object.values(usuariosData)
-    .filter(u=>u.status==='aprovado')
-    .sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-
-  let html = '';
-  for(const u of aprovados){
-    // Usa o cache em memória; só vai ao banco se ainda não tiver carregado
-    let p = (apostasCache[u.uid] && apostasCache[u.uid][jogoId]) || null;
-    if(p === null && todasApostasData && todasApostasData[jogoId] && todasApostasData[jogoId][u.uid]){
-      p = todasApostasData[jogoId][u.uid];
-    }
-    const vA = (p && p.gA!=null) ? p.gA : '';
-    const vB = (p && p.gB!=null) ? p.gB : '';
-    const semPalpite = (vA==='' && vB==='');
-    html += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #d5ede2">
-      <div style="flex:1;font-size:13px;color:#1a1a2e">${u.nome}${semPalpite?' <span style=\'color:#b00;font-size:11px\'>(sem palpite)</span>':''}</div>
-      <input id="ep-gA-${jogoId}-${u.uid}" type="number" min="0" max="99" value="${vA}" placeholder="-"
-        style="width:44px;padding:5px;text-align:center;border:1px solid #9fd8bf;border-radius:6px"/>
-      <span style="color:#888">×</span>
-      <input id="ep-gB-${jogoId}-${u.uid}" type="number" min="0" max="99" value="${vB}" placeholder="-"
-        style="width:44px;padding:5px;text-align:center;border:1px solid #9fd8bf;border-radius:6px"/>
-      <button class="btn btn-primary btn-sm" onclick="salvarPalpiteAdmin('${jogoId}','${u.uid}')" style="background:#0b6e4f;border-color:#0b6e4f">Salvar</button>
-    </div>`;
-  }
-  cont.innerHTML = html || '<div style="font-size:13px;color:#888">Nenhum participante aprovado.</div>';
-}
-
-window.salvarPalpiteAdmin = async (jogoId, uid) => {
-  const inA = document.getElementById(`ep-gA-${jogoId}-${uid}`);
-  const inB = document.getElementById(`ep-gB-${jogoId}-${uid}`);
-  if(!inA || !inB) return;
-  const gA = parseInt(inA.value);
-  const gB = parseInt(inB.value);
-  if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){ alert('Informe um placar válido (dois números).'); return; }
-
-  const btn = event?.target;
-  if(btn){ btn.disabled = true; btn.textContent = '⏳'; }
-  try {
-    // 1 única escrita: o palpite do participante. Sem fan-out.
-    await setDoc(doc(db,`apostas/${uid}/jogos`,jogoId), { gA, gB }, { merge:true });
-
-    // Atualiza os caches em memória para o ranking derivar na hora
-    if(!apostasCache[uid]) apostasCache[uid] = {};
-    apostasCache[uid][jogoId] = { ...(apostasCache[uid][jogoId]||{}), gA, gB };
-    if(!todasApostasData) todasApostasData = {};
-    if(!todasApostasData[jogoId]) todasApostasData[jogoId] = {};
-    todasApostasData[jogoId][uid] = { ...(todasApostasData[jogoId][uid]||{}), gA, gB, _uid:uid };
-
-    aplicarPontuacaoDerivada();
-    renderRanking(); updateMetrics(); renderPublico(); renderApostasHistorico();
-
-    if(btn){ btn.disabled = false; btn.textContent = '✅'; setTimeout(()=>{ if(btn) btn.textContent='Salvar'; }, 1500); }
-  } catch(e){
-    console.error('Erro ao salvar palpite (admin):', e);
-    if(btn){ btn.disabled = false; btn.textContent = 'Salvar'; }
-    alert('❌ Erro ao salvar: ' + e.message);
-  }
-};
-
 window.addJogo = async () => {
   const timeA = document.getElementById('j-timeA').value.trim();
   const timeB = document.getElementById('j-timeB').value.trim();
@@ -2575,50 +2173,46 @@ window.addJogo = async () => {
 };
 
 window.salvarResultado = async (jogoId) => {
-  const btn = event?.target;
   const gA = parseInt(document.getElementById(`adm-gA-${jogoId}`).value);
   const gB = parseInt(document.getElementById(`adm-gB-${jogoId}`).value);
   if(isNaN(gA)||isNaN(gB)){ alert('Informe o placar.'); return; }
   const jogo = jogosData.find(j=>j.id===jogoId);
-
-  if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
-
-  try {
-    // ÚNICA escrita necessária: o placar no doc do jogo. A pontuação de TODOS
-    // os participantes é derivada em memória, em todos os clientes, pelo
-    // onSnapshot de jogos + aplicarPontuacaoDerivada(). Nada de fan-out.
-    await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
-
-    // Atualiza a tela local imediatamente (o onSnapshot confirma em seguida)
-    if(jogo){ jogo.gA = gA; jogo.gB = gB; jogo.encerrado = true; }
-    aplicarPontuacaoDerivada();
-    renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
-    renderApostasHistorico(); renderPublico();
-
-    // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
-    if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
-      const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
-      const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
-      let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
-      if(dests){
-        if(!Array.isArray(dests)) dests = [dests];
-        for(const d of dests){
-          const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
-          if(!time) continue;
-          const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
-          if(!alvo) continue;
-          await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
-        }
+  await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){
+    const aRef = doc(db,`apostas/${u.uid}/jogos`,jogoId);
+    const aSnap = await getDoc(aRef);
+    if(!aSnap.exists()) continue;
+    const a = aSnap.data();
+    const pts = calcularPts(a.gA,a.gB,gA,gB,jogo.fase);
+    let resultado='';
+    if(a.gA===gA&&a.gB===gB) resultado='exato';
+    else if((gA>gB&&a.gA>a.gB)||(gA<gB&&a.gA<a.gB)){
+      if(gA-gB===a.gA-a.gB) resultado='vencedor_saldo';
+      else resultado='vencedor';
+    } else if(gA===gB&&a.gA===a.gB) resultado='empate';
+    else resultado='erro';
+    await updateDoc(aRef,{ pts, resultado });
+    await recalcularPtsUsuario(u.uid);
+  }
+  // Propaga vencedor/perdedor para jogos placeholder da próxima fase (mata-mata)
+  if(jogo && jogo.gerado && jogo.fase !== 'Fase de grupos'){
+    const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
+    const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
+    if(vencedor && jogo.fase === 'Semifinal'){
+      const jogo3 = jogosData.find(j=>j.fase==='Terceiro lugar'&&j.placeholder);
+      if(jogo3 && perdedor){
+        if(!jogo3.timeA || jogo3.timeA.includes('Perdedor')) await updateDoc(doc(db,'jogos',jogo3.id),{timeA:perdedor});
+        else await updateDoc(doc(db,'jogos',jogo3.id),{timeB:perdedor});
+      }
+      const jogoFinal = jogosData.find(j=>j.fase==='Final'&&j.placeholder);
+      if(jogoFinal){
+        if(!jogoFinal.timeA || jogoFinal.timeA.includes('Vencedor')) await updateDoc(doc(db,'jogos',jogoFinal.id),{timeA:vencedor});
+        else await updateDoc(doc(db,'jogos',jogoFinal.id),{timeB:vencedor});
       }
     }
-
-    if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
-    alert('✅ Resultado salvo! O ranking de todos os participantes foi atualizado.');
-  } catch(e){
-    console.error('Erro ao salvar resultado:', e);
-    if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
-    alert('❌ Erro ao salvar: ' + e.message);
   }
+  alert('✅ Resultado salvo e pontos calculados!');
 };
 
 function calcularPts(pA,pB,rA,rB,fase){
@@ -2632,75 +2226,27 @@ function calcularPts(pA,pB,rA,rB,fase){
   return Math.round(5*m);
 }
 
-// ─── PONTUAÇÃO DERIVADA ──────────────────────────────────────────────────────
-// Calcula os pts de cada aposta e o total de cada participante EM MEMÓRIA, a
-// partir dos placares (jogosData) + palpites + bônus de classificação.
-// Nada de pontuação é gravado no Firestore: salvar/reabrir um jogo é 1 única
-// escrita e todos os clientes derivam a pontuação sozinhos via onSnapshot.
-function aplicarPontuacaoDerivada(){
-  const encerrados = {};
-  (jogosData||[]).forEach(j=>{
-    if(j.encerrado && j.gA!=null && j.gB!=null)
-      encerrados[j.id] = { gA:j.gA, gB:j.gB, fase:j.fase||'Fase de grupos' };
-  });
-
-  const totais = {}; // uid -> pontos de jogos
-  const exatos = {}; // uid -> nº de placares exatos
-
-  function pontuar(a, jid){
-    // Limpa valores antigos (gravados no banco ou de jogo reaberto)
-    delete a.pts; delete a.resultado;
-    const jogo = encerrados[jid];
-    if(!jogo || a.gA==null || a.gB==null) return;
-    const pts = calcularPts(a.gA, a.gB, jogo.gA, jogo.gB, jogo.fase);
-    let resultado;
-    if(a.gA===jogo.gA && a.gB===jogo.gB) resultado='exato';
-    else if(pts===0) resultado='erro';
-    else if(jogo.gA===jogo.gB) resultado='empate';
-    else if(jogo.gA-jogo.gB===a.gA-a.gB) resultado='vencedor_saldo';
-    else resultado='vencedor';
-    a.pts = pts; a.resultado = resultado;
-  }
-
-  // Apostas de todos (cache global por jogo) — base do total
-  Object.entries(todasApostasData||{}).forEach(([jid, porUid])=>{
-    Object.entries(porUid).forEach(([uid, a])=>{
-      pontuar(a, jid);
-      if(a.pts!==undefined){
-        totais[uid] = (totais[uid]||0) + a.pts;
-        if(a.resultado==='exato') exatos[uid] = (exatos[uid]||0)+1;
-      }
-    });
-  });
-  // Cache por uid (desempate/perfil) e apostas do usuário logado
-  Object.entries(apostasCache||{}).forEach(([uid, palps])=>{
-    Object.entries(palps||{}).forEach(([jid, a])=>pontuar(a, jid));
-  });
-  Object.entries(apostasData||{}).forEach(([jid, a])=>pontuar(a, jid));
-
-  // Bônus de classificação por fase + especiais (palpites de todos)
-  Object.entries(allApostasData||{}).forEach(([uid, cOrig])=>{
-    const c = {...cOrig};
-    if((c['Semifinal']||[]).length===4 && (c['Terceiro lugar']||[]).length===2){
-      c['Final'] = c['Semifinal'].filter(t=>!c['Terceiro lugar'].includes(t));
-    }
-    let bonus = 0;
+async function recalcularPtsUsuario(uid){
+  let total=0;
+  const jogosSnap = await getDocs(collection(db,`apostas/${uid}/jogos`));
+  jogosSnap.docs.forEach(d=>{ total+=(d.data().pts||0); });
+  // Bônus de classificação por fase
+  const classifSnap = await getDoc(doc(db,'classificacoes',uid));
+  if(classifSnap.exists()){
+    const c = classifSnap.data();
     FASES_CLASSIF.forEach(fase=>{
       const confirmados = classifsData[fase]?.times||[];
-      (c[fase]||[]).forEach(time=>{ if(confirmados.includes(time)) bonus += BONUS_CLASSIF[fase]; });
+      const palpites = c[fase]||[];
+      palpites.forEach(time=>{ if(confirmados.includes(time)) total+=BONUS_CLASSIF[fase]; });
     });
+    // Bônus especiais: 3º lugar e campeão
     ['TerceiroLugar','Campeao'].forEach(chave=>{
       const confirmado = classifsData[chave]?.time||null;
-      if(confirmado && c[chave]===confirmado) bonus += BONUS_ESPECIAL[chave];
+      const palpite = c[chave]||null;
+      if(confirmado && palpite === confirmado) total+=BONUS_ESPECIAL[chave];
     });
-    if(bonus) totais[uid] = (totais[uid]||0) + bonus;
-  });
-
-  // Sobrepõe o pts antigo do banco NO CACHE em memória
-  Object.entries(usuariosData||{}).forEach(([uid, u])=>{
-    u.pts = totais[uid]||0;
-    u._exatosDerivados = exatos[uid]||0;
-  });
+  }
+  await updateDoc(doc(db,'usuarios',uid),{ pts:total });
 }
 
 // Jogos oficiais da fase de grupos — Copa 2026
@@ -2806,71 +2352,9 @@ window.migrarJogosGrupos = async () => {
   alert(`✅ Concluído!\n\n${apagados} jogos antigos removidos.\n${cadastrados} jogos corretos cadastrados.`);
 };
 
-// Bracket do mata-mata (numeracao interna do codigo). Para cada jogo-origem,
-// para onde o vencedor (e, na semi, o perdedor) vai na fase seguinte.
-const BRACKET_PROPAGA = {
-  '16avos': {
-    3:{fase:'Oitavas',jogo:1,slot:'timeA'},  6:{fase:'Oitavas',jogo:1,slot:'timeB'},
-    1:{fase:'Oitavas',jogo:2,slot:'timeA'},  4:{fase:'Oitavas',jogo:2,slot:'timeB'},
-    12:{fase:'Oitavas',jogo:3,slot:'timeA'}, 11:{fase:'Oitavas',jogo:3,slot:'timeB'},
-    10:{fase:'Oitavas',jogo:4,slot:'timeA'}, 9:{fase:'Oitavas',jogo:4,slot:'timeB'},
-    2:{fase:'Oitavas',jogo:5,slot:'timeA'},  5:{fase:'Oitavas',jogo:5,slot:'timeB'},
-    7:{fase:'Oitavas',jogo:6,slot:'timeA'},  8:{fase:'Oitavas',jogo:6,slot:'timeB'},
-    15:{fase:'Oitavas',jogo:7,slot:'timeA'}, 14:{fase:'Oitavas',jogo:7,slot:'timeB'},
-    13:{fase:'Oitavas',jogo:8,slot:'timeA'}, 16:{fase:'Oitavas',jogo:8,slot:'timeB'},
-  },
-  'Oitavas': {
-    1:{fase:'Quartas',jogo:1,slot:'timeA'}, 2:{fase:'Quartas',jogo:1,slot:'timeB'},
-    3:{fase:'Quartas',jogo:2,slot:'timeA'}, 4:{fase:'Quartas',jogo:2,slot:'timeB'},
-    5:{fase:'Quartas',jogo:3,slot:'timeA'}, 6:{fase:'Quartas',jogo:3,slot:'timeB'},
-    7:{fase:'Quartas',jogo:4,slot:'timeA'}, 8:{fase:'Quartas',jogo:4,slot:'timeB'},
-  },
-  'Quartas': {
-    1:{fase:'Semifinal',jogo:1,slot:'timeA'}, 2:{fase:'Semifinal',jogo:1,slot:'timeB'},
-    3:{fase:'Semifinal',jogo:2,slot:'timeA'}, 4:{fase:'Semifinal',jogo:2,slot:'timeB'},
-  },
-  'Semifinal': {
-    1:[{fase:'Final',jogo:1,slot:'timeA',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeA',tipo:'perdedor'}],
-    2:[{fase:'Final',jogo:1,slot:'timeB',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeB',tipo:'perdedor'}],
-  },
-};
-
 window.reabrirJogo = async (jogoId) => {
   if(!confirm('Reabrir jogo e remover resultado?')) return;
-  const btn = event?.target;
-  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
-  try {
-    // ÚNICA escrita: limpa o placar do jogo. A pontuação derivada se ajusta
-    // sozinha em todos os clientes (nenhum pts gravado precisa ser limpo).
-    await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
-
-    // Atualiza a tela local imediatamente
-    const jogo = jogosData.find(j=>j.id===jogoId);
-    if(jogo){ jogo.gA = null; jogo.gB = null; jogo.encerrado = false; }
-    aplicarPontuacaoDerivada();
-    renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
-    renderApostasHistorico(); renderPublico();
-  } catch(e){
-    console.error('Erro ao reabrir jogo:', e);
-    if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
-    alert('❌ Erro ao reabrir: ' + e.message);
-    return;
-  }
-  if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
-  // Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
-  const jReab = jogosData.find(j=>j.id===jogoId);
-  if(jReab && jReab.jogoNum && BRACKET_PROPAGA[jReab.fase]){
-    let dests = BRACKET_PROPAGA[jReab.fase][jReab.jogoNum];
-    if(dests){
-      if(!Array.isArray(dests)) dests = [dests];
-      for(const d of dests){
-        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
-        if(!alvo) continue;
-        const rotulo = d.slot==='timeA' ? alvo.placeholderA : alvo.placeholderB;
-        await setDoc(doc(db,'jogos',alvo.id), { [d.slot]: rotulo }, {merge:true});
-      }
-    }
-  }
+  await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
 };
 
 window.deletarJogo = async (jogoId) => {
@@ -3008,12 +2492,9 @@ function renderAdminClassif(){
       html+=`<div style="font-size:12px;color:#888;margin-top:8px">Selecione os ${LIMITES_CLASSIF[fase]} classificados para ${FASES_LABEL[fase]||fase}. Os jogos da próxima fase serão gerados automaticamente.</div>`;
     }
 
-    html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
-      <button class="btn btn-primary btn-sm" onclick="salvarClassifAdmin('${fase}')">
-        ✅ Confirmar + Gerar jogos
-      </button>
-      ${(classifsData[fase]?.times||[]).length ? `<button class="btn btn-danger btn-sm" onclick="reabrirClassif('${fase}')">↩️ Reabrir classificação</button>` : ''}
-    </div></div></div>`;
+    html+=`<button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarClassifAdmin('${fase}')">
+      ✅ Confirmar + Gerar jogos
+    </button></div></div>`;
   });
 
   // Blocos especiais: vencedor do 3º lugar e campeão
@@ -3042,12 +2523,9 @@ function renderAdminClassif(){
       </div>`;
     });
     html+=`</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
-          <button class="btn btn-primary btn-sm" onclick="salvarEspecialAdmin('${chave}')">
-            Confirmar ${LABEL_ESPECIAL[chave]}
-          </button>
-          ${confirmado ? `<button class="btn btn-danger btn-sm" onclick="reabrirEspecial('${chave}')">↩️ Reabrir</button>` : ''}
-        </div>
+        <button class="btn btn-primary btn-sm" style="margin:12px 0 4px" onclick="salvarEspecialAdmin('${chave}')">
+          Confirmar ${LABEL_ESPECIAL[chave]}
+        </button>
       </div></div>`;
   });
 
@@ -3258,15 +2736,16 @@ window.salvarClassifAdmin = async (fase) => {
   await setDoc(doc(db,'classificados_confirmados',fase),{
     times, primeiros, segundos, terceiros, pts3os, slots3os, fase
   });
-  aplicarPontuacaoDerivada();
-  renderRanking();
-  updateMetrics();
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
 
-  // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
-  // se montam sozinhos quando os placares da fase anterior sao lancados.
+  // Gera jogos do mata-mata automaticamente
   if(fase==='16avos') await gerarJogos16avos(primeiros, segundos, terceiros, pts3os);
+  else if(fase==='Oitavas') await gerarJogosFase(times,'Oitavas');
+  else if(fase==='Quartas') await gerarJogosFase(times,'Quartas');
+  else if(fase==='Semifinal') await gerarJogosFase(times,'Semifinal',null,null,true);
 
-  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Bônus recalculado.`);
+  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Jogos da próxima fase gerados.`);
 };
 
 // Gera os 16 jogos dos 16-avos — chaveamento oficial Copa 2026
@@ -3404,35 +2883,9 @@ window.salvarEspecialAdmin = async (chave) => {
   const time = classifsData[chave]?.time||null;
   if(!time){ alert('Selecione um time primeiro.'); return; }
   await setDoc(doc(db,'classificados_confirmados',chave),{ time, chave });
-  aplicarPontuacaoDerivada();
-  renderRanking();
-  updateMetrics();
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  for(const u of aprovados){ await recalcularPtsUsuario(u.uid); }
   alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
-};
-
-// Reabre uma fase de classificação: apaga a confirmação e recalcula os pontos
-window.reabrirClassif = async (fase) => {
-  if(!confirm(`Reabrir a classificação de ${FASES_LABEL[fase]||fase}?\n\nIsso remove a confirmação dos times e zera os bônus desta fase. Os palpites dos participantes NÃO são afetados.`)) return;
-  await deleteDoc(doc(db,'classificados_confirmados',fase));
-  // Limpa o cache local da fase
-  delete classifsData[fase];
-  aplicarPontuacaoDerivada();
-  renderRanking();
-  updateMetrics();
-  renderAdminClassif();
-  alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
-};
-
-// Reabre um palpite especial (3º lugar ou campeão): apaga a confirmação e recalcula
-window.reabrirEspecial = async (chave) => {
-  if(!confirm(`Reabrir ${LABEL_ESPECIAL[chave]}?\n\nIsso remove a confirmação e zera o bônus. Os palpites dos participantes NÃO são afetados.`)) return;
-  await deleteDoc(doc(db,'classificados_confirmados',chave));
-  delete classifsData[chave];
-  aplicarPontuacaoDerivada();
-  renderRanking();
-  updateMetrics();
-  renderAdminClassif();
-  alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
 };
 
 // ─── REGRAS ───────────────────────────────────────────────────────────────────
@@ -3453,7 +2906,7 @@ const REGRAS_PADRAO = [
     itens: [
       'Acesse a aba "Palpites" e registre o placar que você prevê para cada jogo.',
       'Os palpites de placar são bloqueados individualmente 5 minutos antes do início de cada jogo.',
-      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 16h).',
+      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 15h).',
       'Após o bloqueio, não é possível alterar ou registrar palpites para aquele jogo ou fase.',
       'Palpites não feitos valem 0 pontos — não há pontuação automática.'
     ]
@@ -3600,6 +3053,286 @@ window.salvarRegras = async () => {
   renderRegras();
   fecharEdicaoRegras();
   alert('✅ Regras salvas!');
+};
+
+// ─── BUSCA AUTOMÁTICA DE RESULTADOS ──────────────────────────────────────────
+// Usa football-data.org (plano gratuito) — Copa do Mundo 2026 = competição WC
+// Chave de API gratuita — registre em football-data.org para obter a sua
+const API_KEY = '9db068e239c84a2390ce84f408ade73d';
+const API_BASE = 'https://api.football-data.org/v4';
+
+// Mapa de nomes da API → nomes usados no bolão
+// Ajuste conforme os nomes retornados pela API
+const NOMES_API = {
+  'Mexico': 'México',
+  'South Africa': 'África do Sul',
+  'Korea Republic': 'Coreia do Sul',
+  'Czechia': 'República Tcheca',
+  'Czech Republic': 'República Tcheca',
+  'Canada': 'Canadá',
+  'Bosnia and Herzegovina': 'Bósnia e Herzegovina',
+  'USA': 'Estados Unidos',
+  'United States': 'Estados Unidos',
+  'Paraguay': 'Paraguai',
+  'Qatar': 'Catar',
+  'Switzerland': 'Suíça',
+  'Brazil': 'Brasil',
+  'Morocco': 'Marrocos',
+  'Haiti': 'Haiti',
+  'Scotland': 'Escócia',
+  'Australia': 'Austrália',
+  'Turkey': 'Turquia',
+  'Türkiye': 'Turquia',
+  'Germany': 'Alemanha',
+  'Curaçao': 'Curaçao',
+  'Netherlands': 'Holanda',
+  'Japan': 'Japão',
+  "Côte d'Ivoire": 'Costa do Marfim',
+  'Ivory Coast': 'Costa do Marfim',
+  'Ecuador': 'Equador',
+  'Sweden': 'Suécia',
+  'Tunisia': 'Tunísia',
+  'Spain': 'Espanha',
+  'Cape Verde': 'Cabo Verde',
+  'Belgium': 'Bélgica',
+  'Egypt': 'Egito',
+  'Saudi Arabia': 'Arábia Saudita',
+  'Uruguay': 'Uruguai',
+  'Iran': 'Irã',
+  'New Zealand': 'Nova Zelândia',
+  'France': 'França',
+  'Senegal': 'Senegal',
+  'Iraq': 'Iraque',
+  'Norway': 'Noruega',
+  'Argentina': 'Argentina',
+  'Algeria': 'Argélia',
+  'Austria': 'Áustria',
+  'Jordan': 'Jordânia',
+  'Portugal': 'Portugal',
+  'DR Congo': 'RD Congo',
+  'Congo DR': 'RD Congo',
+  'England': 'Inglaterra',
+  'Croatia': 'Croácia',
+  'Ghana': 'Gana',
+  'Panama': 'Panamá',
+  'Uzbekistan': 'Uzbequistão',
+  'Colombia': 'Colômbia',
+};
+
+function normalizarNomeAPI(nome) {
+  return NOMES_API[nome] || nome;
+}
+
+// Staging: resultados buscados aguardando confirmação
+let stagingResultados = [];
+
+window.buscarResultadosAPI = async () => {
+  const btn = document.getElementById('btn-buscar-api');
+  const msgEl = document.getElementById('staging-msg');
+  const stagingArea = document.getElementById('staging-area');
+
+  if (API_KEY === 'SUA_CHAVE_API_AQUI') {
+    msgEl.innerHTML = `<div class="alert alert-danger" style="font-size:13px">
+      ⚠️ Configure sua chave da API antes de usar esta função.<br>
+      Registre-se em <strong>football-data.org</strong> (gratuito) e substitua <code>SUA_CHAVE_API_AQUI</code> no código.
+    </div>`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Buscando...';
+  msgEl.innerHTML = '';
+  stagingArea.style.display = 'none';
+  stagingResultados = [];
+
+  try {
+    // Busca partidas da Copa do Mundo 2026
+    const resp = await fetch(`${API_BASE}/competitions/WC/matches?status=FINISHED`, {
+      headers: { 'X-Auth-Token': API_KEY }
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Erro na API: ${resp.status} ${resp.statusText}`);
+    }
+
+    const data = await resp.json();
+    const partidas = data.matches || [];
+
+    // Jogos do bolão ainda não encerrados
+    const jogosAbertos = jogosData.filter(j => !j.encerrado && j.ts <= Date.now());
+
+    if (!jogosAbertos.length) {
+      msgEl.innerHTML = `<div class="alert alert-info" style="font-size:13px">Nenhum jogo encerrado sem resultado registrado.</div>`;
+      btn.disabled = false;
+      btn.textContent = '🔍 Buscar resultados';
+      return;
+    }
+
+    // Para cada jogo aberto, tenta encontrar correspondência na API
+    const encontrados = [];
+    for (const jogo of jogosAbertos) {
+      const nomeA = jogo.timeA;
+      const nomeB = jogo.timeB;
+      const dataJogo = jogo.data; // 'YYYY-MM-DD'
+
+      const partida = partidas.find(p => {
+        const homeAPI = normalizarNomeAPI(p.homeTeam?.name || '');
+        const awayAPI = normalizarNomeAPI(p.awayTeam?.name || '');
+        const dataAPI = p.utcDate?.slice(0, 10);
+        return dataAPI === dataJogo && (
+          (homeAPI === nomeA && awayAPI === nomeB) ||
+          (homeAPI === nomeB && awayAPI === nomeA)
+        );
+      });
+
+      if (partida && partida.score?.fullTime) {
+        const homeAPI = normalizarNomeAPI(partida.homeTeam?.name || '');
+        const ft = partida.score.fullTime;
+        // Ajusta gA/gB conforme a ordem no bolão
+        let gA, gB;
+        if (homeAPI === nomeA) {
+          gA = ft.home ?? ft.homeTeam;
+          gB = ft.away ?? ft.awayTeam;
+        } else {
+          gA = ft.away ?? ft.awayTeam;
+          gB = ft.home ?? ft.homeTeam;
+        }
+        if (gA !== null && gA !== undefined && gB !== null && gB !== undefined) {
+          encontrados.push({ jogo, gA: parseInt(gA), gB: parseInt(gB) });
+        }
+      }
+    }
+
+    if (!encontrados.length) {
+      msgEl.innerHTML = `<div class="alert alert-info" style="font-size:13px">Nenhum resultado novo encontrado na API para os jogos pendentes.</div>`;
+      btn.disabled = false;
+      btn.textContent = '🔍 Buscar resultados';
+      return;
+    }
+
+    // Monta prévia (staging)
+    stagingResultados = encontrados;
+    renderStaging();
+    stagingArea.style.display = 'block';
+
+  } catch (e) {
+    msgEl.innerHTML = `<div class="alert alert-danger" style="font-size:13px">❌ Erro ao buscar resultados: ${e.message}</div>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 Buscar resultados';
+};
+
+function renderStaging() {
+  const el = document.getElementById('staging-list');
+  el.innerHTML = stagingResultados.map((item, idx) => `
+    <div class="game-card" style="margin-bottom:8px">
+      <div class="game-header">
+        <span class="phase-badge">${item.jogo.fase === 'Fase de grupos' ? `Grupo ${item.jogo.grupo}` : item.jogo.fase}</span>
+        <span class="game-date">${formatarDataJogo(item.jogo)}</span>
+      </div>
+      <div class="game-teams" style="margin-bottom:10px">
+        <div class="team-block">
+          <span class="team-flag">${flag(item.jogo.timeA)}</span>
+          <div class="team-name">${item.jogo.timeA}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" min="0" max="99" value="${item.gA}"
+            id="stg-gA-${idx}" style="width:46px;text-align:center;font-size:18px;font-weight:700;padding:6px;border:2px solid #2d6a4f;border-radius:8px"/>
+          <span style="font-size:18px;font-weight:700;color:#888">×</span>
+          <input type="number" min="0" max="99" value="${item.gB}"
+            id="stg-gB-${idx}" style="width:46px;text-align:center;font-size:18px;font-weight:700;padding:6px;border:2px solid #2d6a4f;border-radius:8px"/>
+        </div>
+        <div class="team-block">
+          <span class="team-flag">${flag(item.jogo.timeB)}</span>
+          <div class="team-name">${item.jogo.timeB}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.cancelarStaging = () => {
+  stagingResultados = [];
+  document.getElementById('staging-area').style.display = 'none';
+  document.getElementById('staging-msg').innerHTML = '';
+};
+
+window.confirmarResultadosStaging = async () => {
+  if (!stagingResultados.length) return;
+
+  const btnConfirm = document.querySelector('#staging-area .btn-primary');
+  btnConfirm.disabled = true;
+  btnConfirm.textContent = '⏳ Salvando...';
+
+  const msgEl = document.getElementById('staging-msg');
+  let salvos = 0;
+  const erros = [];
+
+  for (let idx = 0; idx < stagingResultados.length; idx++) {
+    const { jogo } = stagingResultados[idx];
+    const gA = parseInt(document.getElementById(`stg-gA-${idx}`)?.value);
+    const gB = parseInt(document.getElementById(`stg-gB-${idx}`)?.value);
+
+    if (isNaN(gA) || isNaN(gB)) { erros.push(jogo.timeA + ' x ' + jogo.timeB); continue; }
+
+    try {
+      // Salva resultado no Firestore
+      await updateDoc(doc(db, 'jogos', jogo.id), { gA, gB, encerrado: true });
+
+      // Calcula pontos de cada participante
+      const aprovados = Object.values(usuariosData).filter(u => u.status === 'aprovado');
+      for (const u of aprovados) {
+        const aRef = doc(db, `apostas/${u.uid}/jogos`, jogo.id);
+        const aSnap = await getDoc(aRef);
+        if (!aSnap.exists()) continue;
+        const a = aSnap.data();
+        const pts = calcularPts(a.gA, a.gB, gA, gB, jogo.fase);
+        let resultado = '';
+        if (a.gA === gA && a.gB === gB) resultado = 'exato';
+        else if ((gA > gB && a.gA > a.gB) || (gA < gB && a.gA < a.gB)) {
+          resultado = gA - gB === a.gA - a.gB ? 'vencedor_saldo' : 'vencedor';
+        } else if (gA === gB && a.gA === a.gB) resultado = 'empate';
+        else resultado = 'erro';
+        await updateDoc(aRef, { pts, resultado });
+        await recalcularPtsUsuario(u.uid);
+      }
+
+      // Propaga vencedor/perdedor para mata-mata
+      if (jogo.gerado && jogo.fase !== 'Fase de grupos') {
+        const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
+        const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
+        if (vencedor && jogo.fase === 'Semifinal') {
+          const jogo3 = jogosData.find(j => j.fase === 'Terceiro lugar' && j.placeholder);
+          if (jogo3 && perdedor) {
+            if (!jogo3.timeA || jogo3.timeA.includes('Perdedor')) await updateDoc(doc(db, 'jogos', jogo3.id), { timeA: perdedor });
+            else await updateDoc(doc(db, 'jogos', jogo3.id), { timeB: perdedor });
+          }
+          const jogoFinal = jogosData.find(j => j.fase === 'Final' && j.placeholder);
+          if (jogoFinal) {
+            if (!jogoFinal.timeA || jogoFinal.timeA.includes('Vencedor')) await updateDoc(doc(db, 'jogos', jogoFinal.id), { timeA: vencedor });
+            else await updateDoc(doc(db, 'jogos', jogoFinal.id), { timeB: vencedor });
+          }
+        }
+      }
+
+      salvos++;
+    } catch (e) {
+      erros.push(jogo.timeA + ' x ' + jogo.timeB);
+    }
+  }
+
+  document.getElementById('staging-area').style.display = 'none';
+  stagingResultados = [];
+
+  let msg = `<div class="alert alert-success" style="font-size:13px">✅ ${salvos} resultado(s) publicado(s) e pontos calculados!</div>`;
+  if (erros.length) {
+    msg += `<div class="alert alert-danger" style="font-size:13px;margin-top:6px">⚠️ Erro ao salvar: ${erros.join(', ')}. Registre manualmente.</div>`;
+  }
+  msgEl.innerHTML = msg;
+
+  btnConfirm.disabled = false;
+  btnConfirm.textContent = '✅ Confirmar e publicar';
 };
 
 </script>
