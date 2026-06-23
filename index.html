@@ -1936,6 +1936,93 @@ window.exportarComparacaoJogo = async (jogoId) => {
   }
 };
 
+// ── Helpers de exportação para WhatsApp (compartilhados) ─────────────────────
+// Reaproveita dados já em memória (allApostasData + usuariosData): leitura zero
+// no Firestore. FORMATO_CONSENSO = fases com muitas seleções (16avos/Oitavas);
+// ESPECIAIS_EXPORT = picks únicos (Campeão / Vencedor do 3º).
+const FORMATO_CONSENSO = ['16avos','Oitavas'];
+const ESPECIAIS_EXPORT = ['Campeao','TerceiroLugar'];
+
+async function copiarParaWhatsApp(texto){
+  try {
+    await navigator.clipboard.writeText(texto);
+    mostrarToast('✅ Palpites copiados! Cole no WhatsApp.');
+  } catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position='fixed'; ta.style.left='0'; ta.style.top='0'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    let ok=false;
+    try { ok = document.execCommand('copy'); } catch(e2){}
+    document.body.removeChild(ta);
+    mostrarToast(ok ? '✅ Palpites copiados! Cole no WhatsApp.' : 'Não foi possível copiar automaticamente.', ok?'success':'error');
+  }
+}
+
+// ── Exportação de ACERTOS de classificação por fase ──────────────────────────
+// Só faz sentido depois de confirmar os classificados da fase. 16avos/Oitavas
+// saem só com o número (X/N); demais fases, número + bandeiras dos acertos.
+// Campeão/3º (pick único) listam quem acertou. Leitura zero (tudo em memória).
+window.exportarAcertosFase = async (fase) => {
+  const aprovados = Object.values(usuariosData).filter(u => u.status === 'aprovado');
+
+  const agora = new Date();
+  const dd=String(agora.getDate()).padStart(2,'0'), mm=String(agora.getMonth()+1).padStart(2,'0');
+  const hh=String(agora.getHours()).padStart(2,'0'), min=String(agora.getMinutes()).padStart(2,'0');
+  const stamp = `${dd}/${mm} às ${hh}:${min}`;
+
+  // Campeão / Vencedor do 3º — escolha única, acerto binário
+  if(ESPECIAIS_EXPORT.includes(fase)){
+    const titulo = LABEL_ESPECIAL[fase] || fase;
+    const confirmado = classifsData[fase]?.time || null;
+    if(!confirmado){ return copiarParaWhatsApp(`${titulo} — Acertos\n\nFase ainda não confirmada.`); }
+    const acertaram = aprovados
+      .filter(u => (allApostasData[u.uid]||{})[fase] === confirmado)
+      .map(u => u.nome || u.email || 'Participante')
+      .sort((a,b)=> a.localeCompare(b,'pt-BR'));
+    let texto = `${titulo} — Acertos\nBolão Copa 2026 · ${stamp}\n\n${flag(confirmado)} ${confirmado}\n\n`;
+    texto += acertaram.length ? `Acertaram (${acertaram.length}): ${acertaram.join(', ')}` : 'Ninguém acertou.';
+    return copiarParaWhatsApp(texto);
+  }
+
+  const label = FASES_LABEL[fase] || fase;
+  const confirmados = classifsData[fase]?.times || [];
+  if(!confirmados.length){
+    return copiarParaWhatsApp(`🎯 ACERTOS — ${label}\n\nFase ainda não confirmada. Confirme os classificados primeiro.`);
+  }
+
+  // Acertos por participante (Final derivada de Semifinal − 3º lugar)
+  const linhas = [];
+  aprovados.forEach(u => {
+    const c = {...(allApostasData[u.uid]||{})};
+    if(fase==='Final' && (c['Semifinal']||[]).length===4 && (c['Terceiro lugar']||[]).length===2){
+      c['Final'] = c['Semifinal'].filter(t => !c['Terceiro lugar'].includes(t));
+    }
+    const picks = c[fase] || [];
+    if(!picks.length) return; // não preencheu essa fase
+    const acertos = picks.filter(t => confirmados.includes(t));
+    linhas.push({ nome: u.nome || u.email || 'Participante', n: acertos.length, acertos });
+  });
+  linhas.sort((a,b)=> b.n - a.n || a.nome.localeCompare(b.nome,'pt-BR'));
+
+  const denom = confirmados.length;
+  let texto = `🎯 ACERTOS — ${label}\nBolão Copa 2026 · ${stamp}\n\n`;
+  if(!linhas.length){ texto += 'Nenhum palpite registrado.'; return copiarParaWhatsApp(texto); }
+  if(FORMATO_CONSENSO.includes(fase)){
+    // 16avos / Oitavas — só o número
+    linhas.forEach(l => { texto += `${l.nome} — ${l.n}/${denom}\n`; });
+  } else {
+    // Quartas pra frente — número + bandeiras dos acertos
+    linhas.forEach(l => {
+      const bandeiras = l.acertos.map(flag).join(' ');
+      texto += `${l.nome} — ${l.n}/${denom}${bandeiras ? '  '+bandeiras : ''}\n`;
+    });
+  }
+  texto += `\n${linhas.length} participantes`;
+  return copiarParaWhatsApp(texto);
+};
+
 window.renderPublico = () => {
   const el = document.getElementById('publico-list');
   const filtroFase = document.getElementById('publico-filtro-fase')?.value || '';
@@ -2158,6 +2245,19 @@ function renderPublicoClassif(el, aprovados, filtroFase){
   const fasesVisiveis = filtroFase ? [filtroFase].filter(f=>FASES_CLASSIF.includes(f)) : FASES_CLASSIF;
   const sorted = [...aprovados].sort((a,b)=>(b.pts||0)-(a.pts||0));
 
+  const fasesBtn = [
+    ['16avos','16-avos'], ['Oitavas','Oitavas'], ['Quartas','Quartas'],
+    ['Semifinal','Semifinal'], ['Terceiro lugar','3º lugar'], ['Final','Finalistas'],
+    ['Campeao','🏆 Campeão'], ['TerceiroLugar','🥉 Vencedor 3º'],
+  ];
+
+  const painelAcertos = `<div style="background:#f7f8fa;border:1px solid #e0e0e0;border-radius:10px;padding:12px 14px;margin-bottom:16px">`
+    + `<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">🎯 Exportar acertos por fase (após confirmar classificados)</div>`
+    + `<div style="font-size:11px;color:#888;margin-bottom:10px">16-avos e oitavas só com o número de acertos; demais fases, número + bandeiras dos acertos.</div>`
+    + `<div style="display:flex;flex-wrap:wrap;gap:8px">`
+    + fasesBtn.map(([f,l]) => `<button onclick="exportarAcertosFase('${f}')" style="background:#1b4332;color:#fff;border:none;font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer">🎯 ${l}</button>`).join('')
+    + `</div></div>`;
+
   let html='';
   sorted.forEach(u=>{
     const classifU = allApostasData[u.uid] || {};
@@ -2207,7 +2307,7 @@ function renderPublicoClassif(el, aprovados, filtroFase){
     }
     html+=`</div></div>`;
   });
-  el.innerHTML = html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>';
+  el.innerHTML = painelAcertos + (html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>');
 }
 
 window.toggleJogoComparar = (header) => {
