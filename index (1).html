@@ -1,0 +1,3783 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bolão Copa do Mundo 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:15px}
+header{background:#1a1a2e;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+header h1{font-size:18px;font-weight:600}
+.header-right{display:flex;align-items:center;gap:10px}
+.btn-header-admin{padding:6px 12px;background:rgba(245,197,24,0.15);color:#f5c518;border:1px solid rgba(245,197,24,0.4);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.btn-header-admin:hover{background:rgba(245,197,24,0.28)}
+.user-info{font-size:13px;opacity:0.8}
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s}
+.btn:hover{opacity:0.85}
+.btn-google{background:#fff;color:#333;display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;border:1px solid #ddd;font-size:15px;font-weight:500;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.btn-google img{width:20px}
+.btn-primary{background:#2d6a4f;color:#fff}
+.btn-secondary{background:#eee;color:#333}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-danger{border:1px solid #c0392b;color:#c0392b;background:transparent;padding:5px 10px;font-size:12px}
+.btn-warn{background:#e67e22;color:#fff;padding:5px 10px;font-size:12px;border:none;border-radius:6px;cursor:pointer}
+.container{max-width:820px;margin:0 auto;padding:20px}
+.tabs{display:none}
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#1a1a2e;
+  display:flex;align-items:stretch;
+  height:62px;z-index:200;
+  box-shadow:0 -2px 12px rgba(0,0,0,0.25);
+  overflow-x:auto;
+}
+.bnav-item{
+  flex:1;min-width:56px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:transparent;
+  color:rgba(255,255,255,0.45);
+  font-size:9px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;
+  cursor:pointer;transition:color 0.15s;position:relative;padding:4px 2px 0;
+  white-space:nowrap;
+}
+.bnav-item .bnav-icon{font-size:19px;line-height:1}
+.bnav-item.active{color:#f5c518}
+.bnav-item.active::after{
+  content:'';position:absolute;bottom:0;left:15%;right:15%;
+  height:3px;background:#f5c518;border-radius:2px 2px 0 0
+}
+.bnav-item.admin-only{display:none}
+body{padding-bottom:72px}
+.section{display:none}.section.active{display:block}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+.metric{background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.metric-label{font-size:12px;color:#666;margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:700;color:#1a1a2e}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-group label{font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.3px}
+input,select,textarea{padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;width:100%;background:#fff}
+input:focus,select:focus{outline:none;border-color:#2d6a4f}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ranking-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+.ranking-row:last-child{border-bottom:none}
+.pos-badge{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.pos-1{background:#FFD700;color:#7a5a00}
+.pos-2{background:#C0C0C0;color:#444}
+.pos-3{background:#CD7F32;color:#5a2d00}
+.pos-n{background:#eee;color:#777}
+.ranking-name{flex:1;font-weight:600;font-size:15px}
+.ranking-sub{font-size:12px;color:#888;margin-top:2px}
+.ranking-pts{font-size:18px;font-weight:700;color:#2d6a4f}
+.game-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.phase-badge{font-size:11px;font-weight:600;background:#e8f5e9;color:#2d6a4f;padding:3px 8px;border-radius:99px}
+.game-date{font-size:12px;color:#888}
+.game-teams{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:10px}
+.team-block{flex:1;text-align:center}
+.team-flag{font-size:22px;display:block;margin-bottom:2px}
+.team-name{font-weight:600;font-size:14px}
+.score-display{font-size:22px;font-weight:700;color:#1a1a2e;min-width:56px;text-align:center}
+.score-input{width:46px;text-align:center;font-size:18px;font-weight:700;padding:6px}
+.encerrado-badge{display:inline-block;background:#e8f5e9;color:#2d6a4f;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.fechado-badge{display:inline-block;background:#fff3cd;color:#856404;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.aposta-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.07);display:flex;align-items:center;gap:12px}
+.aposta-info{flex:1}
+.aposta-jogo{font-size:13px;font-weight:600}
+.aposta-placar{font-size:12px;color:#666}
+.aposta-pts{font-size:15px;font-weight:700;color:#2d6a4f;white-space:nowrap}
+.aposta-pendente{font-size:12px;color:#aaa}
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px}
+.alert-info{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.alert-warn{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.alert-success{background:#e8f5e9;color:#2d6a4f;border:1px solid #a5d6a7}
+.alert-danger{background:#fdecea;color:#c0392b;border:1px solid #f5c6cb}
+.section-title{font-size:16px;font-weight:700}
+.grupo-titulo{font-size:13px;font-weight:700;color:#fff;background:#1a1a2e;padding:6px 14px;border-radius:8px;margin:20px 0 10px;display:inline-block}
+.mata-titulo{font-size:13px;font-weight:700;color:#fff;background:#c0392b;padding:6px 14px;border-radius:8px;margin:20px 0 10px;display:inline-block}
+.pts-rule{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.pts-rule:last-child{border-bottom:none}
+.pts-val{font-weight:700;color:#2d6a4f;font-size:15px}
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:20px}
+.login-screen h2{font-size:28px;font-weight:700;margin-bottom:8px;color:#1a1a2e}
+.login-screen p{color:#666;margin-bottom:32px;font-size:16px}
+.empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:14px}
+.loading{text-align:center;padding:60px;color:#aaa;font-size:15px}
+.countdown{font-size:11px;color:#e67e22;font-weight:600;margin-top:4px}
+
+/* ── Classificação — layout estilo grade de grupos ── */
+.classif-fase-bloco{margin-bottom:32px}
+.classif-fase-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;background:#1a1a2e;border-radius:10px 10px 0 0;
+  color:#fff;margin-bottom:0
+}
+.classif-fase-title{font-size:14px;font-weight:700}
+.classif-fase-meta{display:flex;align-items:center;gap:10px}
+.classif-fase-bonus{font-size:12px;color:#81c784;font-weight:600}
+.classif-fase-count{
+  font-size:12px;background:rgba(255,255,255,0.18);
+  padding:2px 9px;border-radius:99px;font-weight:700
+}
+.classif-fase-body{
+  background:#fff;border:1px solid #e0e0e0;border-top:none;
+  border-radius:0 0 10px 10px;padding:16px;
+}
+.classif-progress{height:3px;background:#e0e0e0;border-radius:2px;margin-bottom:16px;overflow:hidden}
+.classif-progress-bar{height:100%;background:#2d6a4f;border-radius:2px;transition:width 0.3s}
+
+/* Grade dos grupos: 4 colunas no desktop, 2 no mobile */
+.grupos-grade{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px
+}
+.grupo-bloco{background:#f7f8fa;border-radius:8px;overflow:hidden}
+.grupo-header{
+  background:#1a1a2e;color:#fff;font-size:11px;font-weight:700;
+  letter-spacing:0.8px;text-transform:uppercase;
+  padding:5px 10px;text-align:center
+}
+/* cada linha de time dentro do grupo */
+.grupo-time{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 10px;cursor:pointer;
+  border-bottom:1px solid #ebebeb;
+  transition:background 0.1s;user-select:none;position:relative
+}
+.grupo-time:last-child{border-bottom:none}
+.grupo-time:hover{background:#eef7f1}
+.grupo-time.selecionado{background:#2d6a4f}
+.grupo-time.selecionado .gt-nome{color:#fff;font-weight:600}
+.grupo-time.selecionado .gt-flag{filter:none}
+.grupo-time.correto{background:#e8f5e9}
+.grupo-time.correto .gt-nome{color:#1b5e20;font-weight:600}
+.grupo-time.errado{background:#fdf0f0;opacity:0.6}
+.grupo-time.bloqueado{cursor:default}
+.grupo-time.bloqueado:hover{background:transparent}
+.gt-flag{font-size:18px;flex-shrink:0;line-height:1}
+.gt-nome{font-size:12px;font-weight:500;flex:1;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt-check{
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#2d6a4f;font-weight:800;flex-shrink:0;
+  opacity:0;transition:opacity 0.1s
+}
+.grupo-time.selecionado .gt-check{opacity:1}
+.grupo-time.correto .gt-check{opacity:1;color:#2d6a4f;background:#c8e6c9}
+
+/* Para fases posteriores (oitavas+): lista horizontal compacta */
+.fase-times-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:6px
+}
+.fase-time{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  border:2px solid #e8e8e8;background:#fff;
+  cursor:pointer;transition:all 0.1s;user-select:none
+}
+.fase-time:hover{border-color:#b2dfdb;background:#f5fffe}
+.fase-time.selecionado{border-color:#2d6a4f;background:#2d6a4f}
+.fase-time.selecionado .ft-nome{color:#fff;font-weight:600}
+.fase-time.correto{border-color:#2d6a4f;background:#e8f5e9}
+.fase-time.correto .ft-nome{color:#1b5e20;font-weight:600}
+.fase-time.errado{border-color:#e74c3c;background:#fdf0f0;opacity:0.6}
+.fase-time.bloqueado{cursor:default}
+.fase-time.bloqueado:hover{border-color:#e8e8e8;background:#fff}
+.ft-flag{font-size:20px;flex-shrink:0}
+.ft-nome{font-size:13px;font-weight:500;flex:1;color:#222}
+.ft-check{font-size:13px;color:#fff;flex-shrink:0;opacity:0}
+.fase-time.selecionado .ft-check{opacity:1}
+.fase-time.correto .ft-check{opacity:1;color:#2d6a4f}
+
+/* Palpite especial: 3º lugar e campeão (escolha única) */
+.especial-bloco{margin-bottom:28px}
+.especial-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:10px 10px 0 0;color:#fff;
+}
+.especial-header.terceiro{background:#b5651d}
+.especial-header.campeao{background:#c0992a}
+.especial-body{background:#fff;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 10px 10px;padding:16px}
+.especial-times{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.especial-time{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:10px;border:2px solid #e8e8e8;background:#fff;
+  cursor:pointer;transition:all 0.12s;user-select:none
+}
+.especial-time:hover{border-color:#b2dfdb;background:#f9fffe}
+.especial-time.selecionado{border-color:#2d6a4f;background:#2d6a4f}
+.especial-time.selecionado .et-nome{color:#fff;font-weight:700}
+.especial-time.selecionado .et-check{opacity:1}
+.especial-time.correto{border-color:#2d6a4f;background:#e8f5e9}
+.especial-time.correto .et-nome{color:#1b5e20;font-weight:700}
+.especial-time.correto .et-check{opacity:1;color:#2d6a4f}
+.especial-time.errado{border-color:#e74c3c;background:#fdf0f0;opacity:0.55}
+.especial-time.bloqueado{cursor:default}
+.especial-time.bloqueado:hover{border-color:#e8e8e8;background:#fff}
+.et-flag{font-size:24px;flex-shrink:0}
+.et-nome{font-size:13px;font-weight:500;flex:1;color:#222}
+.et-check{font-size:14px;color:#fff;opacity:0;flex-shrink:0}
+.especial-aviso{color:#aaa;font-size:13px;padding:4px 0}
+@media(max-width:600px){
+  .grupos-grade{grid-template-columns:repeat(2,1fr)}
+  .fase-times-grid{grid-template-columns:repeat(2,1fr)}
+  .especial-times{grid-template-columns:repeat(2,1fr)}
+}
+
+
+/* Pending screen */
+.pending-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:20px}
+.pending-screen h2{font-size:24px;font-weight:700;margin-bottom:12px;color:#1a1a2e}
+.pending-screen p{color:#666;font-size:15px;line-height:1.6}
+
+/* Palpites públicos */
+.publico-participante{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.publico-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer}
+.publico-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.publico-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
+.publico-nome{font-weight:600;font-size:14px;flex:1}
+.publico-pts{font-size:13px;color:#2d6a4f;font-weight:700}
+.publico-toggle{font-size:12px;color:#888}
+.publico-palpites{display:none}
+.publico-palpites.aberto{display:block}
+.publico-jogo-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px}
+.publico-jogo-row:last-child{border-bottom:none}
+.publico-jogo-nome{flex:1;color:#333}
+.publico-placar{font-weight:600;color:#1a1a2e;min-width:50px;text-align:center}
+.publico-pts-badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.pts-badge-green{background:#e8f5e9;color:#2d6a4f}
+.pts-badge-gray{background:#f0f0f0;color:#888}
+.publico-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.publico-filter select{width:auto;padding:6px 10px;font-size:13px}
+
+/* Histórico */
+.historico-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:20px}
+.hist-stat{background:#fff;border-radius:10px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.hist-stat-val{font-size:20px;font-weight:700;color:#1a1a2e}
+.hist-stat-label{font-size:11px;color:#888;margin-top:2px}
+
+/* Admin aprovação */
+.participante-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.participante-row:last-child{border-bottom:none}
+.participante-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.participante-placeholder{width:32px;height:32px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#666}
+.participante-nome{flex:1;font-size:14px;font-weight:600}
+.participante-email{font-size:12px;color:#888}
+.status-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.status-pendente{background:#fff3cd;color:#856404}
+.status-aprovado{background:#e8f5e9;color:#2d6a4f}
+.status-rejeitado{background:#fdecea;color:#c0392b}
+
+@media(max-width:500px){.form-row{grid-template-columns:1fr}header h1{font-size:15px}.historico-stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ── MODAL PERFIL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:300;display:flex;align-items:flex-end;justify-content:center}
+.modal-sheet{background:#fff;width:100%;max-width:600px;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.22s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:12px auto 0}
+.modal-header{display:flex;align-items:center;gap:12px;padding:16px 20px 12px;border-bottom:1px solid #f0f0f0}
+.modal-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.modal-avatar-placeholder{width:48px;height:48px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0}
+.modal-body{overflow-y:auto;padding:16px 20px 24px;flex:1}
+.modal-close{margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;color:#888;padding:4px}
+.perfil-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.perfil-stat{background:#f7f8fa;border-radius:10px;padding:12px 8px;text-align:center}
+.perfil-stat-val{font-size:20px;font-weight:800;color:#2d6a4f}
+.perfil-stat-label{font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;font-weight:600}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:400;pointer-events:none}
+.toast{background:#2d6a4f;color:#fff;padding:12px 22px;border-radius:99px;font-size:14px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-15px);transition:opacity 0.2s,transform 0.2s;margin-bottom:8px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.toast-error{background:#c0392b}
+
+/* ── FILTROS PALPITES ── */
+.jogos-filtros{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.jogos-filtros::-webkit-scrollbar{display:none}
+.filtro-btn{padding:8px 14px;border:1.5px solid #ddd;background:#fff;color:#555;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
+.filtro-btn.active{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.filtro-btn:hover:not(.active){background:#f5f5f5}
+.filtro-badge{display:inline-block;background:#c0392b;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:5px;line-height:1.4}
+.filtro-btn.active .filtro-badge{background:rgba(255,255,255,0.25)}
+
+/* ── ANIMAÇÃO DE PALPITE SALVO ── */
+@keyframes pulseGreen{
+  0%   { box-shadow: 0 0 0 0 rgba(45,106,79,0.6), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
+  40%  { box-shadow: 0 0 0 18px rgba(45,106,79,0); transform: scale(1.012); }
+  100% { box-shadow: 0 0 0 0 rgba(45,106,79,0), 0 2px 8px rgba(0,0,0,0.10); transform: scale(1); }
+}
+.card-saved-anim{ animation: pulseGreen 1s ease-out; }
+.game-card.tem-palpite{ border-left:4px solid #2d6a4f !important; }
+.game-card.tem-palpite::before{
+  content:''; position:absolute; top:8px; right:8px;
+  width:18px; height:18px; border-radius:50%;
+  background:#2d6a4f; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; line-height:1;
+  z-index:2;
+}
+.game-card.tem-palpite::before{ content:'✓'; }
+.game-card{ position:relative; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ Bolão Copa 2026</h1>
+  <div class="header-right">
+    <span class="user-info" id="header-user"></span>
+    <button class="btn-header-admin admin-only" id="btn-header-admin" style="display:none" onclick="switchTab('admin')">🔧 Admin</button>
+    <button class="btn btn-secondary btn-sm" id="btn-logout" style="display:none" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<!-- Tela de login -->
+<div id="login-screen" class="login-screen" style="display:none">
+  <h2>Bolão Copa do Mundo 2026</h2>
+  <p>Entre com sua conta Google para acessar o bolão</p>
+  <button class="btn-google" onclick="loginGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"/>
+    Entrar com Google
+  </button>
+</div>
+
+<!-- Tela de aguardando aprovação -->
+<div id="pending-screen" class="pending-screen" style="display:none">
+  <div style="font-size:48px;margin-bottom:16px">⏳</div>
+  <h2>Aguardando aprovação</h2>
+  <p>Seu cadastro está sendo analisado pelo administrador.<br/>Você receberá acesso assim que for aprovado.<br/><br/><span style="font-size:13px;color:#aaa">Conta: <span id="pending-email"></span></span></p>
+  <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
+</div>
+
+<!-- Tela de inscrições encerradas -->
+<div id="closed-screen" class="pending-screen" style="display:none">
+  <div style="font-size:48px;margin-bottom:16px">🔒</div>
+  <h2>Inscrições encerradas</h2>
+  <p>O período de inscrições para o bolão foi encerrado.<br/>Não é mais possível participar desta edição.</p>
+  <button class="btn btn-secondary" style="margin-top:24px" onclick="logout()">Sair</button>
+</div>
+
+<!-- App principal -->
+<div id="app" style="display:none">
+  <div class="container">
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Participantes</div><div class="metric-value" id="m-part">—</div></div>
+      <div class="metric"><div class="metric-label">Jogos</div><div class="metric-value" id="m-jogos">—</div></div>
+      <div class="metric"><div class="metric-label">Encerrados</div><div class="metric-value" id="m-enc">—</div></div>
+      <div class="metric"><div class="metric-label">Líder</div><div class="metric-value" style="font-size:13px;padding-top:4px" id="m-lider">—</div></div>
+    </div>
+
+
+
+    <!-- Ranking -->
+    <div id="tab-ranking" class="section active">
+      <div id="ranking-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Meus palpites / Histórico -->
+    <div id="tab-apostas" class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span class="section-title">Meus palpites</span>
+      </div>
+      <div id="historico-stats-wrap"></div>
+      <div class="alert alert-info" id="apostas-info">Vá até a aba "Palpites" e clique em "Registrar palpite" no jogo desejado.</div>
+      <div id="apostas-form-wrap"></div>
+      <div style="height:1px;background:#f0f0f0;margin:16px 0"></div>
+      <div id="apostas-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Classificação -->
+    <div id="tab-classif" class="section">
+      <div style="margin-bottom:16px">
+        <div class="section-title" style="margin-bottom:4px">Palpites de classificação</div>
+        <div style="font-size:13px;color:#666">Selecione as seleções que você acha que vão avançar em cada fase. Cada acerto gera bônus de pontos.</div>
+      </div>
+      <div id="classif-content"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Jogos -->
+    <div id="tab-jogos" class="section">
+      <div class="jogos-filtros" id="jogos-filtros"></div>
+      <div id="jogos-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Palpites Públicos -->
+    <div id="tab-publico" class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span class="section-title">Comparar palpites</span>
+      </div>
+      <div class="alert alert-info" style="font-size:13px">Palpites ficam visíveis após o bloqueio de cada jogo ou fase.</div>
+      <div class="publico-filter">
+        <select id="publico-filtro-fase" onchange="renderPublico()">
+          <option value="">Todas as fases</option>
+          <option value="Fase de grupos">Fase de grupos</option>
+          <option value="16avos">16-avos de final</option>
+          <option value="Oitavas">Oitavas de final</option>
+          <option value="Quartas">Quartas de final</option>
+          <option value="Semifinal">Semifinal</option>
+          <option value="Terceiro lugar">3º lugar</option>
+          <option value="Final">Final</option>
+        </select>
+        <select id="publico-filtro-tipo" onchange="renderPublico()">
+          <option value="jogos">Palpites de placar</option>
+          <option value="classif">Palpites de classificação</option>
+        </select>
+      </div>
+      <div id="publico-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Admin -->
+    <div id="tab-admin" class="section">
+      <div class="alert alert-warn">Somente o administrador pode ver esta aba.</div>
+
+      <!-- Controle de inscrições -->
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">🔐 Inscrições</div>
+        <div id="inscricoes-status" style="font-size:14px;margin-bottom:12px;color:#555">Carregando...</div>
+        <button id="btn-toggle-inscricoes" class="btn btn-primary" onclick="toggleInscricoes()" style="min-width:180px">Carregando...</button>
+      </div>
+
+      <!-- Exportar ranking -->
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">📤 Exportar ranking (WhatsApp)</div>
+        <div style="font-size:13px;color:#666;margin-bottom:12px">Gera o ranking em texto pronto para colar no grupo.</div>
+        <button class="btn btn-primary" onclick="exportarRanking()" style="min-width:180px">📋 Copiar ranking</button>
+        <textarea id="ranking-export-area" readonly style="display:none;width:100%;margin-top:12px;min-height:200px;font-family:monospace;font-size:13px;white-space:pre"></textarea>
+      </div>
+
+      <!-- Aprovar participantes -->
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">👥 Aprovação de participantes</div>
+        <div id="admin-participantes-list"><div class="loading">Carregando...</div></div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px">Adicionar jogo</div>
+        <div class="form-row">
+          <div class="form-group"><label>Time A</label><input id="j-timeA" placeholder="Brasil"/></div>
+          <div class="form-group"><label>Time B</label><input id="j-timeB" placeholder="Argentina"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data</label><input id="j-data" type="date"/></div>
+          <div class="form-group"><label>Hora (Brasília)</label><input id="j-hora" type="time"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Fase</label>
+            <select id="j-fase">
+              <option value="Fase de grupos">Fase de grupos</option>
+              <option value="16avos">16-avos de final</option>
+              <option value="Oitavas">Oitavas de final</option>
+              <option value="Quartas">Quartas de final</option>
+              <option value="Semifinal">Semifinal</option>
+              <option value="Terceiro lugar">Terceiro lugar</option>
+              <option value="Final">Final</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Grupo (só fase de grupos)</label><input id="j-grupo" placeholder="A"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="addJogo()">Salvar jogo</button>
+      </div>
+
+      <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Registrar resultados</div>
+      <div class="alert alert-warn" style="font-size:13px">⚠️ Use o botão abaixo <strong>uma única vez</strong> para apagar os jogos errados e cadastrar todos os 72 jogos corretos da fase de grupos.</div>
+      <button class="btn btn-danger" style="margin-bottom:16px;font-size:13px;padding:8px 14px" onclick="migrarJogosGrupos()">🔄 Recadastrar 72 jogos da fase de grupos</button>
+
+      <div id="admin-jogos-list"><div class="loading">Carregando...</div></div>
+
+      <div style="font-size:15px;font-weight:700;margin:24px 0 12px">Confirmar classificados</div>
+      <div id="admin-classif-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- Regras -->
+    <div id="tab-regras" class="section">
+
+      <!-- Visualização pública das regras -->
+      <div id="regras-view">
+        <div id="regras-conteudo"><!-- preenchido pelo JS --></div>
+        <div id="regras-edit-btn-wrap" style="display:none;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="abrirEdicaoRegras()">✏️ Editar regras</button>
+        </div>
+      </div>
+
+      <!-- Formulário de edição (admin only, oculto por padrão) -->
+      <div id="regras-editor" style="display:none">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px">✏️ Editar Regras do Bolão</div>
+          <div class="alert alert-warn" style="font-size:13px">As alterações ficam visíveis para todos os participantes imediatamente após salvar.</div>
+
+          <div id="regras-secoes-editor"><!-- seções dinâmicas --></div>
+
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="adicionarSecaoRegra()">＋ Nova seção</button>
+            <button class="btn btn-primary" onclick="salvarRegras()">💾 Salvar regras</button>
+            <button class="btn btn-secondary" onclick="fecharEdicaoRegras()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDoc, getDocs, query, where }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_tGcwH0SaS1likqeonmEnHPkYs7JneIc",
+  authDomain: "bolao-copa-do-mundo-2026-97092.firebaseapp.com",
+  projectId: "bolao-copa-do-mundo-2026-97092",
+  storageBucket: "bolao-copa-do-mundo-2026-97092.firebasestorage.app",
+  messagingSenderId: "1049008727743",
+  appId: "1:1049008727743:web:e2596a5b77374bbdb4480a"
+};
+
+const ADMIN_EMAIL = "felipemarinho.adv@gmail.com";
+
+const MULT = {
+  'Fase de grupos':1, '16avos':1.5, 'Oitavas':2,
+  'Quartas':2.5, 'Semifinal':3, 'Terceiro lugar':2, 'Final':4
+};
+
+const BONUS_CLASSIF = {
+  '16avos':10, 'Oitavas':15, 'Quartas':20, 'Semifinal':30, 'Terceiro lugar':30, 'Final':50
+};
+
+// Palpites especiais: vencedor do 3º lugar e campeão
+const BONUS_ESPECIAL = { 'TerceiroLugar': 50, 'Campeao': 100 };
+const LABEL_ESPECIAL = { 'TerceiroLugar': '🥉 Vencedor do 3º lugar', 'Campeao': '🏆 Campeão' };
+
+const FASES_CLASSIF = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+const LIMITES_CLASSIF = {'16avos':32,'Oitavas':16,'Quartas':8,'Semifinal':4,'Terceiro lugar':2,'Final':2};
+const FASES_LABEL = {
+  '16avos':'16-avos de final','Oitavas':'Oitavas de final',
+  'Quartas':'Quartas de final','Semifinal':'Semifinal',
+  'Terceiro lugar':'Disputa de 3º lugar','Final':'Finalistas'
+};
+const GRUPOS_ORDEM = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+// Grupos fixos da Copa 2026 (fonte: configuração oficial do bolão)
+const GRUPOS_FIXOS = {
+  'A': ['México', 'África do Sul', 'Coreia do Sul', 'Tchéquia'],
+  'B': ['Canadá', 'Bósnia', 'Catar', 'Suíça'],
+  'C': ['Brasil', 'Marrocos', 'Haiti', 'Escócia'],
+  'D': ['Estados Unidos', 'Paraguai', 'Austrália', 'Turquia'],
+  'E': ['Alemanha', 'Curaçao', 'Costa do Marfim', 'Equador'],
+  'F': ['Holanda', 'Japão', 'Suécia', 'Tunísia'],
+  'G': ['Bélgica', 'Egito', 'Irã', 'Nova Zelândia'],
+  'H': ['Espanha', 'Cabo Verde', 'Arábia Saudita', 'Uruguai'],
+  'I': ['França', 'Senegal', 'Iraque', 'Noruega'],
+  'J': ['Argentina', 'Argélia', 'Áustria', 'Jordânia'],
+  'K': ['Portugal', 'RD Congo', 'Uzbequistão', 'Colômbia'],
+  'L': ['Inglaterra', 'Croácia', 'Gana', 'Panamá']
+};
+const FASES_MATA_ORDEM = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+
+const FLAGS = {
+  'Brasil':'🇧🇷','Argentina':'🇦🇷','França':'🇫🇷','Alemanha':'🇩🇪','Espanha':'🇪🇸',
+  'Portugal':'🇵🇹','Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Holanda':'🇳🇱','Bélgica':'🇧🇪','Itália':'🇮🇹',
+  'Croácia':'🇭🇷','Uruguai':'🇺🇾','Colômbia':'🇨🇴','México':'🇲🇽','Estados Unidos':'🇺🇸',
+  'Canadá':'🇨🇦','Marrocos':'🇲🇦','Senegal':'🇸🇳','Gana':'🇬🇭','Nigéria':'🇳🇬',
+  'Egito':'🇪🇬','Costa do Marfim':'🇨🇮','África do Sul':'🇿🇦','Camarões':'🇨🇲',
+  'Mali':'🇲🇱','RD Congo':'🇨🇩','Cabo Verde':'🇨🇻','Japão':'🇯🇵','Coreia do Sul':'🇰🇷',
+  'Austrália':'🇦🇺','Irã':'🇮🇷','Arábia Saudita':'🇸🇦','Iraque':'🇮🇶','Catar':'🇶🇦',
+  'Uzbequistão':'🇺🇿','Jordânia':'🇯🇴','Indonésia':'🇮🇩','Escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Suíça':'🇨🇭',
+  'Áustria':'🇦🇹','Dinamarca':'🇩🇰','Noruega':'🇳🇴','Suécia':'🇸🇪','Turquia':'🇹🇷',
+  'Polônia':'🇵🇱','Tchéquia':'🇨🇿','Sérvia':'🇷🇸','Eslováquia':'🇸🇰','Hungria':'🇭🇺',
+  'Romênia':'🇷🇴','Eslovênia':'🇸🇮','Albânia':'🇦🇱','Geórgia':'🇬🇪','Bósnia':'🇧🇦',
+  'Ucrânia':'🇺🇦','Haiti':'🇭🇹','Panamá':'🇵🇦','Paraguai':'🇵🇾','Equador':'🇪🇨',
+  'Peru':'🇵🇪','Venezuela':'🇻🇪','Chile':'🇨🇱','Bolívia':'🇧🇴','Honduras':'🇭🇳',
+  'Costa Rica':'🇨🇷','Jamaica':'🇯🇲','El Salvador':'🇸🇻','Tunísia':'🇹🇳','Argélia':'🇩🇿',
+  'Nova Zelândia':'🇳🇿','Curaçao':'🇨🇼','Coreia do Sul':'🇰🇷',
+  'Finlândia':'🇫🇮','Grécia':'🇬🇷','Islândia':'🇮🇸','Israel':'🇮🇱','Bulgária':'🇧🇬'
+};
+
+function flag(team){ return FLAGS[team] || '🏳️'; }
+
+// Exibe uma notificação temporária no topo (toast). Definição única e global.
+function mostrarToast(msg, tipo){
+  try {
+    const cont = document.getElementById('toast-container');
+    if(!cont){ return; }
+    const t = document.createElement('div');
+    t.className = 'toast' + (tipo==='error' ? ' toast-error' : '');
+    t.textContent = msg;
+    cont.appendChild(t);
+    // força reflow para a transição de entrada
+    void t.offsetWidth;
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => { if(t.parentNode) t.parentNode.removeChild(t); }, 250);
+    }, 3000);
+  } catch(e){ /* nunca deixa o toast quebrar o fluxo principal */ }
+}
+
+// App state
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+let todasApostasData = null;  // cache: { jogoId: { uid: {gA,gB,pts,...} } }
+let palpitesGlobaisCarregados = false;  // true após carregar palpites de todos 1x na sessão
+let isAdmin = false;
+let jogosData = [];
+let apostasData = {};
+let usuariosData = {};
+let classificadosData = {};
+let classifsData = {}; // palpites de classificação de todos
+let allApostasData = {}; // apostas de todos para aba pública
+
+// Auth
+window.loginGoogle = async () => {
+  try { await signInWithPopup(auth, provider); }
+  catch(e){ console.error(e); }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+
+onAuthStateChanged(auth, async user => {
+  if(!user){
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+    document.getElementById('pending-screen').style.display='none';
+    document.getElementById('btn-logout').style.display='none';
+    return;
+  }
+  currentUser = user;
+  isAdmin = user.email === ADMIN_EMAIL;
+
+  // Registra/verifica usuário no Firestore
+  const userRef = doc(db, 'usuarios', user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if(!userSnap.exists()){
+    if(!isAdmin){
+      // Verifica se inscrições estão abertas antes de criar novo usuário
+      const configSnap = await getDoc(doc(db, 'config', 'bolao'));
+      const inscricoesAbertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
+      if(!inscricoesAbertas){
+        document.getElementById('login-screen').style.display='none';
+        document.getElementById('app').style.display='none';
+        document.getElementById('pending-screen').style.display='none';
+        document.getElementById('closed-screen').style.display='flex';
+        document.getElementById('btn-logout').style.display='block';
+        document.getElementById('header-user').textContent = user.displayName || user.email;
+        return;
+      }
+    }
+    // Novo usuário: entra direto como aprovado
+    await setDoc(userRef, {
+      uid: user.uid,
+      nome: user.displayName || user.email,
+      email: user.email,
+      foto: user.photoURL || '',
+      status: 'aprovado',
+      pts: 0,
+      criadoEm: Date.now()
+    });
+  }
+
+  // Verifica status
+  const snap = await getDoc(userRef);
+  const userData = snap.data();
+
+  // Acesso liberado
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('pending-screen').style.display='none';
+  document.getElementById('closed-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('btn-logout').style.display='block';
+  document.getElementById('header-user').textContent = user.displayName || '';
+
+  if(isAdmin){
+    document.querySelectorAll('.admin-only').forEach(el=>{
+      el.style.display = el.classList.contains('btn-header-admin') ? 'inline-flex' : 'flex';
+    });
+  }
+
+  initListeners();
+});
+
+function initListeners(){
+  carregarRegras();
+  // Jogos
+  onSnapshot(collection(db,'jogos'), snap => {
+    const firestoreJogos = snap.docs.map(d=>({id:d.id,...d.data()}));
+
+    // ── Fase de grupos: sempre do HTML (fonte de verdade) ──
+    const grupos = JOGOS_GRUPOS_OFICIAIS.map(([timeA,timeB,data,hora,grupo])=>({
+      id: (timeA+'_'+timeB+'_'+data+'_'+hora).replace(/[^a-zA-Z0-9_]/g,'_'),
+      timeA, timeB, data, hora, grupo,
+      fase: 'Fase de grupos',
+      ts: new Date(data+'T'+hora+':00-03:00').getTime(),
+      encerrado: false,
+      ...( firestoreJogos.find(j=>j.timeA===timeA && j.timeB===timeB && j.data===data) || {} )
+    }));
+
+    // ── Mata-mata: base fixa do HTML, times preenchidos pelo Firestore quando disponível ──
+    const firestoreMata = firestoreJogos.filter(j=>j.fase!=='Fase de grupos');
+
+    // Chaveamento fixo dos 16-avos com times genéricos
+    const MATA_16AVOS_FIXO = [
+      {timeA:'2º Grupo A', timeB:'2º Grupo B', data:'2026-06-28', hora:'16:00'},
+      {timeA:'1º Grupo C', timeB:'2º Grupo F', data:'2026-06-29', hora:'14:00'},
+      {timeA:'1º Grupo E', timeB:'3º (ABCDF)', data:'2026-06-29', hora:'17:30'},
+      {timeA:'1º Grupo F', timeB:'2º Grupo C', data:'2026-06-29', hora:'22:00'},
+      {timeA:'2º Grupo E', timeB:'2º Grupo I', data:'2026-06-30', hora:'14:00'},
+      {timeA:'1º Grupo I', timeB:'3º (CDFGH)', data:'2026-06-30', hora:'18:00'},
+      {timeA:'1º Grupo A', timeB:'3º (CEFHI)', data:'2026-06-30', hora:'22:00'},
+      {timeA:'1º Grupo L', timeB:'3º (EHIJK)', data:'2026-07-01', hora:'13:00'},
+      {timeA:'1º Grupo G', timeB:'3º (AEHIJ)', data:'2026-07-01', hora:'17:00'},
+      {timeA:'1º Grupo D', timeB:'3º (BEFIJ)', data:'2026-07-01', hora:'21:00'},
+      {timeA:'1º Grupo H', timeB:'2º Grupo J', data:'2026-07-02', hora:'16:00'},
+      {timeA:'2º Grupo K', timeB:'2º Grupo L', data:'2026-07-02', hora:'20:00'},
+      {timeA:'1º Grupo B', timeB:'3º (EFGIJ)', data:'2026-07-03', hora:'00:00'},
+      {timeA:'2º Grupo D', timeB:'2º Grupo G', data:'2026-07-03', hora:'15:00'},
+      {timeA:'1º Grupo J', timeB:'2º Grupo H', data:'2026-07-03', hora:'19:00'},
+      {timeA:'1º Grupo K', timeB:'3º (DEIJL)', data:'2026-07-03', hora:'22:30'},
+    ];
+
+    const MATA_OITAVAS_FIXO = [
+      {timeA:'Venc. Jogo 3', timeB:'Venc. Jogo 6', data:'2026-07-04', hora:'18:00'},
+      {timeA:'Venc. Jogo 1', timeB:'Venc. Jogo 4', data:'2026-07-04', hora:'14:00'},
+      {timeA:'Venc. Jogo 12', timeB:'Venc. Jogo 11', data:'2026-07-06', hora:'16:00'},
+      {timeA:'Venc. Jogo 10', timeB:'Venc. Jogo 9', data:'2026-07-06', hora:'21:00'},
+      {timeA:'Venc. Jogo 2', timeB:'Venc. Jogo 5', data:'2026-07-05', hora:'17:00'},
+      {timeA:'Venc. Jogo 7', timeB:'Venc. Jogo 8', data:'2026-07-05', hora:'21:00'},
+      {timeA:'Venc. Jogo 15', timeB:'Venc. Jogo 14', data:'2026-07-07', hora:'13:00'},
+      {timeA:'Venc. Jogo 13', timeB:'Venc. Jogo 16', data:'2026-07-07', hora:'17:00'},
+    ];
+
+    const MATA_QUARTAS_FIXO = [
+      {timeA:'Venc. Oitavas 1', timeB:'Venc. Oitavas 2', data:'2026-07-09', hora:'17:00'},
+      {timeA:'Venc. Oitavas 3', timeB:'Venc. Oitavas 4', data:'2026-07-10', hora:'16:00'},
+      {timeA:'Venc. Oitavas 5', timeB:'Venc. Oitavas 6', data:'2026-07-11', hora:'18:00'},
+      {timeA:'Venc. Oitavas 7', timeB:'Venc. Oitavas 8', data:'2026-07-11', hora:'22:00'},
+    ];
+
+    const MATA_SEMIS_FIXO = [
+      {timeA:'Venc. Quartas 1', timeB:'Venc. Quartas 2', data:'2026-07-14', hora:'16:00'},
+      {timeA:'Venc. Quartas 3', timeB:'Venc. Quartas 4', data:'2026-07-15', hora:'16:00'},
+    ];
+
+    const MATA_TERCEIRO_FIXO = [
+      {timeA:'Perdedor Semi 1', timeB:'Perdedor Semi 2', data:'2026-07-18', hora:'18:00'},
+    ];
+
+    const MATA_FINAL_FIXO = [
+      {timeA:'Venc. Semi 1', timeB:'Venc. Semi 2', data:'2026-07-19', hora:'16:00'},
+    ];
+
+    function buildMata(fixos, fase) {
+      return fixos.map((base, i) => {
+        const id = `mata_${fase.replace(/\s/g,'_')}_jogo${i+1}`;
+        const fs = firestoreMata.find(j=>j.fase===fase && j.id && j.id.startsWith(id));
+        return {
+          ...base,
+          id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          fase,
+          grupo: '',
+          jogoNum: i+1,
+          placeholderA: base.timeA,
+          placeholderB: base.timeB,
+          ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          encerrado: false,
+          // Se Firestore tem times reais, usa — mantém data/hora do HTML
+          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB, penaltis: fs.penaltis||null} : {}),
+        };
+      });
+    }
+
+    const mataMata = [
+      ...buildMata(MATA_16AVOS_FIXO,   '16avos'),
+      ...buildMata(MATA_OITAVAS_FIXO,  'Oitavas'),
+      ...buildMata(MATA_QUARTAS_FIXO,  'Quartas'),
+      ...buildMata(MATA_SEMIS_FIXO,    'Semifinal'),
+      ...buildMata(MATA_TERCEIRO_FIXO, 'Terceiro lugar'),
+      ...buildMata(MATA_FINAL_FIXO,    'Final'),
+    ];
+
+    jogosData = [...grupos, ...mataMata];
+    aplicarPontuacaoDerivada();
+    renderRanking();
+    renderJogos();
+    renderAdminJogos();
+    renderAdminClassif();
+    updateMetrics();
+    renderApostasHistorico();
+    renderPublico();
+    // Carrega os palpites de todos UMA vez por sessão (base do ranking derivado).
+    // NÃO recarrega quando um placar muda: os palpites não mudaram, então basta
+    // re-derivar a pontuação do cache em memória (já feito acima). Isso elimina
+    // o maior consumo de leituras — antes, cada placar salvo relia ~2.000 docs
+    // em todos os clientes conectados.
+    if(!palpitesGlobaisCarregados){
+      clearTimeout(window.__tPalpites);
+      window.__tPalpites = setTimeout(()=>carregarCachePalpitesGlobal().catch(()=>{}), 600);
+    }
+  });
+
+  // Apostas do usuário atual
+  onSnapshot(collection(db,`apostas/${currentUser.uid}/jogos`), snap => {
+    apostasData = {};
+    snap.docs.forEach(d=>{ apostasData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
+    renderApostasHistorico();
+    renderJogos();
+    renderPublico();
+  });
+
+  // Classificação do usuário atual
+  onSnapshot(doc(db,'classificacoes',currentUser.uid), snap => {
+    classificadosData = snap.exists() ? snap.data() : {};
+    sincronizarFinal();
+    renderClassif();
+  });
+
+  // Usuários
+  onSnapshot(collection(db,'usuarios'), snap => {
+    usuariosData = {};
+    snap.docs.forEach(d=>{ usuariosData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
+    renderRanking();
+    updateMetrics();
+    renderAdminParticipantes();
+    renderAdminInscricoes();
+    renderPublico();
+    // Admin: carrega o cache de palpites UMA vez (indicador de pendentes).
+    // Não recarrega a cada mudança de usuário — evita releituras desnecessárias.
+    if(isAdmin && !palpitesGlobaisCarregados){
+      carregarCachePalpitesGlobal().catch(()=>{});
+    }
+  });
+
+  // Classificados confirmados (admin)
+  onSnapshot(collection(db,'classificados_confirmados'), snap => {
+    classifsData = {};
+    snap.docs.forEach(d=>{ classifsData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
+    renderClassif();
+    renderApostasHistorico();
+    renderRanking();
+    updateMetrics();
+  });
+
+  // Todas as apostas (para aba pública e histórico de classificação)
+  onSnapshot(collection(db,'classificacoes'), snap => {
+    allApostasData = {};
+    snap.docs.forEach(d=>{ allApostasData[d.id]=d.data(); });
+    aplicarPontuacaoDerivada();
+    renderPublico();
+    renderRanking();
+    updateMetrics();
+  });
+}
+
+// ─── TAB SWITCH ───────────────────────────────────────────────────────────────
+window.switchTab = (tab) => {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const nb = document.getElementById(`bnav-${tab}`);
+  if(nb) nb.classList.add('active');
+  if(tab==='publico') renderPublico();
+};
+
+window.fecharPerfil = (e) => {
+  if(e.target === document.getElementById('modal-perfil'))
+    document.getElementById('modal-perfil').style.display = 'none';
+};
+window.fecharPerfilBtn = () => {
+  document.getElementById('modal-perfil').style.display = 'none';
+};
+
+// ─── MÉTRICAS ────────────────────────────────────────────────────────────────
+function updateMetrics(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  document.getElementById('m-part').textContent = aprovados.length || '—';
+  document.getElementById('m-jogos').textContent = jogosData.length || '—';
+  document.getElementById('m-enc').textContent = jogosData.filter(j=>j.encerrado).length || '0';
+  const lider = aprovados.sort((a,b)=>(b.pts||0)-(a.pts||0))[0];
+  document.getElementById('m-lider').textContent = lider ? `${lider.nome.split(' ')[0]} (${lider.pts||0}pts)` : '—';
+}
+
+// ─── RANKING ─────────────────────────────────────────────────────────────────
+// Cache de apostas por uid para desempate e perfil
+const apostasCache = {};
+
+window.exportarRanking = async () => {
+  // Usa o cache em memória: é onde está a pontuação DERIVADA correta
+  aplicarPontuacaoDerivada();
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+
+  // Desempate por placares exatos (mesma lógica do ranking visível)
+  aprovados.forEach(u => {
+    u._exatos = u._exatosDerivados || 0;
+  });
+  aprovados.sort((a,b) => {
+    const diffPts = (b.pts||0) - (a.pts||0);
+    if(diffPts !== 0) return diffPts;
+    return (b._exatos||0) - (a._exatos||0);
+  });
+
+  // Monta texto. Posição empata por pontos (mesmos pts = mesma posição).
+  const agora = new Date();
+  const dd = String(agora.getDate()).padStart(2,'0');
+  const mm = String(agora.getMonth()+1).padStart(2,'0');
+  const hh = String(agora.getHours()).padStart(2,'0');
+  const min = String(agora.getMinutes()).padStart(2,'0');
+
+  let texto = `🏆 RANKING — Bolão Copa 2026\nAtualizado em ${dd}/${mm} às ${hh}:${min}\n\n`;
+
+  aprovados.forEach((u, i) => {
+    const pts = u.pts || 0;
+    const pos = i + 1;
+    const medalha = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`;
+    const sep = pos <= 3 ? ' ' : '  ';
+    texto += `${medalha}${sep}${u.nome} — ${pts} pts\n`;
+  });
+
+  texto += `\nTotal: ${aprovados.length} participantes`;
+
+  // Tenta copiar para a área de transferência
+  const area = document.getElementById('ranking-export-area');
+  area.value = texto;
+  let copiou = false;
+  try {
+    await navigator.clipboard.writeText(texto);
+    copiou = true;
+  } catch(e){
+    // Fallback: mostra a textarea para cópia manual
+    area.style.display = 'block';
+    area.focus();
+    area.select();
+    try { document.execCommand('copy'); copiou = true; } catch(e2){}
+  }
+
+  if(copiou){
+    mostrarToast('✅ Ranking copiado! Cole no WhatsApp.');
+    area.style.display = 'none';
+  } else {
+    area.style.display = 'block';
+    mostrarToast('Selecione o texto abaixo e copie manualmente.', 'error');
+  }
+};
+
+function renderRanking(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+
+  // Calcular exatos de cada participante para desempate
+  aprovados.forEach(u => {
+    u._exatos = u._exatosDerivados || 0;
+  });
+
+  aprovados.sort((a,b) => {
+    const diffPts = (b.pts||0) - (a.pts||0);
+    if(diffPts !== 0) return diffPts;
+    return (b._exatos||0) - (a._exatos||0); // desempate por placares exatos
+  });
+
+  const el = document.getElementById('ranking-list');
+  if(!aprovados.length){ el.innerHTML='<div class="empty-state">Nenhum participante ainda.</div>'; return; }
+  el.innerHTML = aprovados.map((u,i)=>{
+    const posClass = i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'pos-n';
+    const foto = u.foto ? `<img src="${u.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">` :
+      `<div style="width:36px;height:36px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${(u.nome||'?')[0]}</div>`;
+    const exatosBadge = u._exatos > 0 ? `<span style="font-size:10px;background:#e6f4ec;color:#2d6a4f;padding:1px 6px;border-radius:99px;font-weight:700;margin-left:4px">🎯 ${u._exatos}</span>` : '';
+    return `<div class="ranking-row" style="cursor:pointer" onclick="abrirPerfil('${u.uid}')">
+      <div class="pos-badge ${posClass}">${i+1}</div>
+      ${foto}
+      <div class="ranking-name">${u.nome}${exatosBadge}<div class="ranking-sub">${u.email||''}</div></div>
+      <div class="ranking-pts">${u.pts||0} pts</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── JOGOS ───────────────────────────────────────────────────────────────────
+// Filtro ativo (persiste durante a sessão)
+let filtroJogosAtivo = 'hoje';
+
+function contarSemPalpite(jogos){
+  return jogos.filter(j => !j.encerrado && Date.now() < j.ts - 5*60*1000 && !apostasData[j.id]).length;
+}
+
+function renderJogos(){
+  const el = document.getElementById('jogos-list');
+  const filtrosEl = document.getElementById('jogos-filtros');
+  if(!jogosData.length){
+    if(filtrosEl) filtrosEl.innerHTML = '';
+    el.innerHTML='<div class="empty-state">Nenhum jogo cadastrado.</div>';
+    return;
+  }
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+
+  // ── Definir intervalos de filtro (em milissegundos) ──
+  const agora = new Date();
+  const hojeIni = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+  const amanhaIni = hojeIni + 86400000;
+  const depoisAmanhaIni = hojeIni + 2*86400000;
+  // "Esta semana" = próximos 7 dias a partir de hoje
+  const semanaFim = hojeIni + 7*86400000;
+
+  const jogosHoje = sorted.filter(j => j.ts >= hojeIni && j.ts < amanhaIni);
+  const jogosAmanha = sorted.filter(j => j.ts >= amanhaIni && j.ts < depoisAmanhaIni);
+  const jogosSemana = sorted.filter(j => j.ts >= hojeIni && j.ts < semanaFim);
+  const jogosPendentes = sorted.filter(j => !j.encerrado && Date.now() < j.ts - 5*60*1000 && !apostasData[j.id]);
+
+  // ── Renderizar barra de filtros ──
+  const cntHoje = contarSemPalpite(jogosHoje);
+  const cntAmanha = contarSemPalpite(jogosAmanha);
+  const cntSemana = contarSemPalpite(jogosSemana);
+  const cntPend = jogosPendentes.length;
+
+  const badge = (n) => n > 0 ? `<span class="filtro-badge">${n}</span>` : '';
+
+  if(filtrosEl){
+    filtrosEl.innerHTML = `
+      <button class="filtro-btn ${filtroJogosAtivo==='hoje'?'active':''}" onclick="setFiltroJogos('hoje')">Hoje${badge(cntHoje)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='amanha'?'active':''}" onclick="setFiltroJogos('amanha')">Amanhã${badge(cntAmanha)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='semana'?'active':''}" onclick="setFiltroJogos('semana')">Esta semana${badge(cntSemana)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='pendentes'?'active':''}" onclick="setFiltroJogos('pendentes')">Pendentes${badge(cntPend)}</button>
+      <button class="filtro-btn ${filtroJogosAtivo==='todos'?'active':''}" onclick="setFiltroJogos('todos')">Todos</button>
+    `;
+  }
+
+  // ── Filtrar jogos exibidos ──
+  let jogosFiltrados;
+  if(filtroJogosAtivo==='hoje') jogosFiltrados = jogosHoje;
+  else if(filtroJogosAtivo==='amanha') jogosFiltrados = jogosAmanha;
+  else if(filtroJogosAtivo==='semana') jogosFiltrados = jogosSemana;
+  else if(filtroJogosAtivo==='pendentes') jogosFiltrados = jogosPendentes;
+  else jogosFiltrados = sorted;
+
+  if(!jogosFiltrados.length){
+    let msg = 'Nenhum jogo neste filtro.';
+    if(filtroJogosAtivo==='hoje') msg = '🎉 Nenhum jogo hoje. Volte amanhã!';
+    else if(filtroJogosAtivo==='pendentes') msg = '✅ Você já palpitou em todos os jogos abertos!';
+    el.innerHTML = `<div class="empty-state">${msg}</div>`;
+    return;
+  }
+
+  const jogosGrupos = jogosFiltrados.filter(j=>j.fase==='Fase de grupos');
+  const jogosMata   = jogosFiltrados.filter(j=>j.fase!=='Fase de grupos');
+
+  let html='';
+
+  if(jogosGrupos.length){
+    if(filtroJogosAtivo==='todos') html+='<div class="grupo-titulo">Fase de grupos</div>';
+    let dataAtual='';
+    jogosGrupos.forEach(j=>{
+      if(j.data !== dataAtual){
+        dataAtual = j.data;
+        const parts = j.data.split('-');
+        const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(j.data+'T12:00:00').getDay()];
+        html+=`<div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.6px;margin:14px 0 6px;padding:0 0 4px;border-bottom:1px solid #e0e0e0">${parts[2]}/${parts[1]} &middot; ${diaSemana}</div>`;
+      }
+      html+=gameCardHTML(j);
+    });
+  }
+
+  const gruposMata = {};
+  jogosMata.forEach(j=>{ if(!gruposMata[j.fase]) gruposMata[j.fase]=[]; gruposMata[j.fase].push(j); });
+  FASES_MATA_ORDEM.forEach(f=>{
+    if(!gruposMata[f]) return;
+    html+=`<div class="mata-titulo">${FASES_LABEL[f]||f}</div>`;
+    gruposMata[f].forEach(j=>{ html+=gameCardHTML(j); });
+  });
+
+  el.innerHTML=html;
+}
+
+window.setFiltroJogos = (f) => {
+  filtroJogosAtivo = f;
+  renderJogos();
+};
+
+// Estatística: palpite mais comum entre participantes (após bloqueio)
+function calcularPalpiteMaisComum(jogoId){
+  if(!todasApostasData || !todasApostasData[jogoId]) return null;
+  const palpites = Object.values(todasApostasData[jogoId]);
+  if(palpites.length < 2) return null;
+  const cont = {};
+  palpites.forEach(p => {
+    if(p.gA === undefined || p.gB === undefined) return;
+    const k = `${p.gA}×${p.gB}`;
+    cont[k] = (cont[k]||0) + 1;
+  });
+  let maior = null, qtd = 0;
+  Object.entries(cont).forEach(([k,v]) => { if(v > qtd){ maior=k; qtd=v; }});
+  if(!maior) return null;
+  const pct = Math.round((qtd / palpites.length) * 100);
+  return { placar: maior, pct, qtd, total: palpites.length };
+}
+
+function gameCardHTML(j){
+  const now = Date.now();
+  const bloqueado = now >= j.ts - 5*60*1000;
+  const aposta = apostasData[j.id];
+  const temAposta = aposta && aposta.gA !== undefined;
+  const dtStr = formatarDataJogo(j);
+  const jid = j.id;
+
+  // ── Placar central ──
+  let scorePart = '';
+  if(j.encerrado){
+    scorePart = `<div class="score-display">${j.gA} × ${j.gB}</div>`;
+  } else if(bloqueado){
+    scorePart = `<div class="score-display" style="font-size:16px;color:#aaa">× </div>`;
+  } else {
+    // Inputs inline com valores já salvos (se houver)
+    const vA = temAposta ? aposta.gA : '';
+    const vB = temAposta ? aposta.gB : '';
+    scorePart = `
+      <div style="display:flex;align-items:center;gap:6px">
+        <input class="score-input" id="inp-gA-${jid}" type="number" min="0" max="99"
+          value="${vA}" placeholder="0"
+          style="width:52px;text-align:center;font-size:22px;font-weight:800;padding:8px 4px;border:2px solid #2d6a4f;border-radius:8px;color:#2d6a4f"/>
+        <span style="font-size:20px;font-weight:700;color:#aaa">×</span>
+        <input class="score-input" id="inp-gB-${jid}" type="number" min="0" max="99"
+          value="${vB}" placeholder="0"
+          style="width:52px;text-align:center;font-size:22px;font-weight:800;padding:8px 4px;border:2px solid #2d6a4f;border-radius:8px;color:#2d6a4f"/>
+      </div>`;
+  }
+
+  // ── Badge de pontuação do participante ──
+  let ptsBadge = '';
+  if(j.encerrado && temAposta){
+    if(aposta.pts !== undefined){
+      const cor = aposta.pts > 0 ? '#e6f4ec' : '#f0f0f0';
+      const txtCor = aposta.pts > 0 ? '#2d6a4f' : '#888';
+      let desc = '';
+      if(aposta.resultado==='exato') desc = '🎯 Placar exato';
+      else if(aposta.resultado==='vencedor_saldo') desc = '⚖️ Vencedor+saldo';
+      else if(aposta.resultado==='vencedor') desc = '✅ Vencedor certo';
+      else if(aposta.resultado==='empate') desc = '🤝 Empate certo';
+      else desc = '❌ Errou';
+      ptsBadge = `<div style="background:${cor};border-radius:8px;padding:8px 14px;text-align:center;font-size:13px;color:${txtCor};font-weight:700">
+        ${desc} · <strong>+${aposta.pts} pts</strong>
+        <span style="font-size:11px;font-weight:400;margin-left:6px;opacity:0.75">Palpite: ${aposta.gA}×${aposta.gB}</span>
+      </div>`;
+    }
+  } else if(!j.encerrado && temAposta && bloqueado){
+    ptsBadge = `<div style="background:#fff8e1;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a;font-weight:600">
+      ⏳ Pontuação deste palpite: aguardando resultado
+    </div>`;
+  } else if(!j.encerrado && !bloqueado){
+    ptsBadge = `<div style="background:#fffde7;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a">
+      Pontuação deste palpite: aguardando resultado
+    </div>`;
+  }
+
+  // ── Rodapé: status ou botão salvar ──
+  let rodape = '';
+  if(j.encerrado){
+    rodape = `<div style="text-align:center;padding:6px 0">
+      <span class="encerrado-badge">✅ Encerrado</span>
+    </div>`;
+  } else if(bloqueado){
+    const minutos = Math.ceil((j.ts - now) / 60000);
+    const tempoStr = minutos > 0 ? `Inicia em ${minutos} min` : 'Em andamento';
+    rodape = `<div style="text-align:center;padding:6px 0">
+      <span class="fechado-badge">⏱ Bloqueado · ${tempoStr}</span>
+    </div>`;
+  } else {
+    rodape = `
+      <button onclick="salvarApostaInline('${jid}')"
+        style="width:100%;padding:12px;background:#2d6a4f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px">
+        ✅ Salvar Palpite
+      </button>`;
+  }
+
+  // ── Estatística "palpite mais comum" (após bloqueio) ──
+  let statsBox = '';
+  if(bloqueado || j.encerrado){
+    const stat = calcularPalpiteMaisComum(jid);
+    if(stat){
+      statsBox = `<div style="background:#f0f4f8;border-radius:8px;padding:8px 14px;font-size:12px;color:#1a1a2e;font-weight:600;margin-bottom:8px">
+        📊 Palpite mais comum: <strong>${stat.placar}</strong>
+        <span style="font-size:11px;font-weight:500;color:#666"> · ${stat.pct}% (${stat.qtd}/${stat.total})</span>
+      </div>`;
+    }
+  }
+
+  // ── Indicador admin: quem ainda não palpitou (apenas para admin, jogo ainda aberto) ──
+  let adminPendentes = '';
+  if(isAdmin && !j.encerrado && !bloqueado && todasApostasData){
+    const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+    const semPalpite = aprovados.filter(u => {
+      const apostasU = todasApostasData[jid];
+      return !apostasU || !apostasU[u.uid];
+    });
+    if(semPalpite.length){
+      const nomes = semPalpite.map(u => u.nome || u.email || 'Participante').join(', ');
+      adminPendentes = `<div style="background:#fef2f2;border-left:3px solid #c0392b;border-radius:6px;padding:7px 12px;font-size:12px;color:#7a1f1f;margin-bottom:8px">
+        🔧 <strong>${semPalpite.length}/${aprovados.length}</strong> ainda não palpitou: <span style="font-weight:600">${nomes}</span>
+      </div>`;
+    } else if(aprovados.length){
+      adminPendentes = `<div style="background:#e6f4ec;border-left:3px solid #2d6a4f;border-radius:6px;padding:7px 12px;font-size:12px;color:#1b5e20;margin-bottom:8px">
+        🔧 ✅ Todos os ${aprovados.length} participantes já palpitaram
+      </div>`;
+    }
+  }
+
+  const classePalpite = temAposta && !j.encerrado ? ' tem-palpite' : '';
+  return `
+  <div class="game-card${classePalpite}" style="padding:0;overflow:hidden;margin-bottom:16px" id="card-${jid}">
+    <!-- Cabeçalho -->
+    <div style="background:#1a1a2e;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">
+        ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''} · ${dtStr}`:(FASES_LABEL[j.fase]||j.fase)+' · '+dtStr}
+      </span>
+    </div>
+    <!-- Times + inputs -->
+    <div style="padding:18px 16px 12px;background:#fff">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">${j.timeA}</div>
+          <div style="font-size:44px;line-height:1">${flag(j.timeA)}</div>
+        </div>
+        ${scorePart}
+        <div style="flex:1;text-align:center">
+          <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">${j.timeB}</div>
+          <div style="font-size:44px;line-height:1">${flag(j.timeB)}</div>
+        </div>
+      </div>
+    </div>
+    <!-- Indicador admin -->
+    <div style="padding:0 16px">${adminPendentes}</div>
+    <!-- Estatística pública -->
+    <div style="padding:0 16px">${statsBox}</div>
+    <!-- Badge pontuação -->
+    <div style="padding:0 16px 10px">${ptsBadge}</div>
+    <!-- Botão / status -->
+    <div style="padding:0 16px 14px">${rodape}</div>
+  </div>`;
+}
+
+// Salva palpite diretamente do card inline (sem modal)
+window.salvarApostaInline = async (jogoId) => {
+  const inpA = document.getElementById(`inp-gA-${jogoId}`);
+  const inpB = document.getElementById(`inp-gB-${jogoId}`);
+  if(!inpA || !inpB){ alert('Erro ao localizar os campos.'); return; }
+  const gA = parseInt(inpA.value);
+  const gB = parseInt(inpB.value);
+  if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){
+    mostrarToast('Preencha os dois placares antes de salvar.', 'error'); return;
+  }
+  const btn = document.querySelector(`#card-${jogoId} button`);
+  const txtOriginal = btn ? btn.textContent : '';
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = '⏳ Salvando...';
+  }
+  try {
+    await setDoc(doc(db, `apostas/${currentUser.uid}/jogos`, jogoId), { gA, gB });
+    apostasData[jogoId] = { gA, gB };
+
+    // 1. Confirmação no próprio botão (sobrevive ao re-render porque é setada depois)
+    if(btn){
+      btn.textContent = '✅ Palpite salvo!';
+      btn.style.background = '#1b5e20';
+    }
+
+    // 2. Animação de pulse no card inteiro
+    const cardEl = document.getElementById(`card-${jogoId}`);
+    if(cardEl){
+      cardEl.classList.add('card-saved-anim');
+      // Marca como tendo palpite (borda verde + check) imediatamente
+      cardEl.classList.add('tem-palpite');
+    }
+
+    // 3. Toast no topo (5 segundos)
+    mostrarToast('Palpite salvo com sucesso!');
+
+    // Aguarda 1.2s antes de re-renderizar (deixa o usuário ver a confirmação)
+    setTimeout(() => {
+      renderJogos();
+      renderApostasHistorico();
+    }, 1200);
+
+  } catch(e) {
+    mostrarToast('Erro ao salvar: ' + e.message, 'error');
+    if(btn){ btn.disabled = false; btn.textContent = txtOriginal || '✅ Salvar Palpite'; }
+  }
+};
+
+// ─── APOSTAS / HISTÓRICO ─────────────────────────────────────────────────────
+function renderApostasHistorico(){
+  const wrap = document.getElementById('apostas-form-wrap');
+  const list = document.getElementById('apostas-list');
+  const info = document.getElementById('apostas-info');
+  const statsWrap = document.getElementById('historico-stats-wrap');
+
+  // Estatísticas do histórico
+  const minhasApostas = Object.values(apostasData);
+  const comResultado = minhasApostas.filter(a=>a.pts!==undefined);
+  const totalPts = comResultado.reduce((s,a)=>s+(a.pts||0),0);
+  const exatos = comResultado.filter(a=>a.resultado==='exato').length;
+  const vencedor = comResultado.filter(a=>a.resultado==='vencedor').length;
+  const empate = comResultado.filter(a=>a.resultado==='empate').length;
+  const errados = comResultado.filter(a=>a.pts===0).length;
+
+  if(comResultado.length > 0){
+    statsWrap.innerHTML=`<div class="historico-stats">
+      <div class="hist-stat"><div class="hist-stat-val">${totalPts}</div><div class="hist-stat-label">Pontos totais</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${minhasApostas.length}</div><div class="hist-stat-label">Palpites feitos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${exatos}</div><div class="hist-stat-label">Placares exatos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${vencedor}</div><div class="hist-stat-label">Vencedores certos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${empate}</div><div class="hist-stat-label">Empates certos</div></div>
+      <div class="hist-stat"><div class="hist-stat-val">${errados}</div><div class="hist-stat-label">Erros</div></div>
+    </div>`;
+  } else {
+    statsWrap.innerHTML='';
+  }
+
+  if(!minhasApostas.length){
+    info.style.display='block';
+    list.innerHTML='<div class="empty-state">Você ainda não fez nenhum palpite.</div>';
+    return;
+  }
+  info.style.display='none';
+
+  // Ordena cronologicamente
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+  let html='';
+
+  // Agrupa por data (apenas jogos com palpite)
+  const porData = {};
+  sorted.forEach(j=>{
+    if(!apostasData[j.id]) return;
+    const key = j.data || j.ts;
+    if(!porData[key]) porData[key] = [];
+    porData[key].push(j);
+  });
+
+  // Fase de grupos: por rodada/data
+  const datasGrupos = Object.keys(porData)
+    .filter(d => porData[d][0].fase === 'Fase de grupos')
+    .sort();
+
+  if(datasGrupos.length){
+    html+=`<div style="font-size:13px;font-weight:800;color:#2d6a4f;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px">⚽ Fase de grupos</div>`;
+    datasGrupos.forEach(data=>{
+      const jogsDia = porData[data];
+      const parts = data.split('-');
+      const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date(data+'T12:00:00').getDay()];
+      const ptsDia = jogsDia.reduce((s,j)=>{ const a=apostasData[j.id]; return s+(a?.pts||0); },0);
+      const comResultado = jogsDia.filter(j=>apostasData[j.id]?.pts !== undefined);
+
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+        <div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.6px">${parts[2]}/${parts[1]} · ${diaSemana}</div>
+        ${comResultado.length ? `<div style="font-size:12px;font-weight:700;color:#2d6a4f;background:#e6f4ec;padding:2px 10px;border-radius:99px">+${ptsDia} pts no dia</div>` : ''}
+      </div>`;
+
+      jogsDia.forEach(j=>{
+        const a = apostasData[j.id];
+        let ptsBadge='';
+        if(a.pts!==undefined){
+          const cor = a.pts>0?'pts-badge-green':'pts-badge-gray';
+          let desc='';
+          if(a.resultado==='exato') desc='🎯 Placar exato';
+          else if(a.resultado==='vencedor_saldo') desc='⚖️ Vencedor+saldo';
+          else if(a.resultado==='vencedor') desc='✅ Vencedor certo';
+          else if(a.resultado==='empate') desc='🤝 Empate certo';
+          else desc='❌ Errou';
+          ptsBadge=`<div style="text-align:right"><span class="publico-pts-badge ${cor}">+${a.pts} pts</span><div style="font-size:11px;color:#888;margin-top:2px">${desc}</div></div>`;
+        } else {
+          ptsBadge=`<span class="aposta-pendente">Aguardando</span>`;
+        }
+        const resultado = j.encerrado ? `Resultado: ${j.gA}×${j.gB} · ` : '';
+        html+=`<div class="aposta-card">
+          <div style="font-size:22px">${flag(j.timeA)}</div>
+          <div class="aposta-info">
+            <div class="aposta-jogo">${j.timeA} × ${j.timeB}</div>
+            <div class="aposta-placar">${resultado}Palpite: ${a.gA}×${a.gB}</div>
+          </div>
+          ${ptsBadge}
+        </div>`;
+      });
+    });
+  }
+
+  // Mata-mata: por fase
+  const fasesMata = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  fasesMata.forEach(fase=>{
+    const jogsFase = sorted.filter(j=>j.fase===fase && apostasData[j.id]);
+    if(!jogsFase.length) return;
+    const ptsFase = jogsFase.reduce((s,j)=>s+(apostasData[j.id]?.pts||0),0);
+    const comRes = jogsFase.filter(j=>apostasData[j.id]?.pts!==undefined);
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px">
+      <div style="font-size:13px;font-weight:800;color:#b5341b;text-transform:uppercase;letter-spacing:0.5px">${FASES_LABEL[fase]||fase}</div>
+      ${comRes.length ? `<div style="font-size:12px;font-weight:700;color:#b5341b;background:#fdecea;padding:2px 10px;border-radius:99px">+${ptsFase} pts</div>` : ''}
+    </div>`;
+    jogsFase.forEach(j=>{
+      const a = apostasData[j.id];
+      let ptsBadge='';
+      if(a.pts!==undefined){
+        const cor = a.pts>0?'pts-badge-green':'pts-badge-gray';
+        let desc='';
+        if(a.resultado==='exato') desc='🎯 Placar exato';
+        else if(a.resultado==='vencedor_saldo') desc='⚖️ Vencedor+saldo';
+        else if(a.resultado==='vencedor') desc='✅ Vencedor certo';
+        else if(a.resultado==='empate') desc='🤝 Empate certo';
+        else desc='❌ Errou';
+        ptsBadge=`<div style="text-align:right"><span class="publico-pts-badge ${cor}">+${a.pts} pts</span><div style="font-size:11px;color:#888;margin-top:2px">${desc}</div></div>`;
+      } else {
+        ptsBadge=`<span class="aposta-pendente">Aguardando</span>`;
+      }
+      const resultado = j.encerrado ? `Resultado: ${j.gA}×${j.gB} · ` : '';
+      html+=`<div class="aposta-card">
+        <div style="font-size:22px">${flag(j.timeA)}</div>
+        <div class="aposta-info">
+          <div class="aposta-jogo">${j.timeA} × ${j.timeB}</div>
+          <div class="aposta-placar">${resultado}Palpite: ${a.gA}×${a.gB}</div>
+        </div>
+        ${ptsBadge}
+      </div>`;
+    });
+  });
+
+  // Palpites de classificação com resultados
+  const minhasClassifs = classificadosData;
+  let classifHtml='';
+  FASES_CLASSIF.forEach(fase=>{
+    const meusPalpites = minhasClassifs[fase] || [];
+    if(!meusPalpites.length) return;
+    const confirmados = classifsData[fase]?.times || [];
+    classifHtml+=`<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px">Classificação — ${FASES_LABEL[fase]||fase}</div>`;
+    meusPalpites.forEach(time=>{
+      const acertou = confirmados.includes(time);
+      const resultado = confirmados.length > 0 ? (acertou ?
+        `<span class="publico-pts-badge pts-badge-green">+${BONUS_CLASSIF[fase]} pts ✓</span>` :
+        `<span class="publico-pts-badge pts-badge-gray">Não classificado</span>`) : '';
+      classifHtml+=`<div class="aposta-card">
+        <div style="font-size:22px">${flag(time)}</div>
+        <div class="aposta-info">
+          <div class="aposta-jogo">${time}</div>
+          <div class="aposta-placar">${FASES_LABEL[fase]||fase}</div>
+        </div>
+        ${resultado}
+      </div>`;
+    });
+  });
+
+  // Palpites especiais no histórico
+  ['TerceiroLugar','Campeao'].forEach(chave=>{
+    const meuPalpite = classificadosData[chave]||null;
+    if(!meuPalpite) return;
+    const confirmado = classifsData[chave]?.time||null;
+    let resultado='';
+    if(confirmado){
+      if(meuPalpite===confirmado) resultado=`<span class="publico-pts-badge pts-badge-green">+${BONUS_ESPECIAL[chave]} pts ✓</span>`;
+      else resultado=`<span class="publico-pts-badge pts-badge-gray">Errou</span>`;
+    }
+    classifHtml+=`<div class="aposta-card">
+      <div style="font-size:22px">${flag(meuPalpite)}</div>
+      <div class="aposta-info">
+        <div class="aposta-jogo">${meuPalpite}</div>
+        <div class="aposta-placar">${LABEL_ESPECIAL[chave]}</div>
+      </div>
+      ${resultado}
+    </div>`;
+  });
+
+  list.innerHTML = html + (classifHtml ? `<div style="font-size:15px;font-weight:700;margin:20px 0 8px">Palpites de classificação</div>${classifHtml}` : '');
+}
+
+// ─── FORMULÁRIO DE APOSTA ────────────────────────────────────────────────────
+window.abrirAposta = (jogoId) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  const aposta = apostasData[jogoId] || {};
+  const wrap = document.getElementById('apostas-form-wrap');
+  wrap.innerHTML=`<div class="card" id="form-aposta-${jogoId}">
+    <div style="font-weight:700;margin-bottom:12px">${flag(jogo.timeA)} ${jogo.timeA} × ${jogo.timeB} ${flag(jogo.timeB)}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="text-align:center;flex:1">${jogo.timeA}</div>
+      <input class="score-input" id="apA" type="number" min="0" max="99" value="${aposta.gA??''}" placeholder="0"/>
+      <div style="font-size:20px;font-weight:700">×</div>
+      <input class="score-input" id="apB" type="number" min="0" max="99" value="${aposta.gB??''}" placeholder="0"/>
+      <div style="text-align:center;flex:1">${jogo.timeB}</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="salvarAposta('${jogoId}')">Salvar palpite</button>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('apostas-form-wrap').innerHTML=''">Cancelar</button>
+    </div>
+  </div>`;
+  document.getElementById('apostas-form-wrap').scrollIntoView({behavior:'smooth'});
+  switchTab('apostas');
+};
+
+window.salvarAposta = async (jogoId) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  const now=Date.now();
+  if(now >= jogo.ts - 5*60*1000){ alert('Palpite bloqueado — o jogo está prestes a começar.'); return; }
+  const gA = parseInt(document.getElementById('apA').value);
+  const gB = parseInt(document.getElementById('apB').value);
+  if(isNaN(gA)||isNaN(gB)){ alert('Informe placar válido.'); return; }
+  await setDoc(doc(db,`apostas/${currentUser.uid}/jogos`,jogoId),{ gA, gB, ts:now });
+  document.getElementById('apostas-form-wrap').innerHTML='';
+  alert('Palpite salvo!');
+};
+
+// ─── CLASSIFICAÇÃO ───────────────────────────────────────────────────────────
+
+// Retorna o pool de times disponíveis para uma fase, baseado nos palpites
+// da fase anterior do PRÓPRIO participante (encadeamento cascata)
+function poolParaFase(fase){
+  const ordem = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  const idx = ordem.indexOf(fase);
+  if(idx <= 0){
+    // 16-avos: pool = todos os times cadastrados nos grupos (máx 4 por grupo)
+    const gruposMap = obterTimesporGrupo();
+    const pool = [];
+    GRUPOS_ORDEM.forEach(g=>{ (gruposMap[g]||[]).forEach(t=>{ if(!pool.includes(t)) pool.push(t); }); });
+    return pool;
+  }
+  // Demais fases: pool = o que o participante escolheu na fase anterior
+  const faseAnterior = ordem[idx-1];
+  return classificadosData[faseAnterior] || [];
+}
+
+function renderClassif(){
+  const now=Date.now();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  const bloqueado = now >= abertura - 5*60*1000;
+  const el = document.getElementById('classif-content');
+
+  if(bloqueado){
+    el.innerHTML=`<div class="alert alert-warn">⏱ Palpites de classificação encerrados.</div>`;
+    // Mostra palpites feitos em modo leitura
+    const gruposMapR = obterTimesporGrupo();
+    let roHtml='<div style="margin-top:16px">';
+    FASES_CLASSIF.forEach(fase=>{
+      const selecionados = classificadosData[fase]||[];
+      if(!selecionados.length) return;
+      const confirmados = classifsData[fase]?.times||[];
+      roHtml+=`<div class="classif-fase-bloco">
+        <div class="classif-fase-header">
+          <span class="classif-fase-title">${FASES_LABEL[fase]||fase}</span>
+          <span class="classif-fase-bonus">+${BONUS_CLASSIF[fase]} pts/acerto</span>
+        </div>
+        <div class="classif-fase-body">`;
+      if(fase==='16avos'){
+        roHtml+=`<div class="grupos-grade">`;
+        GRUPOS_ORDEM.forEach(g=>{
+          const times=(gruposMapR[g]||[]).slice(0,4).filter(t=>selecionados.includes(t));
+          if(!times.length) return;
+          roHtml+=`<div class="grupo-bloco"><div class="grupo-header">Grupo ${g}</div>`;
+          times.forEach(time=>{
+            const conf=confirmados.length>0&&confirmados.includes(time);
+            const errado=confirmados.length>0&&!confirmados.includes(time);
+            let cls='grupo-time bloqueado'+(conf?' correto':errado?' errado':' selecionado');
+            roHtml+=`<div class="${cls}"><span class="gt-flag">${flag(time)}</span><span class="gt-nome">${time}</span><span class="gt-check">✓</span></div>`;
+          });
+          roHtml+=`</div>`;
+        });
+        roHtml+=`</div>`;
+      } else {
+        roHtml+=`<div class="fase-times-grid">`;
+        selecionados.forEach(time=>{
+          const conf=confirmados.length>0&&confirmados.includes(time);
+          const errado=confirmados.length>0&&!confirmados.includes(time);
+          let cls='fase-time bloqueado'+(conf?' correto':errado?' errado':' selecionado');
+          roHtml+=`<div class="${cls}"><span class="ft-flag">${flag(time)}</span><span class="ft-nome">${time}</span><span class="ft-check">✓</span></div>`;
+        });
+        roHtml+=`</div>`;
+      }
+      roHtml+=`</div></div>`;
+    });
+    roHtml+='</div>';
+    el.innerHTML+=roHtml;
+    el.innerHTML+=renderEspecialBlocos(true);
+    return;
+  }
+
+  const gruposMap = obterTimesporGrupo();
+  const todasSelecoes = obterTodasSelecoes();
+  if(!todasSelecoes.length){ el.innerHTML='<div class="empty-state">Aguardando cadastro dos times.</div>'; return; }
+
+  let html='';
+  FASES_CLASSIF.forEach(fase=>{
+    const selecionados = classificadosData[fase] || [];
+    const confirmados = classifsData[fase]?.times || [];
+    const limite = LIMITES_CLASSIF[fase];
+    const pool = poolParaFase(fase);
+    const pct = Math.round((selecionados.length/limite)*100);
+
+    // Aviso se fase anterior não preenchida
+    const faseAnteriorIdx = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'].indexOf(fase) - 1;
+    const faseAnteriorNome = faseAnteriorIdx >= 0 ? FASES_LABEL[['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'][faseAnteriorIdx]] : null;
+    const semPool = fase !== '16avos' && pool.length === 0;
+
+    html+=`<div class="classif-fase-bloco">
+      <div class="classif-fase-header">
+        <span class="classif-fase-title">${FASES_LABEL[fase]||fase}</span>
+        <div class="classif-fase-meta">
+          <span class="classif-fase-bonus">+${BONUS_CLASSIF[fase]} pts/acerto</span>
+          <span class="classif-fase-count">${selecionados.length}/${limite}</span>
+        </div>
+      </div>
+      <div class="classif-fase-body">
+        <div class="classif-progress"><div class="classif-progress-bar" style="width:${pct}%"></div></div>`;
+
+    if(semPool){
+      html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>${faseAnteriorNome}</strong>.</div>`;
+    } else if(fase === '16avos'){
+      // Grade de grupos estilo Globo: 4 colunas, cada grupo com 4 times em lista vertical
+      html+=`<div class="grupos-grade">`;
+      GRUPOS_ORDEM.forEach(g=>{
+        const times = (gruposMap[g] || []).slice(0,4); // máx 4 por grupo
+        if(!times.length) return;
+        html+=`<div class="grupo-bloco"><div class="grupo-header">Grupo ${g}</div>`;
+        times.forEach(time=>{
+          const sel = selecionados.includes(time);
+          const conf = confirmados.length>0 && confirmados.includes(time);
+          const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+          let cls='grupo-time';
+          if(errado) cls+=' errado';
+          else if(conf&&sel) cls+=' correto';
+          else if(sel) cls+=' selecionado';
+          html+=`<div class="${cls}" onclick="toggleClassif('${fase}','${time}')">
+            <span class="gt-flag">${flag(time)}</span>
+            <span class="gt-nome">${time}</span>
+            <span class="gt-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    } else if(fase === 'Terceiro lugar'){
+      // Participante escolhe 2 dos 4 semifinalistas — os outros 2 são os finalistas automaticamente
+      const semifinalistas = classificadosData['Semifinal'] || [];
+      const tercLugar = classificadosData['Terceiro lugar'] || [];
+      const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+      if(semifinalistas.length < 4){
+        html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>Semifinal</strong> (4 times).</div>`;
+      } else {
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:10px">Escolha os 2 times que vão disputar o <strong>3º lugar</strong> (perdedores das semifinais). Os outros 2 serão automaticamente os finalistas.</div>`;
+        html+=`<div class="fase-times-grid">`;
+        semifinalistas.forEach(time=>{
+          const sel = tercLugar.includes(time);
+          const conf = confirmados.length>0 && confirmados.includes(time);
+          const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+          let cls='fase-time';
+          if(errado) cls+=' errado';
+          else if(conf&&sel) cls+=' correto';
+          else if(sel) cls+=' selecionado';
+          html+=`<div class="${cls}" onclick="toggleClassif('Terceiro lugar','${time}')">
+            <span class="ft-flag">${flag(time)}</span>
+            <span class="ft-nome">${time}</span>
+            <span class="ft-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+        if(finalistas.length > 0){
+          html+=`<div style="margin-top:12px;padding:10px 12px;background:#e8f5e9;border-radius:8px;border-left:3px solid #2d6a4f">
+            <div style="font-size:12px;font-weight:700;color:#2d6a4f;margin-bottom:6px">🏆 Finalistas (automático)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              ${finalistas.map(t=>`<span style="font-size:13px;font-weight:600">${flag(t)} ${t}</span>`).join('<span style="color:#aaa">vs</span>')}
+            </div>
+          </div>`;
+        }
+      }
+    } else if(fase === 'Final'){
+      // Final é gerada automaticamente dos semifinalistas não escolhidos para o 3º lugar
+      const semifinalistas = classificadosData['Semifinal'] || [];
+      const tercLugar = classificadosData['Terceiro lugar'] || [];
+      const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+      const confirmadosFinal = classifsData['Final']?.times || [];
+      if(finalistas.length < 2){
+        html+=`<div style="color:#aaa;font-size:13px;padding:8px 0">Preencha primeiro os palpites de <strong>Disputa de 3º lugar</strong>.</div>`;
+      } else {
+        html+=`<div style="font-size:12px;color:#666;margin-bottom:10px">Finalistas definidos automaticamente pelos semifinalistas não escolhidos para o 3º lugar.</div>`;
+        html+=`<div class="fase-times-grid">`;
+        finalistas.forEach(time=>{
+          const conf = confirmadosFinal.length>0 && confirmadosFinal.includes(time);
+          const sel = finalistas.includes(time); // sempre selecionado
+          let cls='fase-time selecionado bloqueado';
+          if(conf) cls='fase-time correto bloqueado';
+          html+=`<div class="${cls}">
+            <span class="ft-flag">${flag(time)}</span>
+            <span class="ft-nome">${time}</span>
+            <span class="ft-check">✓</span>
+          </div>`;
+        });
+        html+=`</div>`;
+      }
+    } else {
+      // Fases intermediárias: apenas os times que o participante escolheu na fase anterior
+      html+=`<div class="fase-times-grid">`;
+      pool.forEach(time=>{
+        const sel = selecionados.includes(time);
+        const conf = confirmados.length>0 && confirmados.includes(time);
+        const errado = confirmados.length>0 && !confirmados.includes(time) && sel;
+        let cls='fase-time';
+        if(errado) cls+=' errado';
+        else if(conf&&sel) cls+=' correto';
+        else if(sel) cls+=' selecionado';
+        html+=`<div class="${cls}" onclick="toggleClassif('${fase}','${time}')">
+          <span class="ft-flag">${flag(time)}</span>
+          <span class="ft-nome">${time}</span>
+          <span class="ft-check">✓</span>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  });
+
+  // Monta os blocos especiais (3º lugar e campeão) e só então o botão salvar
+  el.innerHTML = html + renderEspecialBlocos(false)
+    + `<button class="btn btn-primary" style="margin-top:16px;width:100%;padding:13px;font-size:15px" onclick="salvarClassif()">💾 Salvar classificação</button>`;
+}
+
+function renderEspecialBlocos(readonly=false){
+  const semifinalistas = classificadosData['Semifinal'] || [];
+  const tercLugar = classificadosData['Terceiro lugar'] || [];
+  const finalistas = semifinalistas.filter(t => !tercLugar.includes(t));
+  let html='';
+
+  ['TerceiroLugar','Campeao'].forEach(chave=>{
+    const isCampeao = chave === 'Campeao';
+    // Pool correto: 3º lugar usa os 2 do 3º, Campeão usa os 2 finalistas
+    const pool = isCampeao ? finalistas : tercLugar;
+    const selecionado = classificadosData[chave] || null;
+    const confirmado = classifsData[chave]?.time || null;
+    const acertou = confirmado && selecionado === confirmado;
+    const errou = confirmado && selecionado && selecionado !== confirmado;
+    const outroChave = isCampeao ? 'TerceiroLugar' : 'Campeao';
+    const selecionadoOutro = classificadosData[outroChave] || null;
+
+    const instrucao = isCampeao
+      ? 'Dentre os 2 finalistas que você escolheu, quem vai <strong>vencer a final</strong>?'
+      : 'Dentre os 2 times que disputam o 3º lugar, quem vai <strong>vencer</strong>?';
+
+    html+=`<div class="especial-bloco">
+      <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
+        <span style="font-size:14px;font-weight:700">${LABEL_ESPECIAL[chave]}</span>
+        <span style="font-size:12px;font-weight:600;opacity:0.9">+${BONUS_ESPECIAL[chave]} pts se acertar</span>
+      </div>
+      <div class="especial-body">
+        <div style="font-size:12px;color:#666;margin-bottom:12px">${instrucao}</div>`;
+
+    if(pool.length === 0){
+      html+=`<div class="especial-aviso">Preencha primeiro os palpites de <strong>Semifinal</strong>.</div>`;
+    } else {
+      html+=`<div class="especial-times">`;
+      pool.forEach(time=>{
+        const sel = selecionado === time;
+        const conf = confirmado === time;
+        const err = errou && sel;
+        // Time já escolhido no outro bloco — bloqueia visualmente
+        const bloqueadoPorOutro = !readonly && !sel && selecionadoOutro === time;
+        let cls='especial-time';
+        if(readonly || bloqueadoPorOutro) cls+=' bloqueado';
+        if(err) cls+=' errado';
+        else if(conf&&sel) cls+=' correto';
+        else if(sel) cls+=' selecionado';
+        const onclick = (readonly || bloqueadoPorOutro) ? '' : `onclick="toggleEspecial('${chave}','${time}')"`;
+        const bloqHint = bloqueadoPorOutro ? `title="Já escolhido como ${isCampeao?'vencedor do 3º lugar':'campeão'}"` : '';
+        html+=`<div class="${cls}" ${onclick} ${bloqHint} style="${bloqueadoPorOutro?'opacity:0.35;cursor:not-allowed':''}">
+          <span class="et-flag">${flag(time)}</span>
+          <span class="et-nome">${time}</span>
+          <span class="et-check">${bloqueadoPorOutro?'🚫':'✓'}</span>
+        </div>`;
+      });
+      html+=`</div>`;
+      if(selecionado && !confirmado) html+=`<div style="margin-top:8px;font-size:12px;color:#2d6a4f">✅ Escolhido: ${flag(selecionado)} <strong>${selecionado}</strong></div>`;
+      if(acertou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-green">✓ Acertou! +${BONUS_ESPECIAL[chave]} pts</span></div>`;
+      else if(errou) html+=`<div style="margin-top:10px"><span class="publico-pts-badge pts-badge-gray">Errou — era ${flag(confirmado)} ${confirmado}</span></div>`;
+    }
+    html+=`</div></div>`;
+  });
+  return html;
+}
+
+
+function formatarDataJogo(j){
+  // Deriva sempre do ts — nunca depende dos campos data/hora separados
+  const ts = typeof j.ts === 'number' ? j.ts : parseInt(j.ts);
+  if(!ts || isNaN(ts)) return 'Data a confirmar';
+  const dt = new Date(ts);
+  return dt.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})
+    + ' ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function obterTimesporGrupo(){
+  // Retorna os grupos fixos definidos na constante GRUPOS_FIXOS
+  return GRUPOS_FIXOS;
+}
+
+function obterTodasSelecoes(){
+  // Todas as 48 seleções, na ordem dos grupos A→L
+  const times = [];
+  GRUPOS_ORDEM.forEach(g=>{
+    (GRUPOS_FIXOS[g]||[]).forEach(t=>{ if(!times.includes(t)) times.push(t); });
+  });
+  return times;
+}
+
+window.toggleClassif = (fase, time) => {
+  const now=Date.now();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  if(now >= abertura - 5*60*1000) return;
+  const arr = classificadosData[fase] || [];
+  const idx = arr.indexOf(time);
+  if(idx>=0){
+    arr.splice(idx,1);
+    // Cascata: remove o time das fases posteriores se estava selecionado lá
+    const ordemFases = ['16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+    const faseIdx = ordemFases.indexOf(fase);
+    for(let i=faseIdx+1; i<ordemFases.length; i++){
+      const f = ordemFases[i];
+      const a = classificadosData[f]||[];
+      const j = a.indexOf(time);
+      if(j>=0){ a.splice(j,1); classificadosData[f]=a; }
+    }
+  } else {
+    if(arr.length >= LIMITES_CLASSIF[fase]){ alert(`Limite de ${LIMITES_CLASSIF[fase]} seleções para ${FASES_LABEL[fase]||fase}.`); return; }
+    arr.push(time);
+  }
+  classificadosData[fase]=arr;
+  sincronizarFinal();
+  renderClassif();
+};
+
+window.toggleEspecial = (chave, time) => {
+  const now=Date.now();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  if(now >= abertura - 5*60*1000) return;
+  // Toggle: se já selecionado, deseleciona; senão seleciona
+  if(classificadosData[chave] === time){
+    classificadosData[chave] = null;
+  } else {
+    classificadosData[chave] = time;
+    // Se o mesmo time estava selecionado no outro bloco, remove de lá
+    const outro = chave === 'TerceiroLugar' ? 'Campeao' : 'TerceiroLugar';
+    if(classificadosData[outro] === time) classificadosData[outro] = null;
+  }
+  renderClassif();
+};
+
+// Finalistas = semifinalistas nao escolhidos para o 3o lugar (derivado, nao toggle)
+function sincronizarFinal(){
+  const semi = classificadosData['Semifinal'] || [];
+  const terc = classificadosData['Terceiro lugar'] || [];
+  if(semi.length === 4 && terc.length === 2){
+    classificadosData['Final'] = semi.filter(t => !terc.includes(t));
+  } else {
+    classificadosData['Final'] = [];
+  }
+}
+
+window.salvarClassif = async () => {
+  await setDoc(doc(db,'classificacoes',currentUser.uid), {...classificadosData, uid:currentUser.uid, nome:currentUser.displayName||'', email:currentUser.email||'', foto:currentUser.photoURL||'' });
+  alert('Classificação salva!');
+};
+
+// ─── PALPITES PÚBLICOS ───────────────────────────────────────────────────────
+// Registro dos dados de comparação por jogo, preenchido ao renderizar a aba Comparar
+const _exportComparacao = {};
+
+window.exportarComparacaoJogo = async (jogoId) => {
+  const d = _exportComparacao[jogoId];
+  if(!d){ mostrarToast('Abra a aba Comparar primeiro.', 'error'); return; }
+
+  const fase = d.fase==='Fase de grupos' ? `Grupo ${d.grupo||''}`.trim() : (FASES_LABEL[d.fase]||d.fase);
+
+  let texto = `⚽ ${d.timeA} × ${d.timeB}\n${fase} · ${d.dataFmt}\n`;
+  if(d.encerrado && d.gA!=null && d.gB!=null){
+    texto += `🏁 Resultado: ${d.gA}×${d.gB}\n`;
+  } else {
+    texto += `🔒 Palpites encerrados — bola vai rolar!\n`;
+  }
+  texto += `\n📊 Como o grupo apostou:\n\n`;
+
+  d.grupos.forEach(g => {
+    const ehReal = d.encerrado && g.gA===d.gA && g.gB===d.gB;
+    const alvo = ehReal ? ' 🎯' : '';
+    const n = g.nomes.length;
+    texto += `▫️ ${d.timeA} ${g.gA}×${g.gB} ${d.timeB} — ${n} ${n===1?'palpite':'palpites'}${alvo}\n`;
+    texto += `   ${g.nomes.join(', ')}\n\n`;
+  });
+
+  const total = d.grupos.reduce((s,g)=>s+g.nomes.length,0);
+  texto += `Total: ${total} ${total===1?'palpite':'palpites'} · ${d.grupos.length} ${d.grupos.length===1?'placar':'placares diferentes'}`;
+
+  try {
+    await navigator.clipboard.writeText(texto);
+    mostrarToast('✅ Palpites copiados! Cole no WhatsApp.');
+  } catch(e){
+    // Fallback: textarea temporária para cópia manual
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position='fixed'; ta.style.left='0'; ta.style.top='0'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    let ok=false;
+    try { ok = document.execCommand('copy'); } catch(e2){}
+    document.body.removeChild(ta);
+    mostrarToast(ok ? '✅ Palpites copiados! Cole no WhatsApp.' : 'Não foi possível copiar automaticamente.', ok?'success':'error');
+  }
+};
+
+// ── Helpers de exportação para WhatsApp (compartilhados) ─────────────────────
+// Reaproveita dados já em memória (allApostasData + usuariosData): leitura zero
+// no Firestore. FORMATO_CONSENSO = fases com muitas seleções (16avos/Oitavas);
+// ESPECIAIS_EXPORT = picks únicos (Campeão / Vencedor do 3º).
+const FORMATO_CONSENSO = ['16avos','Oitavas'];
+const ESPECIAIS_EXPORT = ['Campeao','TerceiroLugar'];
+
+async function copiarParaWhatsApp(texto){
+  try {
+    await navigator.clipboard.writeText(texto);
+    mostrarToast('✅ Palpites copiados! Cole no WhatsApp.');
+  } catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position='fixed'; ta.style.left='0'; ta.style.top='0'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    let ok=false;
+    try { ok = document.execCommand('copy'); } catch(e2){}
+    document.body.removeChild(ta);
+    mostrarToast(ok ? '✅ Palpites copiados! Cole no WhatsApp.' : 'Não foi possível copiar automaticamente.', ok?'success':'error');
+  }
+}
+
+// ── Exportação de ACERTOS de classificação por fase ──────────────────────────
+// Só faz sentido depois de confirmar os classificados da fase. 16avos/Oitavas
+// saem só com o número (X/N); demais fases, número + bandeiras dos acertos.
+// Campeão/3º (pick único) listam quem acertou. Leitura zero (tudo em memória).
+window.exportarAcertosFase = async (fase) => {
+  const aprovados = Object.values(usuariosData).filter(u => u.status === 'aprovado');
+
+  const agora = new Date();
+  const dd=String(agora.getDate()).padStart(2,'0'), mm=String(agora.getMonth()+1).padStart(2,'0');
+  const hh=String(agora.getHours()).padStart(2,'0'), min=String(agora.getMinutes()).padStart(2,'0');
+  const stamp = `${dd}/${mm} às ${hh}:${min}`;
+
+  // Campeão / Vencedor do 3º — escolha única, acerto binário
+  if(ESPECIAIS_EXPORT.includes(fase)){
+    const titulo = LABEL_ESPECIAL[fase] || fase;
+    const confirmado = classifsData[fase]?.time || null;
+    if(!confirmado){ return copiarParaWhatsApp(`${titulo} — Acertos\n\nFase ainda não confirmada.`); }
+    const acertaram = aprovados
+      .filter(u => (allApostasData[u.uid]||{})[fase] === confirmado)
+      .map(u => u.nome || u.email || 'Participante')
+      .sort((a,b)=> a.localeCompare(b,'pt-BR'));
+    let texto = `${titulo} — Acertos\nBolão Copa 2026 · ${stamp}\n\n${flag(confirmado)} ${confirmado}\n\n`;
+    texto += acertaram.length ? `Acertaram (${acertaram.length}): ${acertaram.join(', ')}` : 'Ninguém acertou.';
+    return copiarParaWhatsApp(texto);
+  }
+
+  const label = FASES_LABEL[fase] || fase;
+  const confirmados = classifsData[fase]?.times || [];
+  if(!confirmados.length){
+    return copiarParaWhatsApp(`🎯 ACERTOS — ${label}\n\nFase ainda não confirmada. Confirme os classificados primeiro.`);
+  }
+
+  // Acertos por participante (Final derivada de Semifinal − 3º lugar)
+  const linhas = [];
+  aprovados.forEach(u => {
+    const c = {...(allApostasData[u.uid]||{})};
+    if(fase==='Final' && (c['Semifinal']||[]).length===4 && (c['Terceiro lugar']||[]).length===2){
+      c['Final'] = c['Semifinal'].filter(t => !c['Terceiro lugar'].includes(t));
+    }
+    const picks = c[fase] || [];
+    if(!picks.length) return; // não preencheu essa fase
+    const acertos = picks.filter(t => confirmados.includes(t));
+    linhas.push({ nome: u.nome || u.email || 'Participante', n: acertos.length, acertos });
+  });
+  linhas.sort((a,b)=> b.n - a.n || a.nome.localeCompare(b.nome,'pt-BR'));
+
+  const denom = confirmados.length;
+  let texto = `🎯 ACERTOS — ${label}\nBolão Copa 2026 · ${stamp}\n\n`;
+  if(!linhas.length){ texto += 'Nenhum palpite registrado.'; return copiarParaWhatsApp(texto); }
+  if(FORMATO_CONSENSO.includes(fase)){
+    // 16avos / Oitavas — só o número
+    linhas.forEach(l => { texto += `${l.nome} — ${l.n}/${denom}\n`; });
+  } else {
+    // Quartas pra frente — número + bandeiras dos acertos
+    linhas.forEach(l => {
+      const bandeiras = l.acertos.map(flag).join(' ');
+      texto += `${l.nome} — ${l.n}/${denom}${bandeiras ? '  '+bandeiras : ''}\n`;
+    });
+  }
+  texto += `\n${linhas.length} participantes`;
+  return copiarParaWhatsApp(texto);
+};
+
+window.renderPublico = () => {
+  const el = document.getElementById('publico-list');
+  const filtroFase = document.getElementById('publico-filtro-fase')?.value || '';
+  const filtroTipo = document.getElementById('publico-filtro-tipo')?.value || 'jogos';
+
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  if(!aprovados.length){ el.innerHTML='<div class="empty-state">Nenhum participante.</div>'; return; }
+
+  if(filtroTipo === 'classif'){
+    renderPublicoClassif(el, aprovados, filtroFase);
+    return;
+  }
+
+  // Palpites de placar agrupados por placar dentro de cada jogo
+  const now = Date.now();
+  let jogosVisiveis = jogosData.filter(j => now >= j.ts - 5*60*1000);
+  if(filtroFase) jogosVisiveis = jogosVisiveis.filter(j=>j.fase===filtroFase);
+  jogosVisiveis.sort((a,b)=>a.ts-b.ts);
+
+  if(!jogosVisiveis.length){
+    el.innerHTML='<div class="empty-state">Nenhum palpite disponível ainda. Os palpites aparecem após o bloqueio de cada jogo.</div>';
+    return;
+  }
+
+  el.innerHTML='<div class="loading">Carregando palpites...</div>';
+  carregarTodosOsPalpites(aprovados, jogosVisiveis).then(todosPalpites=>{
+    // Mapa rápido uid → nome
+    const nomeDe = {};
+    aprovados.forEach(u => { nomeDe[u.uid] = u.nome || u.email || 'Participante'; });
+
+    // Agrupa jogos por DIA (derivado do ts), dias mais recentes no topo.
+    // Dentro do dia, ordem cronológica. Cada jogo é recolhível; o dia mais
+    // recente abre expandido, os demais recolhidos.
+    const porDia = {}; // 'YYYY-MM-DD' -> [jogos]
+    jogosVisiveis.forEach(j=>{
+      const dt = new Date(typeof j.ts==='number'?j.ts:parseInt(j.ts));
+      const chave = isNaN(dt) ? '0000-00-00'
+        : `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+      if(!porDia[chave]) porDia[chave]=[];
+      porDia[chave].push(j);
+    });
+    const diasOrdenados = Object.keys(porDia).sort().reverse(); // recente primeiro
+    const diaMaisRecente = diasOrdenados[0];
+
+    let html = '';
+
+    diasOrdenados.forEach(dia => {
+      const jogsDia = porDia[dia].sort((a,b)=>a.ts-b.ts); // cronológico dentro do dia
+      const expandidoDia = (dia === diaMaisRecente);
+      const dtDia = new Date(jogsDia[0].ts);
+      const labelDia = isNaN(dtDia) ? 'Data a confirmar'
+        : dtDia.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+
+      html += `<div style="font-size:13px;font-weight:800;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #e0e0e0">📅 ${labelDia} <span style="font-weight:600;color:#888;text-transform:none">· ${jogsDia.length} ${jogsDia.length===1?'jogo':'jogos'}</span></div>`;
+
+    jogsDia.forEach(j => {
+      // Coletar palpites deste jogo agrupados por placar
+      const porPlacar = {};  // "gA-gB" → { gA, gB, participantes: [{nome, pts, resultado}] }
+      aprovados.forEach(u => {
+        const p = todosPalpites[u.uid]?.[j.id];
+        if(!p || p.gA === undefined || p.gB === undefined) return;
+        const k = `${p.gA}-${p.gB}`;
+        if(!porPlacar[k]) porPlacar[k] = { gA: p.gA, gB: p.gB, participantes: [] };
+        porPlacar[k].participantes.push({
+          nome: nomeDe[u.uid],
+          pts: p.pts,
+          resultado: p.resultado
+        });
+      });
+
+      const grupos = Object.values(porPlacar);
+      if(!grupos.length) return;
+
+      // Ordenar grupos: mais palpites primeiro; em empate, placar exato no topo
+      const placarReal = j.encerrado ? `${j.gA}-${j.gB}` : null;
+      grupos.sort((a,b) => {
+        if(placarReal){
+          const aExato = (a.gA===j.gA && a.gB===j.gB) ? 1 : 0;
+          const bExato = (b.gA===j.gA && b.gB===j.gB) ? 1 : 0;
+          if(aExato !== bExato) return bExato - aExato;
+        }
+        return b.participantes.length - a.participantes.length;
+      });
+
+      const totalPalpites = grupos.reduce((s,g) => s + g.participantes.length, 0);
+      const resultadoBadge = j.encerrado
+        ? `<span style="background:#1a1a2e;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;margin-left:8px">Resultado: ${j.gA}×${j.gB}</span>`
+        : `<span style="background:#fff8e1;color:#92610a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;margin-left:8px">Aguardando resultado</span>`;
+
+      // Guarda os dados deste jogo para o botão de exportar
+      _exportComparacao[j.id] = {
+        timeA: j.timeA, timeB: j.timeB, fase: j.fase, grupo: j.grupo,
+        encerrado: j.encerrado, gA: j.gA, gB: j.gB,
+        dataFmt: formatarDataJogo(j),
+        grupos: grupos.map(g => ({ gA: g.gA, gB: g.gB, nomes: g.participantes.map(p=>p.nome) }))
+      };
+
+      html += `
+      <div class="game-card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <!-- Cabeçalho do jogo (clicável: recolhe/expande) -->
+        <div onclick="toggleJogoComparar(this)" style="background:#1a1a2e;padding:10px 14px;color:#fff;cursor:pointer;position:relative">
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;flex-wrap:wrap">
+            <span>${flag(j.timeA)} ${j.timeA}</span>
+            <span style="opacity:0.6">×</span>
+            <span>${j.timeB} ${flag(j.timeB)}</span>
+          </div>
+          <div style="text-align:center;margin-top:4px;font-size:11px;opacity:0.8">
+            ${j.fase==='Fase de grupos'?`Grupo ${j.grupo||''}`:(FASES_LABEL[j.fase]||j.fase)} · ${formatarDataJogo(j)}
+            ${resultadoBadge}
+          </div>
+          <span class="toggle-jogo-icon" style="position:absolute;right:14px;top:12px;font-size:13px;opacity:0.8">${expandidoDia?'▲':'▼'}</span>
+        </div>
+        <!-- Corpo recolhível -->
+        <div class="jogo-comparar-corpo" style="display:${expandidoDia?'block':'none'}">
+        <div style="text-align:center;padding:8px 0 0;background:#fff">
+          <button onclick="exportarComparacaoJogo('${j.id}')" style="background:#2d6a4f;color:#fff;border:none;font-size:12px;font-weight:600;padding:5px 14px;border-radius:99px;cursor:pointer">📋 Exportar palpites</button>
+        </div>
+        <!-- Grupos de placar -->
+        <div style="padding:12px 14px;background:#fff">`;
+
+      grupos.forEach(g => {
+        const ehPlacarReal = j.encerrado && g.gA===j.gA && g.gB===j.gB;
+        const corBorda = ehPlacarReal ? '#2d6a4f' : '#e0e0e0';
+        const corBg = ehPlacarReal ? '#e6f4ec' : '#f7f8fa';
+
+        // Coletar pontuação (caso já tenha sido calculada)
+        const ptsGrupo = g.participantes[0]?.pts;
+        const ptsLabel = (j.encerrado && ptsGrupo !== undefined && ptsGrupo > 0)
+          ? `<span style="background:#2d6a4f;color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;margin-left:6px">+${ptsGrupo} pts</span>`
+          : '';
+
+        html += `
+        <div style="background:${corBg};border:1.5px solid ${corBorda};border-radius:10px;padding:10px 14px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e">
+              ${j.timeA} <span style="color:#2d6a4f">${g.gA}</span> × <span style="color:#2d6a4f">${g.gB}</span> ${j.timeB}
+              ${ehPlacarReal ? '<span style="margin-left:6px">🎯</span>' : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              ${ptsLabel}
+              <span style="background:#fff;border:1px solid #ddd;color:#1a1a2e;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px">
+                ${g.participantes.length} ${g.participantes.length===1?'palpite':'palpites'}
+              </span>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+            ${g.participantes.map(p => `
+              <span style="background:#fff;border:1px solid #ddd;color:#333;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px">
+                ${p.nome}
+              </span>
+            `).join('')}
+          </div>
+        </div>`;
+      });
+
+      html += `
+          <div style="text-align:center;font-size:11px;color:#888;margin-top:6px">
+            Total: ${totalPalpites} ${totalPalpites===1?'palpite':'palpites'} · ${grupos.length} ${grupos.length===1?'placar diferente':'placares diferentes'}
+          </div>
+        </div>
+        </div>
+      </div>`;
+    }); // fim jogsDia.forEach
+    }); // fim diasOrdenados.forEach
+
+    el.innerHTML = html || '<div class="empty-state">Nenhum palpite registrado para os jogos visíveis.</div>';
+  });
+};
+
+async function carregarTodosOsPalpites(aprovados, jogosVisiveis){
+  // Economia de cota: se já carregamos os palpites de todos nesta sessão,
+  // reusa o cache em memória em vez de reler ~2.000 documentos do Firestore.
+  // É seguro porque a aba Comparar só mostra jogos já bloqueados, cujos
+  // palpites não mudam mais (trava de prazo). Edição do admin atualiza o cache.
+  if(palpitesGlobaisCarregados) return apostasCache;
+
+  const resultado = {};
+  await Promise.all(aprovados.map(async u=>{
+    const snap = await getDocs(collection(db,`apostas/${u.uid}/jogos`));
+    resultado[u.uid]={};
+    snap.docs.forEach(d=>{ resultado[u.uid][d.id]=d.data(); });
+  }));
+  // Atualiza cache global por jogo (para estatísticas e admin)
+  todasApostasData = {};
+  Object.entries(resultado).forEach(([uid, palps])=>{
+    Object.entries(palps).forEach(([jid, p])=>{
+      if(!todasApostasData[jid]) todasApostasData[jid] = {};
+      todasApostasData[jid][uid] = { ...p, _uid: uid };
+    });
+  });
+  // Atualiza também o cache por uid (desempate/perfil)
+  Object.keys(apostasCache).forEach(k => delete apostasCache[k]);
+  Object.entries(resultado).forEach(([uid, palps]) => { apostasCache[uid] = palps; });
+  palpitesGlobaisCarregados = true;
+  return resultado;
+}
+
+// Carrega todas as apostas no login (para popular cache na aba palpites)
+async function carregarCachePalpitesGlobal(){
+  const aprovados = Object.values(usuariosData).filter(u=>u.status==='aprovado');
+  if(!aprovados.length) return;
+  await carregarTodosOsPalpites(aprovados, jogosData);
+  aplicarPontuacaoDerivada();
+  renderJogos();
+  renderRanking();
+  updateMetrics();
+  renderApostasHistorico();
+  renderPublico();
+}
+
+function renderPublicoClassif(el, aprovados, filtroFase){
+  const now = Date.now();
+  const abertura = new Date('2026-06-11T16:00:00-03:00').getTime();
+  const bloqueado = now >= abertura - 5*60*1000;
+  if(!bloqueado){
+    el.innerHTML='<div class="empty-state">Palpites de classificação ficam visíveis após o início da Copa (11/06).</div>';
+    return;
+  }
+
+  const fasesVisiveis = filtroFase ? [filtroFase].filter(f=>FASES_CLASSIF.includes(f)) : FASES_CLASSIF;
+  const sorted = [...aprovados].sort((a,b)=>(b.pts||0)-(a.pts||0));
+
+  const fasesBtn = [
+    ['16avos','16-avos'], ['Oitavas','Oitavas'], ['Quartas','Quartas'],
+    ['Semifinal','Semifinal'], ['Terceiro lugar','3º lugar'], ['Final','Finalistas'],
+    ['Campeao','🏆 Campeão'], ['TerceiroLugar','🥉 Vencedor 3º'],
+  ];
+
+  const painelAcertos = `<div style="background:#f7f8fa;border:1px solid #e0e0e0;border-radius:10px;padding:12px 14px;margin-bottom:16px">`
+    + `<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">🎯 Exportar acertos por fase (após confirmar classificados)</div>`
+    + `<div style="font-size:11px;color:#888;margin-bottom:10px">16-avos e oitavas só com o número de acertos; demais fases, número + bandeiras dos acertos.</div>`
+    + `<div style="display:flex;flex-wrap:wrap;gap:8px">`
+    + fasesBtn.map(([f,l]) => `<button onclick="exportarAcertosFase('${f}')" style="background:#1b4332;color:#fff;border:none;font-size:12px;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer">🎯 ${l}</button>`).join('')
+    + `</div></div>`;
+
+  let html='';
+  sorted.forEach(u=>{
+    const classifU = allApostasData[u.uid] || {};
+    const temEspecial = !filtroFase && (classifU['Campeao']||classifU['TerceiroLugar']);
+    const temAlgum = fasesVisiveis.some(f=>(classifU[f]||[]).length>0) || temEspecial;
+    if(!temAlgum) return;
+    const foto = u.foto ?
+      `<img src="${u.foto}" class="publico-avatar">` :
+      `<div class="publico-avatar-placeholder">${u.nome[0]}</div>`;
+    html+=`<div class="publico-participante">
+      <div class="publico-header" onclick="togglePublicoDetalhes(this)">
+        ${foto}
+        <div class="publico-nome">${u.nome}</div>
+        <div class="publico-pts">${u.pts||0} pts</div>
+        <div class="publico-toggle">▼</div>
+      </div>
+      <div class="publico-palpites">`;
+    fasesVisiveis.forEach(fase=>{
+      const times = classifU[fase]||[];
+      if(!times.length) return;
+      const confirmados = classifsData[fase]?.times||[];
+      html+=`<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 6px;text-transform:uppercase">${FASES_LABEL[fase]||fase}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">`;
+      times.forEach(time=>{
+        const conf=confirmados.length>0&&confirmados.includes(time);
+        const errado=confirmados.length>0&&!confirmados.includes(time);
+        const cls = conf?'pts-badge-green':errado?'pts-badge-gray':'';
+        html+=`<span class="publico-pts-badge ${cls}">${flag(time)} ${time}${conf?' ✓':''}</span>`;
+      });
+      html+=`</div>`;
+    });
+    // Palpites especiais (Campeão e Vencedor do 3º lugar) — só sem filtro de fase,
+    // pois não pertencem a nenhuma fase do seletor
+    if(!filtroFase){
+      ['Campeao','TerceiroLugar'].forEach(chave=>{
+        const palpite = classifU[chave]||null;
+        if(!palpite) return;
+        const confirmado = classifsData[chave]?.time||null;
+        const conf = confirmado && palpite===confirmado;
+        const errado = confirmado && palpite!==confirmado;
+        const cls = conf?'pts-badge-green':errado?'pts-badge-gray':'';
+        html+=`<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 6px;text-transform:uppercase">${LABEL_ESPECIAL[chave]}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+            <span class="publico-pts-badge ${cls}">${flag(palpite)} ${palpite}${conf?' ✓':''}</span>
+          </div>`;
+      });
+    }
+    html+=`</div></div>`;
+  });
+  el.innerHTML = painelAcertos + (html || '<div class="empty-state">Nenhum palpite de classificação encontrado.</div>');
+}
+
+window.toggleJogoComparar = (header) => {
+  const corpo = header.nextElementSibling;
+  const icon = header.querySelector('.toggle-jogo-icon');
+  const aberto = corpo.style.display !== 'none';
+  corpo.style.display = aberto ? 'none' : 'block';
+  if(icon) icon.textContent = aberto ? '▼' : '▲';
+};
+
+window.togglePublicoDetalhes = (header) => {
+  const palpites = header.nextElementSibling;
+  const toggle = header.querySelector('.publico-toggle');
+  palpites.classList.toggle('aberto');
+  toggle.textContent = palpites.classList.contains('aberto') ? '▲' : '▼';
+};
+
+// ─── ADMIN: PARTICIPANTES ────────────────────────────────────────────────────
+// ─── ADMIN: INSCRIÇÕES ───────────────────────────────────────────────────────
+async function renderAdminInscricoes(){
+  if(!isAdmin) return;
+  const configSnap = await getDoc(doc(db, 'config', 'bolao'));
+  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
+  const statusEl = document.getElementById('inscricoes-status');
+  const btnEl = document.getElementById('btn-toggle-inscricoes');
+  if(!statusEl || !btnEl) return;
+  if(abertas){
+    statusEl.innerHTML = '<span style="color:#2d6a4f;font-weight:600">✅ Inscrições abertas</span> — novos participantes podem entrar.';
+    btnEl.textContent = '🔒 Fechar inscrições';
+    btnEl.style.background = '#c0392b';
+  } else {
+    statusEl.innerHTML = '<span style="color:#c0392b;font-weight:600">🔒 Inscrições encerradas</span> — novos acessos estão bloqueados.';
+    btnEl.textContent = '🔓 Reabrir inscrições';
+    btnEl.style.background = '#2d6a4f';
+  }
+}
+
+window.toggleInscricoes = async () => {
+  if(!isAdmin) return;
+  const configRef = doc(db, 'config', 'bolao');
+  const configSnap = await getDoc(configRef);
+  const abertas = configSnap.exists() ? configSnap.data().inscricoesAbertas !== false : true;
+  await setDoc(configRef, { inscricoesAbertas: !abertas }, { merge: true });
+  await renderAdminInscricoes();
+};
+
+function renderAdminParticipantes(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-participantes-list');
+  const todos = Object.values(usuariosData).sort((a,b)=>a.criadoEm-b.criadoEm);
+  if(!todos.length){ el.innerHTML='<div class="empty-state">Nenhum usuário.</div>'; return; }
+
+  const pendentes = todos.filter(u=>u.status==='pendente');
+  const aprovados = todos.filter(u=>u.status==='aprovado');
+  const rejeitados = todos.filter(u=>u.status==='rejeitado');
+
+  let html='';
+  if(pendentes.length){
+    html+=`<div class="alert alert-warn" style="margin-bottom:12px">⚠️ ${pendentes.length} participante(s) aguardando aprovação</div>`;
+  }
+
+  [...pendentes,...aprovados,...rejeitados].forEach(u=>{
+    const foto = u.foto?`<img src="${u.foto}" class="participante-avatar">`:`<div class="participante-placeholder">${u.nome[0]}</div>`;
+    const statusCls = u.status==='aprovado'?'status-aprovado':u.status==='rejeitado'?'status-rejeitado':'status-pendente';
+    const statusTxt = u.status==='aprovado'?'Aprovado':u.status==='rejeitado'?'Rejeitado':'Pendente';
+    let botoes='';
+    if(u.status==='pendente'){
+      botoes=`<button class="btn-warn btn-sm" onclick="aprovarUser('${u.uid}','aprovado')">✅ Aprovar</button>
+              <button class="btn btn-danger btn-sm" onclick="aprovarUser('${u.uid}','rejeitado')">❌ Rejeitar</button>`;
+    } else if(u.status==='aprovado'){
+      botoes=`<button class="btn btn-danger btn-sm" onclick="aprovarUser('${u.uid}','rejeitado')">Revogar</button>`;
+    } else {
+      botoes=`<button class="btn-warn btn-sm" onclick="aprovarUser('${u.uid}','aprovado')">Aprovar</button>`;
+    }
+    html+=`<div class="participante-row">
+      ${foto}
+      <div style="flex:1">
+        <div class="participante-nome">${u.nome}</div>
+        <div class="participante-email">${u.email}</div>
+      </div>
+      <span class="status-badge ${statusCls}">${statusTxt}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${botoes}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+window.aprovarUser = async (uid, status) => {
+  await updateDoc(doc(db,'usuarios',uid),{ status });
+};
+
+// ─── ADMIN: JOGOS ─────────────────────────────────────────────────────────────
+function gameCardAdminHTML(j){
+  const isMata = j.fase !== 'Fase de grupos';
+  // Botão de editar palpites de terceiros só após o bloqueio (5 min antes do
+  // início). Antes disso, o próprio participante edita o palpite; admin não
+  // deve interferir em palpite ainda aberto (evita sobrescrever edição alheia).
+  const palpitesBloqueados = Date.now() >= j.ts - 5*60*1000;
+  return `<div class="game-card">
+    <div class="game-header">
+      <span>${flag(j.timeA)} ${j.timeA} × ${j.timeB} ${flag(j.timeB)}</span>
+      <span class="game-date">${formatarDataJogo(j)}</span>
+    </div>
+    ${j.encerrado ? `<div style="margin-bottom:8px"><span class="encerrado-badge">✅ Resultado: ${j.gA}×${j.gB}</span></div>` : ''}
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input id="adm-gA-${j.id}" type="number" min="0" value="${j.gA??''}" style="width:50px;padding:6px;text-align:center" placeholder="0"/>
+      <span>×</span>
+      <input id="adm-gB-${j.id}" type="number" min="0" value="${j.gB??''}" style="width:50px;padding:6px;text-align:center" placeholder="0"/>
+      <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
+      ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
+      ${isMata?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')" style="background:#7c5cbf;border-color:#7c5cbf;color:#fff">✏️ Editar</button>`:''}
+      ${palpitesBloqueados?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarPalpites('${j.id}')" style="background:#0b6e4f;border-color:#0b6e4f;color:#fff">✏️ Palpites</button>`:''}
+      <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
+    </div>
+    ${(isMata && j.encerrado && j.gA!=null && j.gA===j.gB && BRACKET_PROPAGA[j.fase]) ? `<div style="margin-top:10px;padding:10px;background:#fff8e1;border-radius:8px;border:1px solid #f0d98c">
+      <div style="font-size:12px;font-weight:600;color:#7a5c00;margin-bottom:8px">🎲 Empate — quem venceu nos pênaltis? (monta o próximo jogo do chaveamento)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="definirPenaltis('${j.id}','A')" style="${j.penaltis==='A'?'background:#1b4332;color:#fff;border:1px solid #1b4332':'background:#fff;color:#1b4332;border:1px solid #1b4332'}">${flag(j.timeA)} ${j.timeA}</button>
+        <button class="btn btn-sm" onclick="definirPenaltis('${j.id}','B')" style="${j.penaltis==='B'?'background:#1b4332;color:#fff;border:1px solid #1b4332':'background:#fff;color:#1b4332;border:1px solid #1b4332'}">${flag(j.timeB)} ${j.timeB}</button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:6px">Só monta o chaveamento. Marque o classificado na aba Admin para pontuar.</div>
+    </div>` : ''}
+    ${palpitesBloqueados?`<div id="edit-palpites-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#eafaf2;border-radius:8px;border:1px solid #9fd8bf">
+      <div style="font-size:12px;font-weight:600;color:#0b6e4f;margin-bottom:8px">✏️ Editar palpites dos participantes (correção)</div>
+      <div id="lista-palpites-${j.id}"><div class="loading">Clique para carregar...</div></div>
+    </div>`:''}
+    ${isMata?`<div id="edit-confronto-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#f5f0ff;border-radius:8px;border:1px solid #c9b8f0">
+      <div style="font-size:12px;font-weight:600;color:#5a3d9a;margin-bottom:8px">✏️ Corrigir confronto</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <input id="edit-tA-${j.id}" type="text" value="${j.timeA}" placeholder="Time A"
+          style="flex:1;min-width:120px;padding:6px 8px;border:1px solid #c9b8f0;border-radius:6px;font-size:13px"/>
+        <span style="font-weight:600">×</span>
+        <input id="edit-tB-${j.id}" type="text" value="${j.timeB}" placeholder="Time B"
+          style="flex:1;min-width:120px;padding:6px 8px;border:1px solid #c9b8f0;border-radius:6px;font-size:13px"/>
+        <button class="btn btn-primary btn-sm" onclick="salvarConfrontoMata('${j.id}')" style="background:#5a3d9a;border-color:#5a3d9a">Salvar</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')">Cancelar</button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:6px">⚠️ Apostas já registradas não são alteradas.</div>
+    </div>`:''}
+  </div>`;
+}
+
+// Filtro do admin (persiste na sessão)
+let filtroAdminAtivo = 'pendentes';
+
+function renderAdminJogos(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-jogos-list');
+  const sorted = [...jogosData].sort((a,b)=>a.ts-b.ts);
+
+  // ── Intervalos ──
+  const agora = new Date();
+  const hojeIni = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+  const amanhaIni = hojeIni + 86400000;
+  const depoisAmanhaIni = hojeIni + 2*86400000;
+  const ontemIni = hojeIni - 86400000;
+  const semanaFim = hojeIni + 7*86400000;
+
+  const jogosHoje = sorted.filter(j => j.ts >= hojeIni && j.ts < amanhaIni);
+  const jogosOntem = sorted.filter(j => j.ts >= ontemIni && j.ts < hojeIni);
+  const jogosAmanha = sorted.filter(j => j.ts >= amanhaIni && j.ts < depoisAmanhaIni);
+  const jogosSemana = sorted.filter(j => j.ts >= hojeIni && j.ts < semanaFim);
+  // Pendentes = jogos que já começaram (passaram do horário) e ainda não foram encerrados pelo admin
+  const jogosPendentes = sorted.filter(j => !j.encerrado && Date.now() >= j.ts);
+
+  // Contadores de pendentes (jogos sem resultado, já iniciados)
+  const cntPend = (lista) => lista.filter(j => !j.encerrado && Date.now() >= j.ts).length;
+  const cntHoje = cntPend(jogosHoje);
+  const cntOntem = cntPend(jogosOntem);
+  const cntAmanha = jogosAmanha.length;
+  const cntSemana = cntPend(jogosSemana);
+  const cntPendTotal = jogosPendentes.length;
+
+  const badge = (n) => n > 0 ? `<span class="filtro-badge">${n}</span>` : '';
+
+  const barraFiltros = `
+    <div class="jogos-filtros" id="admin-filtros">
+      <button class="filtro-btn ${filtroAdminAtivo==='pendentes'?'active':''}" onclick="setFiltroAdmin('pendentes')">⏰ Pendentes${badge(cntPendTotal)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='ontem'?'active':''}" onclick="setFiltroAdmin('ontem')">Ontem${badge(cntOntem)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='hoje'?'active':''}" onclick="setFiltroAdmin('hoje')">Hoje${badge(cntHoje)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='amanha'?'active':''}" onclick="setFiltroAdmin('amanha')">Amanhã${badge(cntAmanha)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='semana'?'active':''}" onclick="setFiltroAdmin('semana')">Esta semana${badge(cntSemana)}</button>
+      <button class="filtro-btn ${filtroAdminAtivo==='todos'?'active':''}" onclick="setFiltroAdmin('todos')">Todos</button>
+    </div>
+  `;
+
+  // ── Filtrar ──
+  let jogosFiltrados;
+  if(filtroAdminAtivo==='pendentes') jogosFiltrados = jogosPendentes;
+  else if(filtroAdminAtivo==='ontem') jogosFiltrados = jogosOntem;
+  else if(filtroAdminAtivo==='hoje') jogosFiltrados = jogosHoje;
+  else if(filtroAdminAtivo==='amanha') jogosFiltrados = jogosAmanha;
+  else if(filtroAdminAtivo==='semana') jogosFiltrados = jogosSemana;
+  else jogosFiltrados = sorted;
+
+  if(!jogosFiltrados.length){
+    let msg = 'Nenhum jogo neste filtro.';
+    if(filtroAdminAtivo==='pendentes') msg = '✅ Nenhum resultado pendente — todos os jogos já encerrados foram lançados.';
+    else if(filtroAdminAtivo==='hoje') msg = 'Nenhum jogo hoje.';
+    el.innerHTML = barraFiltros + `<div class="empty-state">${msg}</div>`;
+    return;
+  }
+
+  const FASES_ORDEM = ['Fase de grupos','16avos','Oitavas','Quartas','Semifinal','Terceiro lugar','Final'];
+  const FASE_CONFIG = {
+    'Fase de grupos': { label:'⚽ Fase de Grupos', cor:'#1a5f3c', bg:'#e8f5e9' },
+    '16avos':         { label:'⚔️ 16-avos de Final', cor:'#1565c0', bg:'#e3f2fd' },
+    'Oitavas':        { label:'🏆 Oitavas de Final', cor:'#6a1b9a', bg:'#f3e5f5' },
+    'Quartas':        { label:'🏆 Quartas de Final', cor:'#e65100', bg:'#fff3e0' },
+    'Semifinal':      { label:'🏆 Semifinal', cor:'#b71c1c', bg:'#ffebee' },
+    'Terceiro lugar': { label:'🥉 Disputa de 3º Lugar', cor:'#4e342e', bg:'#efebe9' },
+    'Final':          { label:'🥇 Final', cor:'#f57f17', bg:'#fffde7' },
+  };
+
+  let html = barraFiltros;
+
+  // Quando filtro = pendentes/ontem/hoje/amanhã/semana → agrupar por data
+  // Quando filtro = todos → manter agrupamento por fase
+  if(filtroAdminAtivo === 'todos'){
+    FASES_ORDEM.forEach(fase => {
+      const jogos = jogosFiltrados.filter(j => j.fase === fase);
+      if(!jogos.length) return;
+      const cfg = FASE_CONFIG[fase] || { label: fase, cor:'#333', bg:'#f5f5f5' };
+      const total = jogos.length;
+      const encerrados = jogos.filter(j=>j.encerrado).length;
+      html += `<div style="margin-bottom:24px">
+        <div onclick="toggleFaseAdmin('${fase}')" style="
+          display:flex;justify-content:space-between;align-items:center;
+          padding:10px 14px;border-radius:10px;cursor:pointer;
+          background:${cfg.bg};border-left:4px solid ${cfg.cor};margin-bottom:8px">
+          <span style="font-size:14px;font-weight:700;color:${cfg.cor}">${cfg.label}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:${cfg.cor};opacity:0.8">${encerrados}/${total} encerrados</span>
+            <span id="seta-fase-${fase.replace(/\s/g,'_')}" style="font-size:12px;color:${cfg.cor}">▼</span>
+          </div>
+        </div>
+        <div id="fase-admin-${fase.replace(/\s/g,'_')}">
+          ${jogos.map(j => gameCardAdminHTML(j)).join('')}
+        </div>
+      </div>`;
+    });
+  } else {
+    // Agrupar por data
+    let dataAtual = '';
+    jogosFiltrados.forEach(j => {
+      if(j.data !== dataAtual){
+        dataAtual = j.data;
+        const parts = j.data.split('-');
+        const diaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][new Date(j.data+'T12:00:00').getDay()];
+        html += `<div style="font-size:13px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.6px;margin:18px 0 8px;padding:0 0 6px;border-bottom:2px solid #1a1a2e">${parts[2]}/${parts[1]} · ${diaSemana}</div>`;
+      }
+      html += gameCardAdminHTML(j);
+    });
+  }
+
+  el.innerHTML = html;
+}
+
+window.setFiltroAdmin = (f) => {
+  filtroAdminAtivo = f;
+  renderAdminJogos();
+};
+
+window.toggleFaseAdmin = (fase) => {
+  const id = fase.replace(/\s/g,'_');
+  const el = document.getElementById(`fase-admin-${id}`);
+  const seta = document.getElementById(`seta-fase-${id}`);
+  if(!el) return;
+  const aberto = el.style.display !== 'none';
+  el.style.display = aberto ? 'none' : 'block';
+  if(seta) seta.textContent = aberto ? '▶' : '▼';
+};
+
+window.toggleEditarConfrontoMata = (jogoId) => {
+  const el = document.getElementById(`edit-confronto-${jogoId}`);
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
+};
+
+window.salvarConfrontoMata = async (jogoId) => {
+  const timeA = document.getElementById(`edit-tA-${jogoId}`).value.trim();
+  const timeB = document.getElementById(`edit-tB-${jogoId}`).value.trim();
+  if(!timeA||!timeB){ alert('Preencha os dois times.'); return; }
+  await updateDoc(doc(db,'jogos',jogoId),{ timeA, timeB });
+  toggleEditarConfrontoMata(jogoId);
+  alert('✅ Confronto atualizado!');
+};
+
+// ─── ADMIN: EDITAR PALPITES DE TERCEIROS ─────────────────────────────────────
+window.toggleEditarPalpites = async (jogoId) => {
+  const painel = document.getElementById(`edit-palpites-${jogoId}`);
+  if(!painel) return;
+  const abrindo = painel.style.display === 'none';
+  painel.style.display = abrindo ? 'block' : 'none';
+  if(abrindo) await carregarPalpitesEdicao(jogoId);
+};
+
+async function carregarPalpitesEdicao(jogoId){
+  const cont = document.getElementById(`lista-palpites-${jogoId}`);
+  if(!cont) return;
+  cont.innerHTML = '<div class="loading">Carregando palpites...</div>';
+  const aprovados = Object.values(usuariosData)
+    .filter(u=>u.status==='aprovado')
+    .sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+
+  let html = '';
+  for(const u of aprovados){
+    // Usa o cache em memória; só vai ao banco se ainda não tiver carregado
+    let p = (apostasCache[u.uid] && apostasCache[u.uid][jogoId]) || null;
+    if(p === null && todasApostasData && todasApostasData[jogoId] && todasApostasData[jogoId][u.uid]){
+      p = todasApostasData[jogoId][u.uid];
+    }
+    const vA = (p && p.gA!=null) ? p.gA : '';
+    const vB = (p && p.gB!=null) ? p.gB : '';
+    const semPalpite = (vA==='' && vB==='');
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #d5ede2">
+      <div style="flex:1;font-size:13px;color:#1a1a2e">${u.nome}${semPalpite?' <span style=\'color:#b00;font-size:11px\'>(sem palpite)</span>':''}</div>
+      <input id="ep-gA-${jogoId}-${u.uid}" type="number" min="0" max="99" value="${vA}" placeholder="-"
+        style="width:44px;padding:5px;text-align:center;border:1px solid #9fd8bf;border-radius:6px"/>
+      <span style="color:#888">×</span>
+      <input id="ep-gB-${jogoId}-${u.uid}" type="number" min="0" max="99" value="${vB}" placeholder="-"
+        style="width:44px;padding:5px;text-align:center;border:1px solid #9fd8bf;border-radius:6px"/>
+      <button class="btn btn-primary btn-sm" onclick="salvarPalpiteAdmin('${jogoId}','${u.uid}')" style="background:#0b6e4f;border-color:#0b6e4f">Salvar</button>
+    </div>`;
+  }
+  cont.innerHTML = html || '<div style="font-size:13px;color:#888">Nenhum participante aprovado.</div>';
+}
+
+window.salvarPalpiteAdmin = async (jogoId, uid) => {
+  const inA = document.getElementById(`ep-gA-${jogoId}-${uid}`);
+  const inB = document.getElementById(`ep-gB-${jogoId}-${uid}`);
+  if(!inA || !inB) return;
+  const gA = parseInt(inA.value);
+  const gB = parseInt(inB.value);
+  if(isNaN(gA) || isNaN(gB) || gA < 0 || gB < 0){ alert('Informe um placar válido (dois números).'); return; }
+
+  const btn = event?.target;
+  if(btn){ btn.disabled = true; btn.textContent = '⏳'; }
+  try {
+    // 1 única escrita: o palpite do participante. Sem fan-out.
+    await setDoc(doc(db,`apostas/${uid}/jogos`,jogoId), { gA, gB }, { merge:true });
+
+    // Atualiza os caches em memória para o ranking derivar na hora
+    if(!apostasCache[uid]) apostasCache[uid] = {};
+    apostasCache[uid][jogoId] = { ...(apostasCache[uid][jogoId]||{}), gA, gB };
+    if(!todasApostasData) todasApostasData = {};
+    if(!todasApostasData[jogoId]) todasApostasData[jogoId] = {};
+    todasApostasData[jogoId][uid] = { ...(todasApostasData[jogoId][uid]||{}), gA, gB, _uid:uid };
+
+    aplicarPontuacaoDerivada();
+    renderRanking(); updateMetrics(); renderPublico(); renderApostasHistorico();
+
+    if(btn){ btn.disabled = false; btn.textContent = '✅'; setTimeout(()=>{ if(btn) btn.textContent='Salvar'; }, 1500); }
+  } catch(e){
+    console.error('Erro ao salvar palpite (admin):', e);
+    if(btn){ btn.disabled = false; btn.textContent = 'Salvar'; }
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
+};
+
+window.addJogo = async () => {
+  const timeA = document.getElementById('j-timeA').value.trim();
+  const timeB = document.getElementById('j-timeB').value.trim();
+  const data = document.getElementById('j-data').value;
+  const hora = document.getElementById('j-hora').value;
+  const fase = document.getElementById('j-fase').value;
+  const grupo = document.getElementById('j-grupo').value.trim().toUpperCase();
+  if(!timeA||!timeB||!data||!hora){ alert('Preencha todos os campos.'); return; }
+  const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+  const id = `${timeA.replace(/\s/g,'_')}_${timeB.replace(/\s/g,'_')}_${ts}`;
+  await setDoc(doc(db,'jogos',id),{ timeA, timeB, data, hora, fase, grupo, ts, encerrado:false });
+  ['j-timeA','j-timeB','j-data','j-hora','j-grupo'].forEach(id=>document.getElementById(id).value='');
+  alert('Jogo salvo!');
+};
+
+window.salvarResultado = async (jogoId) => {
+  const btn = event?.target;
+  const gA = parseInt(document.getElementById(`adm-gA-${jogoId}`).value);
+  const gB = parseInt(document.getElementById(`adm-gB-${jogoId}`).value);
+  if(isNaN(gA)||isNaN(gB)){ alert('Informe o placar.'); return; }
+  const jogo = jogosData.find(j=>j.id===jogoId);
+
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Salvando...'; }
+
+  try {
+    // ÚNICA escrita necessária: o placar no doc do jogo. A pontuação de TODOS
+    // os participantes é derivada em memória, em todos os clientes, pelo
+    // onSnapshot de jogos + aplicarPontuacaoDerivada(). Nada de fan-out.
+    await updateDoc(doc(db,'jogos',jogoId),{ gA, gB, encerrado:true });
+
+    // Atualiza a tela local imediatamente (o onSnapshot confirma em seguida)
+    if(jogo){ jogo.gA = gA; jogo.gB = gB; jogo.encerrado = true; }
+    aplicarPontuacaoDerivada();
+    renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
+    renderApostasHistorico(); renderPublico();
+
+    // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo).
+    // Empate: usa o vencedor dos pênaltis (jogo.penaltis) se já definido; senão
+    // não propaga, e o admin define pelo botão de pênaltis no card.
+    if(jogo){
+      if(gA !== gB && jogo.penaltis){
+        // Deixou de ser empate: descarta vencedor de pênaltis antigo
+        jogo.penaltis = null;
+        await updateDoc(doc(db,'jogos',jogoId), { penaltis: null });
+      }
+      const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB
+        : jogo.penaltis === 'A' ? jogo.timeA : jogo.penaltis === 'B' ? jogo.timeB : null;
+      const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA
+        : jogo.penaltis === 'A' ? jogo.timeB : jogo.penaltis === 'B' ? jogo.timeA : null;
+      await propagarBracket(jogo, vencedor, perdedor);
+    }
+
+    if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
+    alert('✅ Resultado salvo! O ranking de todos os participantes foi atualizado.');
+  } catch(e){
+    console.error('Erro ao salvar resultado:', e);
+    if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
+    alert('❌ Erro ao salvar: ' + e.message);
+  }
+};
+
+// Propaga o vencedor (e o perdedor, na semi) de um jogo para o próximo do
+// bracket. Reusada por salvarResultado e por definirPenaltis.
+async function propagarBracket(jogo, vencedor, perdedor){
+  if(!(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase])) return;
+  let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
+  if(!dests) return;
+  if(!Array.isArray(dests)) dests = [dests];
+  for(const d of dests){
+    const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
+    if(!time) continue;
+    const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+    if(!alvo) continue;
+    await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
+  }
+}
+
+// Admin define quem venceu nos pênaltis num jogo de mata-mata empatado, para
+// montar o próximo jogo do chaveamento. NÃO altera placar nem classificados.
+window.definirPenaltis = async (jogoId, lado) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  if(!(jogo.encerrado && jogo.gA!=null && jogo.gA===jogo.gB)){
+    alert('O vencedor nos pênaltis só vale para jogo encerrado com placar empatado.');
+    return;
+  }
+  const vencedor = lado==='A' ? jogo.timeA : jogo.timeB;
+  const perdedor = lado==='A' ? jogo.timeB : jogo.timeA;
+  try {
+    await setDoc(doc(db,'jogos',jogoId), { penaltis: lado }, {merge:true});
+    jogo.penaltis = lado;
+    await propagarBracket(jogo, vencedor, perdedor);
+    renderAdminJogos(); renderJogos(); renderPublico();
+    mostrarToast(`✅ ${vencedor} avança no chaveamento.`);
+  } catch(e){
+    console.error('Erro ao definir pênaltis:', e);
+    mostrarToast('Não foi possível definir o vencedor dos pênaltis.', 'error');
+  }
+};
+
+function calcularPts(pA,pB,rA,rB,fase){
+  const m = MULT[fase]||1;
+  if(pA===rA&&pB===rB) return 10*m;
+  const vencedorReal = rA>rB?'A':rA<rB?'B':'E';
+  const vencedorPalp = pA>pB?'A':pA<pB?'B':'E';
+  if(vencedorReal!==vencedorPalp) return 0;
+  if(vencedorReal==='E') return 3*m;
+  if(rA-rB===pA-pB) return 7*m;
+  return 5*m;
+}
+
+// ─── PONTUAÇÃO DERIVADA ──────────────────────────────────────────────────────
+// Calcula os pts de cada aposta e o total de cada participante EM MEMÓRIA, a
+// partir dos placares (jogosData) + palpites + bônus de classificação.
+// Nada de pontuação é gravado no Firestore: salvar/reabrir um jogo é 1 única
+// escrita e todos os clientes derivam a pontuação sozinhos via onSnapshot.
+function aplicarPontuacaoDerivada(){
+  const encerrados = {};
+  (jogosData||[]).forEach(j=>{
+    if(j.encerrado && j.gA!=null && j.gB!=null)
+      encerrados[j.id] = { gA:j.gA, gB:j.gB, fase:j.fase||'Fase de grupos' };
+  });
+
+  const totais = {}; // uid -> pontos de jogos
+  const exatos = {}; // uid -> nº de placares exatos
+
+  function pontuar(a, jid){
+    // Limpa valores antigos (gravados no banco ou de jogo reaberto)
+    delete a.pts; delete a.resultado;
+    const jogo = encerrados[jid];
+    if(!jogo || a.gA==null || a.gB==null) return;
+    const pts = calcularPts(a.gA, a.gB, jogo.gA, jogo.gB, jogo.fase);
+    let resultado;
+    if(a.gA===jogo.gA && a.gB===jogo.gB) resultado='exato';
+    else if(pts===0) resultado='erro';
+    else if(jogo.gA===jogo.gB) resultado='empate';
+    else if(jogo.gA-jogo.gB===a.gA-a.gB) resultado='vencedor_saldo';
+    else resultado='vencedor';
+    a.pts = pts; a.resultado = resultado;
+  }
+
+  // Apostas de todos (cache global por jogo) — base do total
+  Object.entries(todasApostasData||{}).forEach(([jid, porUid])=>{
+    Object.entries(porUid).forEach(([uid, a])=>{
+      pontuar(a, jid);
+      if(a.pts!==undefined){
+        totais[uid] = (totais[uid]||0) + a.pts;
+        if(a.resultado==='exato') exatos[uid] = (exatos[uid]||0)+1;
+      }
+    });
+  });
+  // Cache por uid (desempate/perfil) e apostas do usuário logado
+  Object.entries(apostasCache||{}).forEach(([uid, palps])=>{
+    Object.entries(palps||{}).forEach(([jid, a])=>pontuar(a, jid));
+  });
+  Object.entries(apostasData||{}).forEach(([jid, a])=>pontuar(a, jid));
+
+  // Bônus de classificação por fase + especiais (palpites de todos)
+  Object.entries(allApostasData||{}).forEach(([uid, cOrig])=>{
+    const c = {...cOrig};
+    if((c['Semifinal']||[]).length===4 && (c['Terceiro lugar']||[]).length===2){
+      c['Final'] = c['Semifinal'].filter(t=>!c['Terceiro lugar'].includes(t));
+    }
+    let bonus = 0;
+    FASES_CLASSIF.forEach(fase=>{
+      const confirmados = classifsData[fase]?.times||[];
+      (c[fase]||[]).forEach(time=>{ if(confirmados.includes(time)) bonus += BONUS_CLASSIF[fase]; });
+    });
+    ['TerceiroLugar','Campeao'].forEach(chave=>{
+      const confirmado = classifsData[chave]?.time||null;
+      if(confirmado && c[chave]===confirmado) bonus += BONUS_ESPECIAL[chave];
+    });
+    if(bonus) totais[uid] = (totais[uid]||0) + bonus;
+  });
+
+  // Sobrepõe o pts antigo do banco NO CACHE em memória
+  Object.entries(usuariosData||{}).forEach(([uid, u])=>{
+    u.pts = totais[uid]||0;
+    u._exatosDerivados = exatos[uid]||0;
+  });
+}
+
+// Jogos oficiais da fase de grupos — Copa 2026
+// Formato: [timeA, timeB, 'YYYY-MM-DD', 'HH:MM', 'Grupo']
+// Horários em Brasília (UTC-3)
+const JOGOS_GRUPOS_OFICIAIS = [
+  ['México','África do Sul','2026-06-11','16:00','A'],
+  ['Coreia do Sul','Tchéquia','2026-06-11','23:00','A'],
+  ['Canadá','Bósnia','2026-06-12','16:00','B'],
+  ['Estados Unidos','Paraguai','2026-06-12','22:00','D'],
+  ['Catar','Suíça','2026-06-13','16:00','B'],
+  ['Brasil','Marrocos','2026-06-13','19:00','C'],
+  ['Haiti','Escócia','2026-06-13','22:00','C'],
+  ['Austrália','Turquia','2026-06-14','01:00','D'],
+  ['Alemanha','Curaçao','2026-06-14','14:00','E'],
+  ['Holanda','Japão','2026-06-14','17:00','F'],
+  ['Costa do Marfim','Equador','2026-06-14','20:00','E'],
+  ['Suécia','Tunísia','2026-06-14','23:00','F'],
+  ['Espanha','Cabo Verde','2026-06-15','13:00','H'],
+  ['Bélgica','Egito','2026-06-15','16:00','G'],
+  ['Arábia Saudita','Uruguai','2026-06-15','19:00','H'],
+  ['Irã','Nova Zelândia','2026-06-15','22:00','G'],
+  ['França','Senegal','2026-06-16','16:00','I'],
+  ['Iraque','Noruega','2026-06-16','19:00','I'],
+  ['Argentina','Argélia','2026-06-16','22:00','J'],
+  ['Áustria','Jordânia','2026-06-17','01:00','J'],
+  ['Portugal','RD Congo','2026-06-17','14:00','K'],
+  ['Inglaterra','Croácia','2026-06-17','17:00','L'],
+  ['Gana','Panamá','2026-06-17','20:00','L'],
+  ['Uzbequistão','Colômbia','2026-06-17','23:00','K'],
+  ['Tchéquia','África do Sul','2026-06-18','13:00','A'],
+  ['Suíça','Bósnia','2026-06-18','16:00','B'],
+  ['Canadá','Catar','2026-06-18','19:00','B'],
+  ['México','Coreia do Sul','2026-06-18','22:00','A'],
+  ['Estados Unidos','Austrália','2026-06-19','16:00','D'],
+  ['Escócia','Marrocos','2026-06-19','19:00','C'],
+  ['Brasil','Haiti','2026-06-19','21:30','C'],
+  ['Turquia','Paraguai','2026-06-20','00:00','D'],
+  ['Holanda','Suécia','2026-06-20','14:00','F'],
+  ['Alemanha','Costa do Marfim','2026-06-20','17:00','E'],
+  ['Equador','Curaçao','2026-06-20','21:00','E'],
+  ['Tunísia','Japão','2026-06-21','01:00','F'],
+  ['Espanha','Arábia Saudita','2026-06-21','13:00','H'],
+  ['Bélgica','Irã','2026-06-21','16:00','G'],
+  ['Uruguai','Cabo Verde','2026-06-21','19:00','H'],
+  ['Nova Zelândia','Egito','2026-06-21','22:00','G'],
+  ['Argentina','Áustria','2026-06-22','14:00','J'],
+  ['França','Iraque','2026-06-22','18:00','I'],
+  ['Noruega','Senegal','2026-06-22','21:00','I'],
+  ['Jordânia','Argélia','2026-06-23','00:00','J'],
+  ['Portugal','Uzbequistão','2026-06-23','14:00','K'],
+  ['Inglaterra','Gana','2026-06-23','17:00','L'],
+  ['Panamá','Croácia','2026-06-23','20:00','L'],
+  ['Colômbia','RD Congo','2026-06-23','23:00','K'],
+  ['Suíça','Canadá','2026-06-24','16:00','B'],
+  ['Bósnia','Catar','2026-06-24','16:00','B'],
+  ['Marrocos','Haiti','2026-06-24','19:00','C'],
+  ['Escócia','Brasil','2026-06-24','19:00','C'],
+  ['Tchéquia','México','2026-06-24','22:00','A'],
+  ['África do Sul','Coreia do Sul','2026-06-24','22:00','A'],
+  ['Curaçao','Costa do Marfim','2026-06-25','17:00','E'],
+  ['Equador','Alemanha','2026-06-25','17:00','E'],
+  ['Japão','Suécia','2026-06-25','20:00','F'],
+  ['Tunísia','Holanda','2026-06-25','20:00','F'],
+  ['Paraguai','Austrália','2026-06-25','23:00','D'],
+  ['Turquia','Estados Unidos','2026-06-25','23:00','D'],
+  ['Senegal','Iraque','2026-06-26','16:00','I'],
+  ['Noruega','França','2026-06-26','16:00','I'],
+  ['Cabo Verde','Arábia Saudita','2026-06-26','21:00','H'],
+  ['Uruguai','Espanha','2026-06-26','21:00','H'],
+  ['Nova Zelândia','Bélgica','2026-06-27','00:00','G'],
+  ['Egito','Irã','2026-06-27','00:00','G'],
+  ['Panamá','Inglaterra','2026-06-27','18:00','L'],
+  ['Croácia','Gana','2026-06-27','18:00','L'],
+  ['RD Congo','Uzbequistão','2026-06-27','20:30','K'],
+  ['Colômbia','Portugal','2026-06-27','20:30','K'],
+  ['Argélia','Áustria','2026-06-27','23:00','J'],
+  ['Jordânia','Argentina','2026-06-27','23:00','J'],
+];
+
+window.migrarJogosGrupos = async () => {
+  if(!confirm('Isso vai APAGAR todos os jogos da fase de grupos existentes e recadastrar os 72 jogos corretos.\n\nJogos do mata-mata NÃO serão afetados.\n\nConfirmar?')) return;
+  
+  // 1. Apaga jogos da fase de grupos existentes
+  const jogosGrupos = jogosData.filter(j=>j.fase==='Fase de grupos');
+  let apagados = 0;
+  for(const j of jogosGrupos){
+    await deleteDoc(doc(db,'jogos',j.id));
+    apagados++;
+  }
+  
+  // 2. Cadastra os 72 jogos corretos
+  let cadastrados = 0;
+  for(const [timeA, timeB, data, hora, grupo] of JOGOS_GRUPOS_OFICIAIS){
+    const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+    const id = `${timeA.replace(/\s/g,'_')}_${timeB.replace(/\s/g,'_')}_${ts}`;
+    await setDoc(doc(db,'jogos',id),{
+      timeA, timeB, data, hora, grupo, fase:'Fase de grupos', ts, encerrado:false
+    });
+    cadastrados++;
+  }
+  
+  alert(`✅ Concluído!\n\n${apagados} jogos antigos removidos.\n${cadastrados} jogos corretos cadastrados.`);
+};
+
+// Bracket do mata-mata (numeracao interna do codigo). Para cada jogo-origem,
+// para onde o vencedor (e, na semi, o perdedor) vai na fase seguinte.
+const BRACKET_PROPAGA = {
+  '16avos': {
+    3:{fase:'Oitavas',jogo:1,slot:'timeA'},  6:{fase:'Oitavas',jogo:1,slot:'timeB'},
+    1:{fase:'Oitavas',jogo:2,slot:'timeA'},  4:{fase:'Oitavas',jogo:2,slot:'timeB'},
+    12:{fase:'Oitavas',jogo:3,slot:'timeA'}, 11:{fase:'Oitavas',jogo:3,slot:'timeB'},
+    10:{fase:'Oitavas',jogo:4,slot:'timeA'}, 9:{fase:'Oitavas',jogo:4,slot:'timeB'},
+    2:{fase:'Oitavas',jogo:5,slot:'timeA'},  5:{fase:'Oitavas',jogo:5,slot:'timeB'},
+    7:{fase:'Oitavas',jogo:6,slot:'timeA'},  8:{fase:'Oitavas',jogo:6,slot:'timeB'},
+    15:{fase:'Oitavas',jogo:7,slot:'timeA'}, 14:{fase:'Oitavas',jogo:7,slot:'timeB'},
+    13:{fase:'Oitavas',jogo:8,slot:'timeA'}, 16:{fase:'Oitavas',jogo:8,slot:'timeB'},
+  },
+  'Oitavas': {
+    1:{fase:'Quartas',jogo:1,slot:'timeA'}, 2:{fase:'Quartas',jogo:1,slot:'timeB'},
+    3:{fase:'Quartas',jogo:2,slot:'timeA'}, 4:{fase:'Quartas',jogo:2,slot:'timeB'},
+    5:{fase:'Quartas',jogo:3,slot:'timeA'}, 6:{fase:'Quartas',jogo:3,slot:'timeB'},
+    7:{fase:'Quartas',jogo:4,slot:'timeA'}, 8:{fase:'Quartas',jogo:4,slot:'timeB'},
+  },
+  'Quartas': {
+    1:{fase:'Semifinal',jogo:1,slot:'timeA'}, 2:{fase:'Semifinal',jogo:1,slot:'timeB'},
+    3:{fase:'Semifinal',jogo:2,slot:'timeA'}, 4:{fase:'Semifinal',jogo:2,slot:'timeB'},
+  },
+  'Semifinal': {
+    1:[{fase:'Final',jogo:1,slot:'timeA',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeA',tipo:'perdedor'}],
+    2:[{fase:'Final',jogo:1,slot:'timeB',tipo:'vencedor'},{fase:'Terceiro lugar',jogo:1,slot:'timeB',tipo:'perdedor'}],
+  },
+};
+
+window.reabrirJogo = async (jogoId) => {
+  if(!confirm('Reabrir jogo e remover resultado?')) return;
+  const btn = event?.target;
+  if(btn){ btn.disabled = true; btn.textContent = '⏳...'; }
+  try {
+    // ÚNICA escrita: limpa o placar do jogo. A pontuação derivada se ajusta
+    // sozinha em todos os clientes (nenhum pts gravado precisa ser limpo).
+    await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null, penaltis:null });
+
+    // Atualiza a tela local imediatamente
+    const jogo = jogosData.find(j=>j.id===jogoId);
+    if(jogo){ jogo.gA = null; jogo.gB = null; jogo.encerrado = false; jogo.penaltis = null; }
+    aplicarPontuacaoDerivada();
+    renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
+    renderApostasHistorico(); renderPublico();
+  } catch(e){
+    console.error('Erro ao reabrir jogo:', e);
+    if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
+    alert('❌ Erro ao reabrir: ' + e.message);
+    return;
+  }
+  if(btn){ btn.disabled = false; btn.textContent = 'Reabrir'; }
+  // Desfaz a propagacao: limpa na proxima fase o slot que este jogo preencheu
+  const jReab = jogosData.find(j=>j.id===jogoId);
+  if(jReab && jReab.jogoNum && BRACKET_PROPAGA[jReab.fase]){
+    let dests = BRACKET_PROPAGA[jReab.fase][jReab.jogoNum];
+    if(dests){
+      if(!Array.isArray(dests)) dests = [dests];
+      for(const d of dests){
+        const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+        if(!alvo) continue;
+        const rotulo = d.slot==='timeA' ? alvo.placeholderA : alvo.placeholderB;
+        await setDoc(doc(db,'jogos',alvo.id), { [d.slot]: rotulo }, {merge:true});
+      }
+    }
+  }
+};
+
+window.deletarJogo = async (jogoId) => {
+  if(!confirm('Excluir este jogo?')) return;
+  await deleteDoc(doc(db,'jogos',jogoId));
+};
+
+// ─── ADMIN: CLASSIFICADOS ────────────────────────────────────────────────────
+function renderAdminClassif(){
+  if(!isAdmin) return;
+  const el = document.getElementById('admin-classif-list');
+  const gruposMap = obterTimesporGrupo();
+
+  let html='';
+  FASES_CLASSIF.forEach(fase=>{
+    const confirmados = classifsData[fase]?.times||[];
+    const primeiros = classifsData[fase]?.primeiros||{};
+    const segundos  = classifsData[fase]?.segundos||{};
+
+    html+=`<div class="classif-fase-bloco">
+      <div class="classif-fase-header">
+        <span class="classif-fase-title">${FASES_LABEL[fase]||fase}</span>
+        <span class="classif-fase-count">${confirmados.length} confirmados</span>
+      </div>
+      <div class="classif-fase-body">`;
+
+    if(fase==='16avos'){
+      const terceiros = classifsData[fase]?.terceiros||{};
+      const pts3os    = classifsData[fase]?.pts3os||{};  // pontuação dos 3os para ranking
+      html+=`<div style="font-size:12px;color:#666;margin-bottom:12px">
+        Defina <strong>1º</strong>, <strong>2º</strong> e <strong>3º</strong> de cada grupo.<br>
+        Os 8 melhores 3os colocados classificam junto com os 24 diretos (1º e 2º de cada grupo).
+      </div>`;
+      html+=`<div class="grupos-grade">`;
+      GRUPOS_ORDEM.forEach(g=>{
+        const times = gruposMap[g]||[];
+        if(!times.length) return;
+        const prim  = primeiros[g]||null;
+        const seg   = segundos[g]||null;
+        const terc  = terceiros[g]||null;
+        html+=`<div class="grupo-bloco"><div class="grupo-header">Grupo ${g}</div>`;
+        times.forEach(time=>{
+          const isPrim = prim===time;
+          const isSeg  = seg===time;
+          const isTerc = terc===time;
+          let cls='grupo-time';
+          if(isPrim) cls+=' selecionado';
+          else if(isSeg) cls+=' correto';
+          else if(isTerc) cls+=' errado'; // usa estilo diferente para 3o
+          html+=`<div class="${cls}">
+            <span class="gt-flag">${flag(time)}</span>
+            <span class="gt-nome" style="font-size:11px;flex:1">${time}</span>
+            <div style="display:flex;gap:2px;flex-shrink:0">
+              <button onclick="setPos('${g}','${time}','1')" style="font-size:9px;padding:2px 4px;border-radius:3px;border:1px solid #2d6a4f;background:${isPrim?'#2d6a4f':'transparent'};color:${isPrim?'#fff':'#2d6a4f'};cursor:pointer;font-weight:700">1º</button>
+              <button onclick="setPos('${g}','${time}','2')" style="font-size:9px;padding:2px 4px;border-radius:3px;border:1px solid #888;background:${isSeg?'#888':'transparent'};color:${isSeg?'#fff':'#888'};cursor:pointer;font-weight:700">2º</button>
+              <button onclick="setPos('${g}','${time}','3')" style="font-size:9px;padding:2px 4px;border-radius:3px;border:1px solid #e67e22;background:${isTerc?'#e67e22':'transparent'};color:${isTerc?'#fff':'#e67e22'};cursor:pointer;font-weight:700">3º</button>
+            </div>
+          </div>`;
+        });
+        html+=`<div style="font-size:10px;padding:4px 8px;background:#f5f5f5;color:#555;line-height:1.6">
+          1º: ${prim?`${flag(prim)} ${prim}`:'—'}<br>
+          2º: ${seg?`${flag(seg)} ${seg}`:'—'}<br>
+          3º: ${terc?`${flag(terc)} ${terc}`:'—'}
+        </div>`;
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+
+      // Seleção manual dos 3os para cada slot do chaveamento
+      const slots3os = classifsData['16avos']?.slots3os || {};
+      const terceirosList = Object.entries(terceiros).filter(([g,t])=>t).map(([g,t])=>t);
+
+      // Jogos dos 16-avos que têm 3o colocado
+      const JOGOS_COM_3O = [
+        { jogo: 3,  slot:'T1', desc:'Jogo 3 — 1ºE x 3º(ABCDF)' },
+        { jogo: 6,  slot:'T2', desc:'Jogo 6 — 1ºI x 3º(CDFGH)' },
+        { jogo: 7,  slot:'T5', desc:'Jogo 7 — 1ºA x 3º(CEFHI)' },
+        { jogo: 8,  slot:'T6', desc:'Jogo 8 — 1ºL x 3º(EHIJK)' },
+        { jogo: 9,  slot:'T4', desc:'Jogo 9 — 1ºG x 3º(AEHIJ)' },
+        { jogo: 10, slot:'T3', desc:'Jogo 10 — 1ºD x 3º(BEFIJ)' },
+        { jogo: 13, slot:'T7', desc:'Jogo 13 — 1ºB x 3º(EFGIJ)' },
+        { jogo: 16, slot:'T8', desc:'Jogo 16 — 1ºK x 3º(DEIJL)' },
+      ];
+
+      html+=`<div style="margin-top:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">🏅 Definir 3os colocados para cada jogo dos 16-avos</div>
+        <div style="font-size:12px;color:#666;margin-bottom:12px">
+          Selecione manualmente qual 3º colocado enfrenta cada 1º colocado no chaveamento.<br>
+          Defina primeiro o 3º de cada grupo na tabela acima.
+        </div>`;
+
+      if(terceirosList.length === 0){
+        html+=`<div style="color:#aaa;font-size:13px">Defina o 3º colocado de cada grupo acima primeiro.</div>`;
+      } else {
+        html+=`<div style="display:flex;flex-direction:column;gap:8px">`;
+        JOGOS_COM_3O.forEach(({jogo, slot, desc})=>{
+          const selecionado = slots3os[slot]||'';
+          html+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;border:1px solid #eee">
+            <span style="font-size:12px;font-weight:600;min-width:220px;color:#333">${desc}</span>
+            <select onchange="setSlot3('${slot}',this.value)"
+              style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px;background:#fff">
+              <option value="">— Selecionar 3º colocado —</option>
+              ${terceirosList.map(t=>`<option value="${t}" ${selecionado===t?'selected':''}>${flag(t)} ${t}</option>`).join('')}
+            </select>
+            <span style="font-size:13px">${selecionado ? flag(selecionado)+' '+selecionado : '—'}</span>
+          </div>`;
+        });
+        html+=`</div>`;
+
+        const definidos = JOGOS_COM_3O.filter(({slot})=>slots3os[slot]).length;
+        html+=`<div style="font-size:12px;margin-top:10px;padding:8px 12px;background:${definidos===8?'#e8f5e9':'#fff8e1'};border-radius:8px;color:${definidos===8?'#2d6a4f':'#f57c00'}">
+          ${definidos===8?'✅ Todos os 8 slots definidos — pronto para gerar os 16-avos!':'⚠️ '+definidos+'/8 slots definidos. Defina todos antes de confirmar.'}
+        </div>`;
+      }
+      html+=`</div>`;
+    } else {
+      // Demais fases: seleção simples dos classificados
+      const selecoes = obterTodasSelecoes();
+      // Para fases após os grupos, mostra só times dos jogos daquela fase
+      const timesNaFase = [...new Set(
+        jogosData.filter(j=>j.fase===faseAnteriorDe(fase)).flatMap(j=>[j.timeA,j.timeB])
+          .filter(t=>!t.startsWith('Vencedor')&&!t.startsWith('Perdedor'))
+      )];
+      const pool = timesNaFase.length > 0 ? timesNaFase : selecoes;
+      html+=`<div class="fase-times-grid">`;
+      pool.forEach(time=>{
+        const sel=confirmados.includes(time);
+        html+=`<div class="fase-time${sel?' selecionado':''}" onclick="toggleAdminClassif('${fase}','${time}')">
+          <span class="ft-flag">${flag(time)}</span>
+          <span class="ft-nome">${time}</span>
+          <span class="ft-check">✓</span>
+        </div>`;
+      });
+      html+=`</div>`;
+      html+=`<div style="font-size:12px;color:#888;margin-top:8px">Selecione os ${LIMITES_CLASSIF[fase]} classificados para ${FASES_LABEL[fase]||fase}. Os jogos da próxima fase serão gerados automaticamente.</div>`;
+    }
+
+    html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+      <button class="btn btn-primary btn-sm" onclick="salvarClassifAdmin('${fase}')">
+        ✅ Confirmar + Gerar jogos
+      </button>
+      ${(classifsData[fase]?.times||[]).length ? `<button class="btn btn-danger btn-sm" onclick="reabrirClassif('${fase}')">↩️ Reabrir classificação</button>` : ''}
+    </div></div></div>`;
+  });
+
+  // Blocos especiais: vencedor do 3º lugar e campeão
+  const todasSel = obterTodasSelecoes();
+  ['TerceiroLugar','Campeao'].forEach(chave=>{
+    const isCampeao = chave==='Campeao';
+    const confirmado = classifsData[chave]?.time||null;
+    // Pool: times que jogaram 3º lugar ou final
+    const jogoEspecial = jogosData.find(j=>j.fase===(isCampeao?'Final':'Terceiro lugar'));
+    const poolEspecial = jogoEspecial
+      ? [jogoEspecial.timeA, jogoEspecial.timeB].filter(t=>!t.startsWith('Vencedor')&&!t.startsWith('Perdedor'))
+      : todasSel;
+    html+=`<div class="especial-bloco">
+      <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
+        <span style="font-size:14px;font-weight:700">${LABEL_ESPECIAL[chave]}</span>
+        <span style="font-size:12px;opacity:0.9">${confirmado?`✅ ${flag(confirmado)} ${confirmado}`:'Não confirmado'}</span>
+      </div>
+      <div class="especial-body">
+        <div class="especial-times">`;
+    poolEspecial.forEach(time=>{
+      const sel=confirmado===time;
+      html+=`<div class="especial-time${sel?' selecionado':''}" onclick="setAdminEspecial('${chave}','${time}')">
+        <span class="et-flag">${flag(time)}</span>
+        <span class="et-nome">${time}</span>
+        <span class="et-check">✓</span>
+      </div>`;
+    });
+    html+=`</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">
+          <button class="btn btn-primary btn-sm" onclick="salvarEspecialAdmin('${chave}')">
+            Confirmar ${LABEL_ESPECIAL[chave]}
+          </button>
+          ${confirmado ? `<button class="btn btn-danger btn-sm" onclick="reabrirEspecial('${chave}')">↩️ Reabrir</button>` : ''}
+        </div>
+      </div></div>`;
+  });
+
+  el.innerHTML=html;
+}
+
+function faseAnteriorDe(fase){
+  const map = {'Oitavas':'16avos','Quartas':'Oitavas','Semifinal':'Quartas','Terceiro lugar':'Semifinal','Final':'Semifinal'};
+  return map[fase]||'16avos';
+}
+
+// Define 1º ou 2º de um grupo no admin
+window.setPos = (grupo, time, pos) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.primeiros) d.primeiros={};
+  if(!d.segundos)  d.segundos={};
+  if(!d.terceiros) d.terceiros={};
+  if(!d.pts3os)    d.pts3os={};
+
+  // Remove time de qualquer posição antes de atribuir nova
+  if(d.primeiros[grupo]===time) d.primeiros[grupo]=null;
+  if(d.segundos[grupo]===time)  d.segundos[grupo]=null;
+  if(d.terceiros[grupo]===time) d.terceiros[grupo]=null;
+
+  if(pos==='1') d.primeiros[grupo] = d.primeiros[grupo]===time ? null : time;
+  else if(pos==='2') d.segundos[grupo] = d.segundos[grupo]===time ? null : time;
+  else if(pos==='3') d.terceiros[grupo] = d.terceiros[grupo]===time ? null : time;
+
+  // times = 1os + 2os + 8 melhores 3os (por pontuação)
+  const todos12 = Object.values(d.primeiros).concat(Object.values(d.segundos)).filter(Boolean);
+  const todos3 = Object.entries(d.terceiros)
+    .filter(([g,t])=>t)
+    .sort((a,b)=>(d.pts3os[b[0]]||0)-(d.pts3os[a[0]]||0))
+    .slice(0,8).map(([g,t])=>t);
+  d.times = [...new Set([...todos12, ...todos3])];
+  renderAdminClassif();
+};
+
+window.setPts3 = (grupo, valor) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.pts3os) d.pts3os={};
+  d.pts3os[grupo] = parseInt(valor)||0;
+  renderAdminClassif();
+};
+
+window.setSlot3 = (slot, time) => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{},slots3os:{}};
+  const d = classifsData['16avos'];
+  if(!d.slots3os) d.slots3os={};
+  d.slots3os[slot] = time;
+  // Atualiza lista de classificados: 1os + 2os + 3os dos slots
+  const todos12 = Object.values(d.primeiros||{}).concat(Object.values(d.segundos||{})).filter(Boolean);
+  const todos3  = Object.values(d.slots3os).filter(Boolean);
+  d.times = [...new Set([...todos12,...todos3])];
+  renderAdminClassif();
+};
+
+// Calcula automaticamente a tabela de classificação de cada grupo
+// com base nos resultados registrados no Firebase
+function calcularTabelaGrupos(){
+  const tabela = {}; // { grupo: { time: {pts,vit,emp,der,gp,gc,sg} } }
+  GRUPOS_ORDEM.forEach(g=>{
+    tabela[g]={};
+    (GRUPOS_FIXOS[g]||[]).forEach(t=>{
+      tabela[g][t]={pts:0,vit:0,emp:0,der:0,gp:0,gc:0,sg:0};
+    });
+  });
+
+  // Processa jogos encerrados da fase de grupos
+  jogosData.filter(j=>j.fase==='Fase de grupos'&&j.encerrado&&j.gA!==null&&j.gB!==null).forEach(j=>{
+    const g = j.grupo?.toUpperCase();
+    if(!g||!tabela[g]) return;
+    const tA = tabela[g][j.timeA];
+    const tB = tabela[g][j.timeB];
+    if(!tA||!tB) return;
+
+    tA.gp+=j.gA; tA.gc+=j.gB; tA.sg+=j.gA-j.gB;
+    tB.gp+=j.gB; tB.gc+=j.gA; tB.sg+=j.gB-j.gA;
+
+    if(j.gA>j.gB){
+      tA.pts+=3; tA.vit++;
+      tB.der++;
+    } else if(j.gA<j.gB){
+      tB.pts+=3; tB.vit++;
+      tA.der++;
+    } else {
+      tA.pts+=1; tA.emp++;
+      tB.pts+=1; tB.emp++;
+    }
+  });
+  return tabela;
+}
+
+// Retorna os 3os colocados de cada grupo ordenados: pontos, saldo, gols pro
+function calcularRanking3os(){
+  const tabela = calcularTabelaGrupos();
+  const terceiros = classifsData['16avos']?.terceiros||{};
+  const resultado = [];
+
+  GRUPOS_ORDEM.forEach(g=>{
+    const timeTerc = terceiros[g];
+    if(!timeTerc) return;
+    const stats = tabela[g]?.[timeTerc]||{pts:0,sg:0,gp:0};
+    resultado.push({g, t:timeTerc, pts:stats.pts, sg:stats.sg, gp:stats.gp});
+  });
+
+  // Ordena: pontos > saldo de gols > gols pró
+  resultado.sort((a,b)=>{
+    if(b.pts!==a.pts) return b.pts-a.pts;
+    if(b.sg!==a.sg) return b.sg-a.sg;
+    return b.gp-a.gp;
+  });
+  return resultado;
+}
+
+// Calcula e aplica ranking automático dos 3os
+window.calcularRankingAuto = () => {
+  if(!classifsData['16avos']) classifsData['16avos']={times:[],primeiros:{},segundos:{},terceiros:{},pts3os:{}};
+  const d = classifsData['16avos'];
+
+  const ranking = calcularRanking3os();
+  if(ranking.length === 0){
+    alert('Nenhum 3º colocado definido ainda. Defina o 3º de cada grupo primeiro.');
+    return;
+  }
+
+  // Atualiza pts3os com os pontos calculados automaticamente
+  if(!d.pts3os) d.pts3os={};
+  ranking.forEach(({g, pts, sg, gp})=>{
+    d.pts3os[g] = pts; // usa pontos reais como critério primário
+  });
+
+  // Atualiza lista de classificados (top 8)
+  const todos12 = Object.values(d.primeiros||{}).concat(Object.values(d.segundos||{})).filter(Boolean);
+  const top8 = ranking.slice(0,8).map(r=>r.t);
+  d.times = [...new Set([...todos12,...top8])];
+
+  renderAdminClassif();
+  alert(`✅ Ranking calculado automaticamente!\nCritérios: pontos > saldo de gols > gols marcados\n\nTop 8: ${ranking.slice(0,8).map((r,i)=>`${i+1}º ${r.t} (${r.pts}pts, SG:${r.sg})`).join('\n')}`);
+};
+
+// Tabela oficial FIFA: dado os grupos dos 8 melhores 3os (conjunto de letras),
+// mapeia para os slots T1..T8 do chaveamento
+// Fonte: https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_knockout_stage
+// Slots: T1=3ABCDF, T2=3CDFGH, T3=3BEFIJ, T4=3AEHIJ, T5=3CEFHI, T6=3EHIJK, T7=3EFGIJ, T8=3DEIJL
+const SLOTS_3OS = [
+  { slot:'T1', grupos:'ABCDF' },
+  { slot:'T2', grupos:'CDFGH' },
+  { slot:'T3', grupos:'BEFIJ' },
+  { slot:'T4', grupos:'AEHIJ' },
+  { slot:'T5', grupos:'CEFHI' },
+  { slot:'T6', grupos:'EHIJK' },
+  { slot:'T7', grupos:'EFGIJ' },
+  { slot:'T8', grupos:'DEIJL' },
+];
+
+// Dado os grupos dos 8 classificados 3os, retorna mapa slot→time
+// seguindo a tabela oficial da FIFA para Copa 2026
+function mapearSlots3os(ranking8){
+  // ranking8 = [{g, t, pts...}] — os 8 melhores 3os em ordem
+  const gruposClassificados = ranking8.map(r=>r.g).sort().join(''); // ex: 'ABCDEFGH'
+  const mapSlot = {};
+
+  // A FIFA define qual slot recebe qual 3o dependendo dos grupos classificados
+  // A tabela completa da FIFA para 12 grupos ainda não foi publicada oficialmente
+  // Usamos a lógica: cada slot tem afinidade com grupos específicos
+  // Atribuímos o 3o do grupo mais bem colocado no ranking a cada slot compatível
+
+  const gruposOrdenados = [...ranking8]; // já ordenado por pontuação
+
+  SLOTS_3OS.forEach(({slot, grupos})=>{
+    // Encontra o melhor 3o disponível que vem de um dos grupos compatíveis
+    const compativel = gruposOrdenados.find(r=>grupos.includes(r.g) && !Object.values(mapSlot).includes(r.t));
+    mapSlot[slot] = compativel ? compativel.t : `3º Melhor (${grupos})`;
+  });
+
+  return mapSlot;
+}
+
+window.toggleAdminClassif = (fase,time) => {
+  if(!classifsData[fase]) classifsData[fase]={times:[]};
+  const arr = classifsData[fase].times;
+  const idx=arr.indexOf(time);
+  if(idx>=0) arr.splice(idx,1); else arr.push(time);
+  renderAdminClassif();
+};
+
+window.salvarClassifAdmin = async (fase) => {
+  const d = classifsData[fase]||{};
+  const times    = d.times||[];
+  const primeiros = d.primeiros||{};
+  const segundos  = d.segundos||{};
+  const terceiros = d.terceiros||{};
+  const pts3os    = d.pts3os||{};
+  const slots3os  = d.slots3os||{};
+
+  // Validação: para 16avos, exige 8 slots definidos
+  if(fase==='16avos'){
+    const definidos = Object.values(slots3os).filter(Boolean).length;
+    if(definidos < 8){
+      alert(`⚠️ Defina os 8 slots dos 3os colocados antes de confirmar.\nAtualmente ${definidos}/8 definidos.`);
+      return;
+    }
+  }
+
+  await setDoc(doc(db,'classificados_confirmados',fase),{
+    times, primeiros, segundos, terceiros, pts3os, slots3os, fase
+  });
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
+
+  // 16-avos: gera os jogos a partir dos grupos. Oitavas em diante: os confrontos
+  // se montam sozinhos quando os placares da fase anterior sao lancados.
+  if(fase==='16avos') await gerarJogos16avos(primeiros, segundos, terceiros, pts3os);
+
+  alert(`✅ Classificados de ${FASES_LABEL[fase]||fase} salvos! Bônus recalculado.`);
+};
+
+// Gera os 16 jogos dos 16-avos — chaveamento oficial Copa 2026
+async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
+  const p = primeiros||{};
+  const s = segundos||{};
+  const P = (g) => p[g]||`1º Grupo ${g}`;
+  const S = (g) => s[g]||`2º Grupo ${g}`;
+
+  // Usa seleção manual dos slots feita pelo admin
+  const slots3os = classifsData['16avos']?.slots3os || {};
+  const T = (slot) => slots3os[slot] || `3º (${slot})`;
+
+  // 16 confrontos oficiais Copa 2026 — fonte: FIFA/FOX Sports
+  const jogos16 = [
+    { timeA:S('A'),  timeB:S('B'),  data:'2026-06-28', hora:'16:00' },
+    { timeA:P('C'),  timeB:S('F'),  data:'2026-06-29', hora:'14:00' },
+    { timeA:P('E'),  timeB:T('T1'), data:'2026-06-29', hora:'17:30' },
+    { timeA:P('F'),  timeB:S('C'),  data:'2026-06-29', hora:'22:00' },
+    { timeA:S('E'),  timeB:S('I'),  data:'2026-06-30', hora:'14:00' },
+    { timeA:P('I'),  timeB:T('T2'), data:'2026-06-30', hora:'18:00' },
+    { timeA:P('A'),  timeB:T('T5'), data:'2026-06-30', hora:'22:00' },
+    { timeA:P('L'),  timeB:T('T6'), data:'2026-07-01', hora:'13:00' },
+    { timeA:P('G'),  timeB:T('T4'), data:'2026-07-01', hora:'17:00' },
+    { timeA:P('D'),  timeB:T('T3'), data:'2026-07-01', hora:'21:00' },
+    { timeA:P('H'),  timeB:S('J'),  data:'2026-07-02', hora:'16:00' },
+    { timeA:S('K'),  timeB:S('L'),  data:'2026-07-02', hora:'20:00' },
+    { timeA:P('B'),  timeB:T('T7'), data:'2026-07-03', hora:'00:00' },
+    { timeA:S('D'),  timeB:S('G'),  data:'2026-07-03', hora:'15:00' },
+    { timeA:P('J'),  timeB:S('H'),  data:'2026-07-03', hora:'19:00' },
+    { timeA:P('K'),  timeB:T('T8'), data:'2026-07-03', hora:'22:30' },
+  ];
+
+  let criados = 0, atualizados = 0;
+  for(let i=0; i<jogos16.length; i++){
+    const {timeA, timeB, data, hora} = jogos16[i];
+    const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+    const id = `mata_16avos_jogo${i+1}_${ts}`;
+    const existing = await getDoc(doc(db,'jogos',id));
+    if(!existing.exists()){
+      await setDoc(doc(db,'jogos',id),{ timeA, timeB, data, hora, fase:'16avos', grupo:'', ts, encerrado:false, gerado:true });
+      criados++;
+    } else {
+      await updateDoc(doc(db,'jogos',id),{ timeA, timeB });
+      atualizados++;
+    }
+  }
+  const slotsInfo = Object.entries(mapSlot).map(([sl,t])=>`${sl}: ${t}`).join(' | ');
+  alert(`🏆 16-avos gerados!\n${criados} novos · ${atualizados} atualizados\n\nSlots 3os:\n${slotsInfo}`);
+}
+
+// Datas e horários reais de cada fase do mata-mata Copa 2026
+const DATAS_MATA_MATA = {
+  'Oitavas': [
+    ['2026-07-04','14:00'],['2026-07-04','18:00'],
+    ['2026-07-05','17:00'],['2026-07-05','21:00'],
+    ['2026-07-06','16:00'],['2026-07-06','21:00'],
+    ['2026-07-07','13:00'],['2026-07-07','17:00'],
+  ],
+  'Quartas': [
+    ['2026-07-09','17:00'],['2026-07-10','16:00'],
+    ['2026-07-11','18:00'],['2026-07-11','22:00'],
+  ],
+  'Semifinal': [
+    ['2026-07-14','16:00'],
+    ['2026-07-15','16:00'],
+  ],
+  'Terceiro lugar': [
+    ['2026-07-18','18:00'],
+  ],
+  'Final': [
+    ['2026-07-19','16:00'],
+  ],
+};
+
+async function gerarJogosFase(times, proximaFase, _dataInicio, _qtdJogos, gerarTerceiro=false){
+  const datas = DATAS_MATA_MATA[proximaFase] || [];
+  if(!datas.length){ console.warn('Sem datas para fase', proximaFase); return; }
+
+  let criados = 0;
+  for(let i=0; i<Math.floor(times.length/2); i++){
+    const timeA = times[i*2];
+    const timeB = times[i*2+1];
+    if(!timeA||!timeB) break;
+    const [data, hora] = datas[i] || datas[0];
+    const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
+    const id = `mata_${proximaFase.replace(/\s/g,'_')}_jogo${i+1}_${ts}`;
+    const jaExiste = jogosData.some(j=>
+      j.fase===proximaFase && j.gerado &&
+      ((j.timeA===timeA&&j.timeB===timeB)||(j.timeA===timeB&&j.timeB===timeA))
+    );
+    if(!jaExiste){
+      await setDoc(doc(db,'jogos',id),{
+        timeA, timeB, data, hora, fase:proximaFase, grupo:'', ts, encerrado:false, gerado:true
+      });
+      criados++;
+    }
+  }
+
+  // Após semifinal: cria placeholders para 3º lugar e final com datas corretas
+  if(gerarTerceiro){
+    const [dataTerceiro, horaTerceiro] = DATAS_MATA_MATA['Terceiro lugar'][0];
+    const [dataFinal, horaFinal]       = DATAS_MATA_MATA['Final'][0];
+
+    const jogo3 = jogosData.find(j=>j.fase==='Terceiro lugar'&&j.gerado);
+    if(!jogo3){
+      const ts3 = new Date(`${dataTerceiro}T${horaTerceiro}:00-03:00`).getTime();
+      await setDoc(doc(db,'jogos',`mata_Terceiro_lugar_${ts3}`),{
+        timeA:'Perdedor Semi 1', timeB:'Perdedor Semi 2',
+        data:dataTerceiro, hora:horaTerceiro, fase:'Terceiro lugar',
+        grupo:'', ts:ts3, encerrado:false, gerado:true, placeholder:true
+      });
+    }
+    const jogoFinal = jogosData.find(j=>j.fase==='Final'&&j.gerado);
+    if(!jogoFinal){
+      const tsF = new Date(`${dataFinal}T${horaFinal}:00-03:00`).getTime();
+      await setDoc(doc(db,'jogos',`mata_Final_${tsF}`),{
+        timeA:'Vencedor Semi 1', timeB:'Vencedor Semi 2',
+        data:dataFinal, hora:horaFinal, fase:'Final',
+        grupo:'', ts:tsF, encerrado:false, gerado:true, placeholder:true
+      });
+    }
+  }
+
+  if(criados > 0) alert(`🏆 ${criados} jogo(s) de ${FASES_LABEL[proximaFase]||proximaFase} gerados!`);
+}
+
+window.salvarEspecialAdmin = async (chave) => {
+  if(!classifsData[chave]) classifsData[chave]={};
+  classifsData[chave].time = classifsData[chave].time === time ? null : time;
+  renderAdminClassif();
+};
+
+window.salvarEspecialAdmin = async (chave) => {
+  const time = classifsData[chave]?.time||null;
+  if(!time){ alert('Selecione um time primeiro.'); return; }
+  await setDoc(doc(db,'classificados_confirmados',chave),{ time, chave });
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
+  alert(`${LABEL_ESPECIAL[chave]}: ${flag(time)} ${time} confirmado!`);
+};
+
+// Reabre uma fase de classificação: apaga a confirmação e recalcula os pontos
+window.reabrirClassif = async (fase) => {
+  if(!confirm(`Reabrir a classificação de ${FASES_LABEL[fase]||fase}?\n\nIsso remove a confirmação dos times e zera os bônus desta fase. Os palpites dos participantes NÃO são afetados.`)) return;
+  await deleteDoc(doc(db,'classificados_confirmados',fase));
+  // Limpa o cache local da fase
+  delete classifsData[fase];
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
+  renderAdminClassif();
+  alert(`↩️ Classificação de ${FASES_LABEL[fase]||fase} reaberta. Bônus zerados.`);
+};
+
+// Reabre um palpite especial (3º lugar ou campeão): apaga a confirmação e recalcula
+window.reabrirEspecial = async (chave) => {
+  if(!confirm(`Reabrir ${LABEL_ESPECIAL[chave]}?\n\nIsso remove a confirmação e zera o bônus. Os palpites dos participantes NÃO são afetados.`)) return;
+  await deleteDoc(doc(db,'classificados_confirmados',chave));
+  delete classifsData[chave];
+  aplicarPontuacaoDerivada();
+  renderRanking();
+  updateMetrics();
+  renderAdminClassif();
+  alert(`↩️ ${LABEL_ESPECIAL[chave]} reaberto. Bônus zerado.`);
+};
+
+// ─── REGRAS ───────────────────────────────────────────────────────────────────
+
+// Regras padrão — usadas na primeira carga se não houver nada no Firestore
+const REGRAS_PADRAO = [
+  {
+    titulo: '📋 Participação',
+    itens: [
+      'O bolão é aberto a todos os participantes aprovados pelo administrador.',
+      'Cada participante deve fazer seus palpites individualmente, sem combinação com outros.',
+      'A taxa de participação é definida pelo administrador e deve ser paga antes do início da Copa.',
+      'Qualquer irregularidade pode resultar na desclassificação do participante.'
+    ]
+  },
+  {
+    titulo: '✏️ Como fazer palpites',
+    itens: [
+      'Acesse a aba "Palpites" e registre o placar que você prevê para cada jogo.',
+      'Os palpites de placar são bloqueados individualmente 5 minutos antes do início de cada jogo.',
+      'Os palpites de classificação (seleções que avançam nas fases) são bloqueados 5 minutos antes do jogo de abertura da Copa (11/06 às 16h).',
+      'Após o bloqueio, não é possível alterar ou registrar palpites para aquele jogo ou fase.',
+      'Palpites não feitos valem 0 pontos — não há pontuação automática.'
+    ]
+  },
+  {
+    titulo: '🏆 Pontuação por placar',
+    itens: [
+      'Placar exato: 10 pontos × multiplicador da fase.',
+      'Vencedor certo + saldo de gols correto: 7 pontos × multiplicador.',
+      'Vencedor certo (placar errado): 5 pontos × multiplicador.',
+      'Empate previsto corretamente (placar errado): 3 pontos × multiplicador.',
+      'Resultado completamente errado: 0 pontos.'
+    ]
+  },
+  {
+    titulo: '✖️ Multiplicador por fase',
+    itens: [
+      'Fase de grupos: × 1',
+      '16-avos de final: × 1,5',
+      'Oitavas de final: × 2',
+      'Quartas de final: × 2,5',
+      'Semifinal: × 3',
+      'Terceiro lugar: × 2',
+      'Final: × 4'
+    ]
+  },
+  {
+    titulo: '🌟 Bônus por classificação',
+    itens: [
+      'Acertou seleção classificada aos 16-avos: +10 pts por seleção.',
+      'Acertou seleção classificada às oitavas: +15 pts por seleção.',
+      'Acertou seleção classificada às quartas: +20 pts por seleção.',
+      'Acertou seleção classificada à semifinal: +30 pts por seleção.',
+      'Acertou disputante do 3º lugar: +30 pts.',
+      'Acertou um finalista: +50 pts por finalista.',
+      'Acertou o vencedor do 3º lugar: +50 pts.',
+      'Acertou o campeão: +100 pts.'
+    ]
+  },
+  {
+    titulo: '🏅 Premiação',
+    itens: [
+      '1º lugar: 50% do valor total arrecadado.',
+      '2º lugar: 30% do valor total arrecadado.',
+      '3º lugar: 20% do valor total arrecadado.',
+      'Em caso de empate na pontuação final, o critério de desempate é o maior número de placares exatos.'
+    ]
+  }
+];
+
+let regrasData = null; // cache local
+
+// Carrega regras do Firestore (ou usa padrão)
+async function carregarRegras() {
+  const snap = await getDoc(doc(db, 'config', 'regras'));
+  if (snap.exists() && snap.data().secoes) {
+    regrasData = snap.data().secoes;
+  } else {
+    regrasData = REGRAS_PADRAO;
+  }
+  renderRegras();
+}
+
+function renderRegras() {
+  const el = document.getElementById('regras-conteudo');
+  if (!el || !regrasData) return;
+
+  el.innerHTML = regrasData.map(sec => `
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:12px">${sec.titulo}</div>
+      <ul style="padding-left:18px;display:flex;flex-direction:column;gap:8px">
+        ${sec.itens.map(item => `<li style="font-size:14px;color:#444;line-height:1.5">${item}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+
+  // Botão de edição visível só para admin
+  const btnWrap = document.getElementById('regras-edit-btn-wrap');
+  if (btnWrap) btnWrap.style.display = isAdmin ? 'block' : 'none';
+}
+
+window.abrirEdicaoRegras = () => {
+  document.getElementById('regras-view').style.display = 'none';
+  document.getElementById('regras-editor').style.display = 'block';
+  renderEditorRegras();
+};
+
+window.fecharEdicaoRegras = () => {
+  document.getElementById('regras-editor').style.display = 'none';
+  document.getElementById('regras-view').style.display = 'block';
+};
+
+function renderEditorRegras() {
+  const el = document.getElementById('regras-secoes-editor');
+  el.innerHTML = (regrasData || []).map((sec, si) => `
+    <div class="card" style="margin-bottom:12px;border:1px solid #ddd" id="sec-editor-${si}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:#555;text-transform:uppercase">Seção ${si+1}</span>
+        <button class="btn btn-danger btn-sm" onclick="removerSecaoRegra(${si})">🗑 Remover seção</button>
+      </div>
+      <div class="form-group">
+        <label>Título da seção</label>
+        <input type="text" id="sec-titulo-${si}" value="${escHtml(sec.titulo)}" placeholder="Ex: 🏆 Pontuação"/>
+      </div>
+      <div class="form-group">
+        <label>Itens (um por linha)</label>
+        <textarea id="sec-itens-${si}" rows="6" style="resize:vertical;font-size:13px;line-height:1.6">${sec.itens.map(escHtml).join('\n')}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+window.adicionarSecaoRegra = () => {
+  if (!regrasData) regrasData = [];
+  regrasData.push({ titulo: '📌 Nova seção', itens: ['Novo item'] });
+  renderEditorRegras();
+};
+
+window.removerSecaoRegra = (idx) => {
+  if (!confirm('Remover esta seção?')) return;
+  regrasData.splice(idx, 1);
+  renderEditorRegras();
+};
+
+window.salvarRegras = async () => {
+  const total = document.querySelectorAll('[id^="sec-titulo-"]').length;
+  const secoes = [];
+  for (let i = 0; i < total; i++) {
+    const tituloEl = document.getElementById(`sec-titulo-${i}`);
+    const itensEl  = document.getElementById(`sec-itens-${i}`);
+    if (!tituloEl || !itensEl) continue;
+    const titulo = tituloEl.value.trim();
+    const itens  = itensEl.value.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!titulo) continue;
+    secoes.push({ titulo, itens });
+  }
+  if (!secoes.length) { alert('Adicione ao menos uma seção.'); return; }
+  await setDoc(doc(db, 'config', 'regras'), { secoes, atualizadoEm: Date.now() });
+  regrasData = secoes;
+  renderRegras();
+  fecharEdicaoRegras();
+  alert('✅ Regras salvas!');
+};
+
+</script>
+
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bnav-item active" id="bnav-ranking" onclick="switchTab('ranking')">
+    <span class="bnav-icon">🏆</span><span>Ranking</span>
+  </button>
+  <button class="bnav-item" id="bnav-apostas" onclick="switchTab('apostas')">
+    <span class="bnav-icon">✏️</span><span>Meus Palpites</span>
+  </button>
+  <button class="bnav-item" id="bnav-jogos" onclick="switchTab('jogos')">
+    <span class="bnav-icon">⚽</span><span>Palpites</span>
+  </button>
+  <button class="bnav-item" id="bnav-classif" onclick="switchTab('classif')">
+    <span class="bnav-icon">🗂️</span><span>Seleções</span>
+  </button>
+  <button class="bnav-item" id="bnav-publico" onclick="switchTab('publico')">
+    <span class="bnav-icon">📊</span><span>Comparar</span>
+  </button>
+  <button class="bnav-item" id="bnav-regras" onclick="switchTab('regras')">
+    <span class="bnav-icon">📖</span><span>Regras</span>
+  </button>
+
+</nav>
+
+<div id="modal-perfil" class="modal-overlay" style="display:none" onclick="fecharPerfil(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header" id="modal-perfil-header"></div>
+    <div class="modal-body" id="modal-perfil-body"><div class="loading">Carregando...</div></div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div></body>
+</html>
