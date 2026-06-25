@@ -785,7 +785,7 @@ function initListeners(){
     function buildMata(fixos, fase) {
       return fixos.map((base, i) => {
         const id = `mata_${fase.replace(/\s/g,'_')}_jogo${i+1}`;
-        const fs = firestoreMata.find(j=>j.fase===fase && j.id && j.id.startsWith(id));
+        const fs = firestoreMata.find(j=>j.fase===fase && j.id && j.id.startsWith(id + '_'));
         return {
           ...base,
           id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
@@ -797,7 +797,7 @@ function initListeners(){
           ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           encerrado: false,
           // Se Firestore tem times reais, usa — mantém data/hora do HTML
-          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB} : {}),
+          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB, penaltis: fs.penaltis||null} : {}),
         };
       });
     }
@@ -2422,6 +2422,14 @@ function gameCardAdminHTML(j){
       ${palpitesBloqueados?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarPalpites('${j.id}')" style="background:#0b6e4f;border-color:#0b6e4f;color:#fff">✏️ Palpites</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
     </div>
+    ${(isMata && j.encerrado && j.gA!=null && j.gA===j.gB && BRACKET_PROPAGA[j.fase]) ? `<div style="margin-top:10px;padding:10px;background:#fff8e1;border-radius:8px;border:1px solid #f0d98c">
+      <div style="font-size:12px;font-weight:600;color:#7a5c00;margin-bottom:8px">🎲 Empate — quem venceu nos pênaltis? (monta o próximo jogo do chaveamento)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="definirPenaltis('${j.id}','A')" style="${j.penaltis==='A'?'background:#1b4332;color:#fff;border:1px solid #1b4332':'background:#fff;color:#1b4332;border:1px solid #1b4332'}">${flag(j.timeA)} ${j.timeA}</button>
+        <button class="btn btn-sm" onclick="definirPenaltis('${j.id}','B')" style="${j.penaltis==='B'?'background:#1b4332;color:#fff;border:1px solid #1b4332':'background:#fff;color:#1b4332;border:1px solid #1b4332'}">${flag(j.timeB)} ${j.timeB}</button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:6px">Só monta o chaveamento. Marque o classificado na aba Admin para pontuar.</div>
+    </div>` : ''}
     ${palpitesBloqueados?`<div id="edit-palpites-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#eafaf2;border-radius:8px;border:1px solid #9fd8bf">
       <div style="font-size:12px;font-weight:600;color:#0b6e4f;margin-bottom:8px">✏️ Editar palpites dos participantes (correção)</div>
       <div id="lista-palpites-${j.id}"><div class="loading">Clique para carregar...</div></div>
@@ -2695,21 +2703,20 @@ window.salvarResultado = async (jogoId) => {
     renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
     renderApostasHistorico(); renderPublico();
 
-    // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo)
-    if(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase]){
-      const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB : null;
-      const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA : null;
-      let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
-      if(dests){
-        if(!Array.isArray(dests)) dests = [dests];
-        for(const d of dests){
-          const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
-          if(!time) continue;
-          const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
-          if(!alvo) continue;
-          await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
-        }
+    // Propaga vencedor/perdedor para a próxima fase do mata-mata (bracket fixo).
+    // Empate: usa o vencedor dos pênaltis (jogo.penaltis) se já definido; senão
+    // não propaga, e o admin define pelo botão de pênaltis no card.
+    if(jogo){
+      if(gA !== gB && jogo.penaltis){
+        // Deixou de ser empate: descarta vencedor de pênaltis antigo
+        jogo.penaltis = null;
+        await updateDoc(doc(db,'jogos',jogoId), { penaltis: null });
       }
+      const vencedor = gA > gB ? jogo.timeA : gA < gB ? jogo.timeB
+        : jogo.penaltis === 'A' ? jogo.timeA : jogo.penaltis === 'B' ? jogo.timeB : null;
+      const perdedor = gA > gB ? jogo.timeB : gA < gB ? jogo.timeA
+        : jogo.penaltis === 'A' ? jogo.timeB : jogo.penaltis === 'B' ? jogo.timeA : null;
+      await propagarBracket(jogo, vencedor, perdedor);
     }
 
     if(btn){ btn.disabled = false; btn.textContent = 'Salvar resultado'; }
@@ -2721,15 +2728,54 @@ window.salvarResultado = async (jogoId) => {
   }
 };
 
+// Propaga o vencedor (e o perdedor, na semi) de um jogo para o próximo do
+// bracket. Reusada por salvarResultado e por definirPenaltis.
+async function propagarBracket(jogo, vencedor, perdedor){
+  if(!(jogo && jogo.jogoNum && BRACKET_PROPAGA[jogo.fase])) return;
+  let dests = BRACKET_PROPAGA[jogo.fase][jogo.jogoNum];
+  if(!dests) return;
+  if(!Array.isArray(dests)) dests = [dests];
+  for(const d of dests){
+    const time = (d.tipo === 'perdedor') ? perdedor : vencedor;
+    if(!time) continue;
+    const alvo = jogosData.find(j=>j.fase===d.fase && j.jogoNum===d.jogo);
+    if(!alvo) continue;
+    await setDoc(doc(db,'jogos',alvo.id), { fase:d.fase, data:alvo.data, hora:alvo.hora, ts:alvo.ts, grupo:'', [d.slot]:time }, {merge:true});
+  }
+}
+
+// Admin define quem venceu nos pênaltis num jogo de mata-mata empatado, para
+// montar o próximo jogo do chaveamento. NÃO altera placar nem classificados.
+window.definirPenaltis = async (jogoId, lado) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  if(!(jogo.encerrado && jogo.gA!=null && jogo.gA===jogo.gB)){
+    alert('O vencedor nos pênaltis só vale para jogo encerrado com placar empatado.');
+    return;
+  }
+  const vencedor = lado==='A' ? jogo.timeA : jogo.timeB;
+  const perdedor = lado==='A' ? jogo.timeB : jogo.timeA;
+  try {
+    await setDoc(doc(db,'jogos',jogoId), { penaltis: lado }, {merge:true});
+    jogo.penaltis = lado;
+    await propagarBracket(jogo, vencedor, perdedor);
+    renderAdminJogos(); renderJogos(); renderPublico();
+    mostrarToast(`✅ ${vencedor} avança no chaveamento.`);
+  } catch(e){
+    console.error('Erro ao definir pênaltis:', e);
+    mostrarToast('Não foi possível definir o vencedor dos pênaltis.', 'error');
+  }
+};
+
 function calcularPts(pA,pB,rA,rB,fase){
   const m = MULT[fase]||1;
-  if(pA===rA&&pB===rB) return Math.round(10*m);
+  if(pA===rA&&pB===rB) return 10*m;
   const vencedorReal = rA>rB?'A':rA<rB?'B':'E';
   const vencedorPalp = pA>pB?'A':pA<pB?'B':'E';
   if(vencedorReal!==vencedorPalp) return 0;
-  if(vencedorReal==='E') return Math.round(3*m);
-  if(rA-rB===pA-pB) return Math.round(7*m);
-  return Math.round(5*m);
+  if(vencedorReal==='E') return 3*m;
+  if(rA-rB===pA-pB) return 7*m;
+  return 5*m;
 }
 
 // ─── PONTUAÇÃO DERIVADA ──────────────────────────────────────────────────────
@@ -2942,11 +2988,11 @@ window.reabrirJogo = async (jogoId) => {
   try {
     // ÚNICA escrita: limpa o placar do jogo. A pontuação derivada se ajusta
     // sozinha em todos os clientes (nenhum pts gravado precisa ser limpo).
-    await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null });
+    await updateDoc(doc(db,'jogos',jogoId),{ encerrado:false, gA:null, gB:null, penaltis:null });
 
     // Atualiza a tela local imediatamente
     const jogo = jogosData.find(j=>j.id===jogoId);
-    if(jogo){ jogo.gA = null; jogo.gB = null; jogo.encerrado = false; }
+    if(jogo){ jogo.gA = null; jogo.gB = null; jogo.encerrado = false; jogo.penaltis = null; }
     aplicarPontuacaoDerivada();
     renderRanking(); updateMetrics(); renderJogos(); renderAdminJogos();
     renderApostasHistorico(); renderPublico();
@@ -3414,7 +3460,7 @@ async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
       atualizados++;
     }
   }
-  const slotsInfo = Object.entries(mapSlot).map(([sl,t])=>`${sl}: ${t}`).join(' | ');
+  const slotsInfo = Object.entries(slots3os).map(([sl,t])=>`${sl}: ${t}`).join(' | ');
   alert(`🏆 16-avos gerados!\n${criados} novos · ${atualizados} atualizados\n\nSlots 3os:\n${slotsInfo}`);
 }
 
