@@ -602,17 +602,6 @@ const FLAGS = {
 
 function flag(team){ return FLAGS[team] || '🏳️'; }
 
-// Detecta se um "time" ainda é placeholder do chaveamento (ex.: "2º Grupo J",
-// "1º Grupo K", "3º (ABCDF)", "3º AEHIJ", "Venc. Jogo 3", "Perdedor Semi 1").
-// Um time real SEMPRE tem bandeira em FLAGS; placeholders nunca têm. Usamos
-// também padrões explícitos como reforço. Serve para travar palpite em jogo
-// cujo adversário ainda não foi definido, mesmo que o horário já permita.
-function ehPlaceholderTime(t){
-  if(!t) return true;
-  if(FLAGS[t]) return false; // tem bandeira => seleção real
-  return /^(1º|2º|3º|venc\.?|vencedor|perdedor)/i.test(t.trim());
-}
-
 // Exibe uma notificação temporária no topo (toast). Definição única e global.
 function mostrarToast(msg, tipo){
   try {
@@ -1143,14 +1132,11 @@ function gameCardHTML(j){
   const temAposta = aposta && aposta.gA !== undefined;
   const dtStr = formatarDataJogo(j);
   const jid = j.id;
-  const aguardandoTime = ehPlaceholderTime(j.timeA) || ehPlaceholderTime(j.timeB);
 
   // ── Placar central ──
   let scorePart = '';
   if(j.encerrado){
     scorePart = `<div class="score-display">${j.gA} × ${j.gB}</div>`;
-  } else if(aguardandoTime){
-    scorePart = `<div class="score-display" style="font-size:15px;color:#aaa">⏳</div>`;
   } else if(bloqueado){
     scorePart = `<div class="score-display" style="font-size:16px;color:#aaa">× </div>`;
   } else {
@@ -1190,7 +1176,7 @@ function gameCardHTML(j){
     ptsBadge = `<div style="background:#fff8e1;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a;font-weight:600">
       ⏳ Pontuação deste palpite: aguardando resultado
     </div>`;
-  } else if(!j.encerrado && !bloqueado && !aguardandoTime){
+  } else if(!j.encerrado && !bloqueado){
     ptsBadge = `<div style="background:#fffde7;border-radius:8px;padding:8px 14px;font-size:13px;color:#92610a">
       Pontuação deste palpite: aguardando resultado
     </div>`;
@@ -1201,10 +1187,6 @@ function gameCardHTML(j){
   if(j.encerrado){
     rodape = `<div style="text-align:center;padding:6px 0">
       <span class="encerrado-badge">✅ Encerrado</span>
-    </div>`;
-  } else if(aguardandoTime){
-    rodape = `<div style="text-align:center;padding:8px 0">
-      <span class="fechado-badge">⏳ Aguardando definição do confronto</span>
     </div>`;
   } else if(bloqueado){
     const minutos = Math.ceil((j.ts - now) / 60000);
@@ -3156,7 +3138,7 @@ function renderAdminClassif(){
       // Para fases após os grupos, mostra só times dos jogos daquela fase
       const timesNaFase = [...new Set(
         jogosData.filter(j=>j.fase===faseAnteriorDe(fase)).flatMap(j=>[j.timeA,j.timeB])
-          .filter(t=>!t.startsWith('Vencedor')&&!t.startsWith('Perdedor'))
+          .filter(t=>!t.startsWith('Venc')&&!t.startsWith('Perdedor'))
       )];
       const pool = timesNaFase.length > 0 ? timesNaFase : selecoes;
       html+=`<div class="fase-times-grid">`;
@@ -3188,7 +3170,7 @@ function renderAdminClassif(){
     // Pool: times que jogaram 3º lugar ou final
     const jogoEspecial = jogosData.find(j=>j.fase===(isCampeao?'Final':'Terceiro lugar'));
     const poolEspecial = jogoEspecial
-      ? [jogoEspecial.timeA, jogoEspecial.timeB].filter(t=>!t.startsWith('Vencedor')&&!t.startsWith('Perdedor'))
+      ? [jogoEspecial.timeA, jogoEspecial.timeB].filter(t=>!t.startsWith('Venc')&&!t.startsWith('Perdedor'))
       : todasSel;
     html+=`<div class="especial-bloco">
       <div class="especial-header ${isCampeao?'campeao':'terceiro'}">
@@ -3410,19 +3392,12 @@ window.salvarClassifAdmin = async (fase) => {
   const pts3os    = d.pts3os||{};
   const slots3os  = d.slots3os||{};
 
-  // Validação parcial: para 16avos NÃO exigimos mais os 8 slots de uma vez.
-  // Permite salvar os classificados já fechados e gerar só os jogos definidos.
-  // Os jogos cujo adversário ainda é placeholder ficam travados para palpite
-  // (ver ehPlaceholderTime) até serem completados depois.
+  // Validação: para 16avos, exige 8 slots definidos
   if(fase==='16avos'){
     const definidos = Object.values(slots3os).filter(Boolean).length;
     if(definidos < 8){
-      const ok = confirm(`⚠️ Apenas ${definidos}/8 slots de 3º definidos.\n\n`+
-        `Você pode salvar assim mesmo: os jogos já definidos serão gerados e `+
-        `liberados para palpite; os que ainda dependem de 3º colocado (ou de 1º/2º `+
-        `de grupos abertos) ficarão visíveis, porém TRAVADOS para palpite até você `+
-        `completar.\n\nConfirmar geração parcial?`);
-      if(!ok) return;
+      alert(`⚠️ Defina os 8 slots dos 3os colocados antes de confirmar.\nAtualmente ${definidos}/8 definidos.`);
+      return;
     }
   }
 
@@ -3471,31 +3446,22 @@ async function gerarJogos16avos(primeiros, segundos, terceiros, pts3os) {
     { timeA:P('K'),  timeB:T('T8'), data:'2026-07-03', hora:'22:30' },
   ];
 
-  let criados = 0, atualizados = 0, pulados = 0, protegidos = 0;
+  let criados = 0, atualizados = 0;
   for(let i=0; i<jogos16.length; i++){
     const {timeA, timeB, data, hora} = jogos16[i];
     const ts = new Date(`${data}T${hora}:00-03:00`).getTime();
     const id = `mata_16avos_jogo${i+1}_${ts}`;
-    // Geração parcial: só cria/atualiza jogo cujos DOIS lados já são seleções reais.
-    if(ehPlaceholderTime(timeA) || ehPlaceholderTime(timeB)){ pulados++; continue; }
     const existing = await getDoc(doc(db,'jogos',id));
     if(!existing.exists()){
       await setDoc(doc(db,'jogos',id),{ timeA, timeB, data, hora, fase:'16avos', grupo:'', ts, encerrado:false, gerado:true });
       criados++;
     } else {
-      // Blindagem: não sobrescrever times de um jogo que já tem placar lançado.
-      const ex = existing.data();
-      const temPlacar = ex.encerrado || ex.gA!==undefined || ex.gB!==undefined;
-      if(temPlacar){ protegidos++; continue; }
       await updateDoc(doc(db,'jogos',id),{ timeA, timeB });
       atualizados++;
     }
   }
-  const slotsInfo = Object.entries(slots3os).map(([sl,t])=>`${sl}: ${t}`).join(' | ') || '(nenhum slot definido ainda)';
-  alert(`🏆 16-avos — geração parcial!\n`+
-    `${criados} novos · ${atualizados} atualizados\n`+
-    `${pulados} aguardando definição (não gerados)\n`+
-    `${protegidos} protegidos (já tinham placar)\n\nSlots 3os:\n${slotsInfo}`);
+  const slotsInfo = Object.entries(slots3os).map(([sl,t])=>`${sl}: ${t}`).join(' | ');
+  alert(`🏆 16-avos gerados!\n${criados} novos · ${atualizados} atualizados\n\nSlots 3os:\n${slotsInfo}`);
 }
 
 // Datas e horários reais de cada fase do mata-mata Copa 2026
