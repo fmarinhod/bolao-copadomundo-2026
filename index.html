@@ -1270,6 +1270,12 @@ function gameCardHTML(j){
 
 // Salva palpite diretamente do card inline (sem modal)
 window.salvarApostaInline = async (jogoId) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(jogo && (jogo.encerrado || Date.now() >= jogo.ts - 5*60*1000)){
+    mostrarToast('Palpite bloqueado — o jogo já começou ou está prestes a começar.', 'error');
+    renderJogos(); renderApostasHistorico();
+    return;
+  }
   const inpA = document.getElementById(`inp-gA-${jogoId}`);
   const inpB = document.getElementById(`inp-gB-${jogoId}`);
   if(!inpA || !inpB){ alert('Erro ao localizar os campos.'); return; }
@@ -1316,6 +1322,26 @@ window.salvarApostaInline = async (jogoId) => {
     if(btn){ btn.disabled = false; btn.textContent = txtOriginal || '✅ Salvar Palpite'; }
   }
 };
+
+// Trava visual automática: quando o prazo de um jogo passa, desabilita o botão
+// de salvar SEM re-renderizar o card (não apaga o placar que o participante
+// esteja digitando). Complementa a trava no clique da salvarApostaInline.
+setInterval(() => {
+  if(!Array.isArray(jogosData) || !jogosData.length) return;
+  const agora = Date.now();
+  jogosData.forEach(j => {
+    if(j.encerrado || agora < j.ts - 5*60*1000) return;
+    const card = document.getElementById(`card-${j.id}`);
+    if(!card) return;
+    const btn = card.querySelector('button[onclick*="salvarApostaInline"]');
+    if(btn && !btn.disabled){
+      btn.disabled = true;
+      btn.textContent = '⏱ Bloqueado';
+      btn.style.background = '#9aa0a6';
+      btn.style.cursor = 'default';
+    }
+  });
+}, 20000);
 
 // ─── APOSTAS / HISTÓRICO ─────────────────────────────────────────────────────
 function renderApostasHistorico(){
