@@ -789,6 +789,7 @@ function initListeners(){
         return {
           ...base,
           id: id + '_' + new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
+          _docId: fs ? fs.id : null,
           fase,
           grupo: '',
           jogoNum: i+1,
@@ -796,8 +797,9 @@ function initListeners(){
           placeholderB: base.timeB,
           ts: new Date(base.data+'T'+base.hora+':00-03:00').getTime(),
           encerrado: false,
-          // Se Firestore tem times reais, usa — mantém data/hora do HTML
-          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB, penaltis: fs.penaltis||null} : {}),
+          // Se Firestore tem times reais, usa — e lê override de data/hora/ts
+          // (horário remarcado pelo admin). Padrão é o fixo do HTML.
+          ...(fs ? {timeA: fs.timeA||base.timeA, timeB: fs.timeB||base.timeB, encerrado: fs.encerrado||false, gA: fs.gA, gB: fs.gB, penaltis: fs.penaltis||null, ...(fs.data?{data:fs.data}:{}), ...(fs.hora?{hora:fs.hora}:{}), ...(fs.ts?{ts:fs.ts}:{})} : {}),
         };
       });
     }
@@ -2445,6 +2447,7 @@ function gameCardAdminHTML(j){
       <button class="btn btn-primary btn-sm" onclick="salvarResultado('${j.id}')">Salvar resultado</button>
       ${j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="reabrirJogo('${j.id}')">Reabrir</button>`:''}
       ${isMata?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')" style="background:#7c5cbf;border-color:#7c5cbf;color:#fff">✏️ Editar</button>`:''}
+      ${isMata && !j.encerrado?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarHorario('${j.id}')" style="background:#b26a00;border-color:#b26a00;color:#fff">🕐 Horário</button>`:''}
       ${palpitesBloqueados?`<button class="btn btn-secondary btn-sm" onclick="toggleEditarPalpites('${j.id}')" style="background:#0b6e4f;border-color:#0b6e4f;color:#fff">✏️ Palpites</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletarJogo('${j.id}')">Excluir</button>
     </div>
@@ -2472,6 +2475,16 @@ function gameCardAdminHTML(j){
         <button class="btn btn-secondary btn-sm" onclick="toggleEditarConfrontoMata('${j.id}')">Cancelar</button>
       </div>
       <div style="font-size:11px;color:#888;margin-top:6px">⚠️ Apostas já registradas não são alteradas.</div>
+    </div>`:''}
+    ${isMata && !j.encerrado?`<div id="edit-horario-${j.id}" style="display:none;margin-top:10px;padding:10px;background:#fff4e5;border-radius:8px;border:1px solid #f0c896">
+      <div style="font-size:12px;font-weight:600;color:#8a4b00;margin-bottom:8px">🕐 Alterar horário do jogo</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <input id="edit-data-${j.id}" type="date" value="${j.data}" style="padding:6px 8px;border:1px solid #f0c896;border-radius:6px;font-size:13px"/>
+        <input id="edit-hora-${j.id}" type="time" value="${j.hora}" style="padding:6px 8px;border:1px solid #f0c896;border-radius:6px;font-size:13px"/>
+        <button class="btn btn-primary btn-sm" onclick="salvarHorarioJogo('${j.id}')" style="background:#b26a00;border-color:#b26a00">Salvar horário</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleEditarHorario('${j.id}')">Cancelar</button>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:6px">Horário de Brasília. A trava de palpite passa a valer 5 min antes do novo horário.</div>
     </div>`:''}
   </div>`;
 }
@@ -2619,6 +2632,38 @@ window.salvarConfrontoMata = async (jogoId) => {
   await updateDoc(doc(db,'jogos',jogoId),{ timeA, timeB });
   toggleEditarConfrontoMata(jogoId);
   alert('✅ Confronto atualizado!');
+};
+
+window.toggleEditarHorario = (jogoId) => {
+  const el = document.getElementById(`edit-horario-${jogoId}`);
+  if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
+
+// Admin altera o horário de um jogo de mata-mata (ex.: FIFA remarca). Grava
+// data/hora/ts no Firestore; o buildMata passa a ler esse override. A trava
+// de palpite segue o novo ts automaticamente (5 min antes).
+window.salvarHorarioJogo = async (jogoId) => {
+  const jogo = jogosData.find(j=>j.id===jogoId);
+  if(!jogo) return;
+  if(jogo.encerrado){ alert('Jogo já encerrado — o horário não pode ser alterado.'); return; }
+  const data = document.getElementById(`edit-data-${jogoId}`).value;
+  const hora = document.getElementById(`edit-hora-${jogoId}`).value;
+  if(!data || !hora){ alert('Preencha data e hora.'); return; }
+  const novoTs = new Date(`${data}T${hora}:00-03:00`).getTime();
+  if(isNaN(novoTs)){ alert('Data ou hora inválida.'); return; }
+  if(novoTs <= Date.now()){ alert('O novo horário está no passado. Escolha um horário futuro.'); return; }
+  const fmt = (ts) => new Date(ts).toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+  if(!confirm(`Alterar o horário deste jogo?\n\nDe:   ${fmt(jogo.ts)}\nPara: ${fmt(novoTs)}\n\nA trava de palpite de todos os participantes passa a valer 5 minutos antes do novo horário.`)) return;
+  try {
+    await setDoc(doc(db,'jogos', jogo._docId || jogoId), { fase: jogo.fase, data, hora, ts: novoTs }, {merge:true});
+    jogo.data = data; jogo.hora = hora; jogo.ts = novoTs;
+    toggleEditarHorario(jogoId);
+    renderAdminJogos(); renderJogos();
+    mostrarToast('✅ Horário atualizado.');
+  } catch(e){
+    console.error('Erro ao salvar horário:', e);
+    mostrarToast('Não foi possível alterar o horário.', 'error');
+  }
 };
 
 // ─── ADMIN: EDITAR PALPITES DE TERCEIROS ─────────────────────────────────────
