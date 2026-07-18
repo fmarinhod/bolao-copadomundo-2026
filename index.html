@@ -3611,7 +3611,10 @@ async function gerarJogosFase(times, proximaFase, _dataInicio, _qtdJogos, gerarT
   if(criados > 0) alert(`🏆 ${criados} jogo(s) de ${FASES_LABEL[proximaFase]||proximaFase} gerados!`);
 }
 
-window.salvarEspecialAdmin = async (chave) => {
+// Seleciona (sem salvar) o time do bloco especial. O clique no card chama esta
+// função; antes ela estava nomeada como salvarEspecialAdmin (nome duplicado) e
+// sem o parâmetro `time`, então o clique não registrava nada.
+window.setAdminEspecial = (chave, time) => {
   if(!classifsData[chave]) classifsData[chave]={};
   classifsData[chave].time = classifsData[chave].time === time ? null : time;
   renderAdminClassif();
